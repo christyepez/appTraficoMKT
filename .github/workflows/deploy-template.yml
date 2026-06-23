@@ -1,0 +1,76 @@
+name: Deploy Template
+
+on:
+  workflow_call:
+    inputs:
+      environment_name:
+        required: true
+        type: string
+      compose_file:
+        required: true
+        type: string
+
+jobs:
+  build:
+    name: Validate package
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment_name }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Restore backend
+        run: dotnet restore backend/RequirementsPlatform.slnx
+
+      - name: Build backend
+        run: dotnet build backend/RequirementsPlatform.slnx --configuration Release --no-restore
+
+      - name: Test backend
+        run: dotnet test backend/RequirementsPlatform.slnx --configuration Release --no-build
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm install
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+
+      - name: Docker compose build
+        run: docker compose -f ${{ inputs.compose_file }} build
+
+  deploy:
+    name: Deploy by SSH
+    needs: build
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment_name }}
+    if: ${{ vars.DEPLOY_ENABLED == 'true' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy compose stack
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            set -e
+            cd ${{ vars.DEPLOY_PATH }}
+            git fetch origin
+            git checkout ${{ github.ref_name }}
+            git pull --ff-only origin ${{ github.ref_name }}
+            docker compose -f ${{ inputs.compose_file }} up -d --build

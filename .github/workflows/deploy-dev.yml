@@ -1,0 +1,17 @@
+name: Deploy Dev
+
+on:
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+
+jobs:
+  deploy-dev:
+    name: Build and deploy dev
+    uses: ./.github/workflows/deploy-template.yml
+    with:
+      environment_name: dev
+      compose_file: docker-compose.yml
+    secrets: inherit
+

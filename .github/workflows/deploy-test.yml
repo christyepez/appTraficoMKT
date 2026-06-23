@@ -1,0 +1,17 @@
+name: Deploy Test
+
+on:
+  push:
+    branches:
+      - test
+  workflow_dispatch:
+
+jobs:
+  deploy-test:
+    name: Build and deploy test
+    uses: ./.github/workflows/deploy-template.yml
+    with:
+      environment_name: test
+      compose_file: docker-compose.https.yml
+    secrets: inherit
+

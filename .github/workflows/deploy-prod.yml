@@ -1,0 +1,17 @@
+name: Deploy Prod
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy-prod:
+    name: Build and deploy prod
+    uses: ./.github/workflows/deploy-template.yml
+    with:
+      environment_name: prod
+      compose_file: docker-compose.prod.yml
+    secrets: inherit
+
