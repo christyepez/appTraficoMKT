@@ -37,6 +37,15 @@ type User = {
   isActive: boolean;
 };
 
+type Approval = {
+  id: string;
+  activityId: string;
+  decision: string;
+  approvedBy: string;
+  comments: string;
+  createdAt: string;
+};
+
 export default function ActivitiesPage() {
   const [requirements, setRequirements] = useState<Requirement[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -52,8 +61,10 @@ export default function ActivitiesPage() {
   const [editing, setEditing] = useState<Activity | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [evidence, setEvidence] = useState<EvidenceItem[]>([]);
+  const [approvals, setApprovals] = useState<Approval[]>([]);
   const [attachmentActivityId, setAttachmentActivityId] = useState("");
   const [attachmentDetailActivityId, setAttachmentDetailActivityId] = useState("");
+  const [approvalVersionsActivityId, setApprovalVersionsActivityId] = useState("");
   const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
   const [attachmentPreview, setAttachmentPreview] = useState("");
   const [dragging, setDragging] = useState(false);
@@ -66,10 +77,11 @@ export default function ActivitiesPage() {
 
   async function load() {
     const session = getSession();
-    const [reqs, acts, evs, users, nextProduct, tipoRequerimiento, publicoObjetivo, tipoProducto, canalDifusion, kpiPrincipal] = await Promise.all([
+    const [reqs, acts, evs, aps, users, nextProduct, tipoRequerimiento, publicoObjetivo, tipoProducto, canalDifusion, kpiPrincipal] = await Promise.all([
       api<Requirement[]>("/api/requirements"),
       api<Activity[]>("/api/activities"),
       api<EvidenceItem[]>("/api/evidence"),
+      api<Approval[]>("/api/approvals").catch(() => []),
       api<User[]>("/api/identity/users/technicians").catch(() => []),
       api<{ productId: string }>("/api/activities/next-product-id").catch(() => ({ productId: nextProductId([]) })),
       api<CatalogItem[]>("/api/admin/catalogs/by-type/TipoRequerimiento"),
@@ -83,6 +95,7 @@ export default function ActivitiesPage() {
     setRequirements(visibleRequirements);
     setActivities(visibleActivities);
     setEvidence(evs.filter((item) => visibleActivities.some((activity) => activity.id === item.activityId)));
+    setApprovals(aps.filter((item) => visibleActivities.some((activity) => activity.id === item.activityId)));
     const fallbackUser = session
       ? [{ id: session.user.id, name: session.user.name, email: session.user.email, roles: session.user.roles, isActive: true }]
       : [];
@@ -383,6 +396,36 @@ export default function ActivitiesPage() {
               </section>
             </div>
           )}
+          {approvalVersionsActivityId && (
+            <div className="modal-backdrop" role="dialog" aria-modal="true">
+              <section className="modal-panel">
+                <div className="card-head">
+                  <div>
+                    <h2>Versiones enviadas a aprobación</h2>
+                    <p>{activities.find((item) => item.id === approvalVersionsActivityId)?.productId ?? "Producto seleccionado"}</p>
+                  </div>
+                  <button className="icon-button" type="button" title="Cerrar versiones de aprobación" onClick={() => setApprovalVersionsActivityId("")}><X size={16} /></button>
+                </div>
+                <div className="stack compact-stack top-space">
+                  {approvals.filter((approval) => approval.activityId === approvalVersionsActivityId).map((approval, index) => (
+                    <article className="card compact-card" key={approval.id}>
+                      <div className="card-head">
+                        <div className="compact-title">
+                          <h3>Versión {index + 1} - {approval.decision}</h3>
+                          <p>{formatDate(approval.createdAt)} | {approval.approvedBy}</p>
+                        </div>
+                        <span className="badge">{approval.decision}</span>
+                      </div>
+                      <div className="inline-facts">
+                        <span>{approval.comments || "Sin comentarios."}</span>
+                      </div>
+                    </article>
+                  ))}
+                  {approvals.filter((approval) => approval.activityId === approvalVersionsActivityId).length === 0 && <div className="empty">Este producto aún no tiene versiones enviadas a aprobación.</div>}
+                </div>
+              </section>
+            </div>
+          )}
           <div className="stack compact-stack top-space">
             {filtered.map((item) => (
               <article className="card compact-card" key={item.id}>
@@ -397,6 +440,7 @@ export default function ActivitiesPage() {
                       <button className={workflowButtonClass(activityStepState(item, "start"))} disabled={activityStepState(item, "start") !== "ready"} title="Cambiar producto a en progreso" onClick={() => patch(`/api/activities/${item.id}/start`)}><Play size={16} /></button>
                       <button className={workflowButtonClass(activityStepState(item, "evidence"))} disabled={activityStepState(item, "evidence") !== "ready"} title="Adjuntar evidencia o archivo a este producto" onClick={() => setAttachmentActivityId(item.id)}><Paperclip size={16} /></button>
                       <button className={workflowButtonClass(activityStepState(item, "approval"))} disabled={activityStepState(item, "approval") !== "ready"} title="Enviar producto a aprobación" onClick={() => patch(`/api/activities/${item.id}/submit-approval`)}><Send size={16} /></button>
+                      <button className="icon-button" title="Ver versiones enviadas a aprobación" onClick={() => setApprovalVersionsActivityId(item.id)}><Eye size={16} /></button>
                       <button className="icon-button" title="Editar datos del producto" onClick={() => openEditor(item)}><Edit3 size={16} /></button>
                       <button className="icon-button danger" title="Eliminar lógicamente el producto" onClick={() => removeActivity(item.id)}><Trash2 size={16} /></button>
                     </div>
@@ -419,6 +463,11 @@ export default function ActivitiesPage() {
       </section>
     </main>
   );
+}
+
+function formatDate(value?: string) {
+  if (!value) return "Sin fecha";
+  return new Intl.DateTimeFormat("es-EC", { dateStyle: "short", timeStyle: "short" }).format(new Date(value));
 }
 
 function EvidencePreview({ item }: { item: EvidenceItem }) {

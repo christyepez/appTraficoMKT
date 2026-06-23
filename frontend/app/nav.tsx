@@ -1,7 +1,7 @@
 "use client";
 
 import { api, applyBrandVariables, clearSession, defaultBrandSettings, getSession, t, type BrandSettings } from "./lib";
-import { BarChart3, Bell, CheckCircle2, ClipboardList, FileCheck2, Landmark, ListChecks, LogOut, Palette, Settings, ShieldCheck, UploadCloud, Users } from "lucide-react";
+import { BarChart3, Bell, CheckCircle2, ClipboardList, FileCheck2, History, Landmark, ListChecks, LogOut, Palette, Settings, ShieldCheck, UploadCloud, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -12,6 +12,7 @@ const items = [
   { href: "/evidence", label: "Adjuntos", icon: FileCheck2 },
   { href: "/approvals", label: "Aprobaciones", icon: CheckCircle2 },
   { href: "/metrics", label: "Métricas", icon: BarChart3 },
+  { href: "/audit", label: "Auditorías", icon: History },
   { href: "/admin", label: "Administración", icon: Landmark },
   { href: "/users", label: "Usuarios", icon: Users },
   { href: "/storage", label: "Archivos", icon: Settings },

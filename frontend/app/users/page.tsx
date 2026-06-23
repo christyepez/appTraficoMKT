@@ -24,6 +24,7 @@ const screenLabels: Record<string, string> = {
   evidence: "Adjuntos",
   approvals: "Aprobaciones",
   metrics: "Métricas",
+  audit: "Auditorías",
   admin: "Administración",
   users: "Usuarios",
   storage: "Archivos",
@@ -264,10 +265,10 @@ function highlight(text: string, term: string) {
 }
 
 function defaultScreensForRole(role: string) {
-  if (role === "Administrador") return ["dashboard", "activities", "evidence", "approvals", "metrics", "admin", "users", "storage", "initial-import", "branding", "notifications"];
-  if (role === "Coordinador") return ["dashboard", "activities", "evidence", "approvals", "metrics"];
+  if (role === "Administrador") return ["dashboard", "activities", "evidence", "approvals", "metrics", "audit", "admin", "users", "storage", "initial-import", "branding", "notifications"];
+  if (role === "Coordinador") return ["dashboard", "activities", "evidence", "approvals", "metrics", "audit"];
   if (role === "Tecnico") return ["dashboard", "activities", "evidence"];
   if (role === "Aprobador") return ["dashboard", "approvals"];
-  if (role === "Auditor") return ["dashboard", "activities", "evidence", "approvals", "metrics"];
+  if (role === "Auditor") return ["dashboard", "activities", "evidence", "approvals", "metrics", "audit"];
   return ["dashboard"];
 }

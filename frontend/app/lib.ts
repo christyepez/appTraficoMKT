@@ -152,6 +152,7 @@ export const translations: Record<string, Record<string, string>> = {
     "Adjuntos": "Attachments",
     "Aprobaciones": "Approvals",
     "Métricas": "Metrics",
+    "Auditorías": "Audits",
     "Administración": "Administration",
     "Usuarios": "Users",
     "Archivos": "Files",
@@ -190,8 +191,8 @@ export function t(text: string) {
 }
 
 function defaultScreensForRoles(roles: string[]) {
-  if (roles.includes("Administrador")) return ["dashboard", "activities", "evidence", "approvals", "metrics", "admin", "users", "storage", "initial-import", "branding", "notifications"];
-  if (roles.includes("Coordinador")) return ["dashboard", "activities", "evidence", "approvals", "metrics"];
+  if (roles.includes("Administrador")) return ["dashboard", "activities", "evidence", "approvals", "metrics", "audit", "admin", "users", "storage", "initial-import", "branding", "notifications"];
+  if (roles.includes("Coordinador")) return ["dashboard", "activities", "evidence", "approvals", "metrics", "audit"];
   const screens = new Set(["dashboard"]);
   if (roles.includes("Tecnico")) {
     screens.add("activities");
@@ -203,6 +204,7 @@ function defaultScreensForRoles(roles: string[]) {
     screens.add("evidence");
     screens.add("approvals");
     screens.add("metrics");
+    screens.add("audit");
   }
   return Array.from(screens);
 }

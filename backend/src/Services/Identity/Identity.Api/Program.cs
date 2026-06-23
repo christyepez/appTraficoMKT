@@ -564,7 +564,7 @@ public sealed class BrandSettings
 
 public static class ScreenAccess
 {
-    public static readonly string[] All = ["dashboard", "activities", "evidence", "approvals", "metrics", "admin", "users", "storage", "initial-import", "branding", "notifications"];
+    public static readonly string[] All = ["dashboard", "activities", "evidence", "approvals", "metrics", "audit", "admin", "users", "storage", "initial-import", "branding", "notifications"];
 
     public static string[] DefaultForRoles(IEnumerable<string> roles)
     {
@@ -573,8 +573,8 @@ public static class ScreenAccess
         var screens = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "dashboard" };
         if (roleSet.Contains("Tecnico")) screens.UnionWith(["activities", "evidence"]);
         if (roleSet.Contains("Aprobador")) screens.UnionWith(["approvals"]);
-        if (roleSet.Contains("Coordinador")) screens.UnionWith(["activities", "evidence", "approvals", "metrics"]);
-        if (roleSet.Contains("Auditor")) screens.UnionWith(["dashboard", "activities", "evidence", "approvals", "metrics"]);
+        if (roleSet.Contains("Coordinador")) screens.UnionWith(["activities", "evidence", "approvals", "metrics", "audit"]);
+        if (roleSet.Contains("Auditor")) screens.UnionWith(["dashboard", "activities", "evidence", "approvals", "metrics", "audit"]);
         return screens.ToArray();
     }
 }

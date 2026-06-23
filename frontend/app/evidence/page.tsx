@@ -152,14 +152,21 @@ export default function EvidencePage() {
         )}
         <section className="panel">
           <div className="card-head">
-            <h2>Evidencias y aprobaciones</h2>
+            <div>
+              <h2>Evidencias y aprobaciones</h2>
+              <p>{evidence.length} adjuntos registrados sobre {activities.length} productos visibles.</p>
+            </div>
             <div className="actions">
               <button className="icon-button" title="Adjuntar nueva evidencia" onClick={() => setIsUploadOpen(true)}><Plus size={16} /></button>
               <button className="button secondary" title="Actualizar evidencias y aprobaciones" onClick={load}><RefreshCw size={16} /> Actualizar</button>
             </div>
           </div>
-          <div className="split top-space">
-            <div className="stack compact-stack">
+          <div className="detail-grid compact-detail-grid top-space">
+            <div className="detail-item"><span>Productos visibles</span><strong>{activities.length}</strong></div>
+            <div className="detail-item"><span>Adjuntos</span><strong>{evidence.length}</strong></div>
+            <div className="detail-item"><span>Aprobaciones</span><strong>{approvals.length}</strong></div>
+          </div>
+          <div className="stack compact-stack top-space">
               {evidence.map((item) => (
                 <article className="card compact-card" key={item.id}>
                   <div className="card-head">
@@ -177,26 +184,19 @@ export default function EvidencePage() {
                   <div className="detail-grid compact-detail-grid">
                     <div className="detail-item"><span>Tipo</span><strong>{item.contentType || "Archivo"}</strong></div>
                     <div className="detail-item"><span>Ruta</span><strong>{item.storageUrl}</strong></div>
+                    <div className="detail-item"><span>Aprobaciones</span><strong>{approvals.filter((approval) => approval.activityId === item.activityId).length}</strong></div>
                   </div>
+                  {approvals.filter((approval) => approval.activityId === item.activityId).map((approval) => (
+                    <div className="inline-facts" key={approval.id}>
+                      <span>{approval.decision}</span>
+                      <span>{approval.approvedBy}</span>
+                      {approval.comments && <span>{approval.comments}</span>}
+                    </div>
+                  ))}
                   <EvidencePreview item={item} />
                 </article>
               ))}
-            </div>
-            <div className="stack compact-stack">
-              {approvals.map((item) => (
-                <article className="card compact-card" key={item.id}>
-                  <div className="card-head">
-                    <div className="compact-title">
-                      <h3>{item.decision}</h3>
-                      <p>{item.comments}</p>
-                    </div>
-                    <div className="card-meta">
-                      <span className="badge">{item.approvedBy}</span>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
+              {evidence.length === 0 && <div className="empty">No hay adjuntos registrados.</div>}
           </div>
         </section>
       </section>
@@ -227,13 +227,13 @@ function activityLabel(activities: Activity[], activityId: string) {
 }
 
 function filterRequirementsForSession(requirements: Requirement[], session: ReturnType<typeof getSession>) {
-  if (!session || session.user.roles.some((role) => ["Administrador", "Auditor"].includes(role))) return requirements;
+  if (!session || session.user.roles.some((role) => ["Administrador", "Auditor", "Coordinador"].includes(role))) return requirements;
   const userKeys = [session.user.name, session.user.email].map((value) => value.toLowerCase());
   return requirements.filter((item) => userKeys.includes(item.requestedBy.toLowerCase()));
 }
 
 function filterActivitiesForSession(activities: Activity[], visibleRequirements: Requirement[], session: ReturnType<typeof getSession>) {
-  if (!session || session.user.roles.some((role) => ["Administrador", "Auditor"].includes(role))) return activities;
+  if (!session || session.user.roles.some((role) => ["Administrador", "Auditor", "Coordinador"].includes(role))) return activities;
   const userKeys = [session.user.name, session.user.email].map((value) => value.toLowerCase());
   const visibleRequirementIds = new Set(visibleRequirements.map((item) => item.id));
   return activities.filter((item) => userKeys.includes(item.productResponsible.toLowerCase()) || visibleRequirementIds.has(item.requirementId));
