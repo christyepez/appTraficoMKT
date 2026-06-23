@@ -48,6 +48,19 @@ public sealed class RequirementWorkflowTests
         activity.Status.Should().Be(ActivityStatus.Approved);
     }
 
+    [Fact]
+    public void Activity_returns_to_in_progress_when_approval_is_rejected()
+    {
+        var activity = CreateActivity();
+
+        activity.Start();
+        activity.MarkEvidenceAttached();
+        activity.SendToApproval();
+        activity.Decide(ApprovalDecision.Rejected);
+
+        activity.Status.Should().Be(ActivityStatus.InProgress);
+    }
+
     private static Requirement CreateRequirement() => new(
         "Casa abierta",
         "Marketing",

@@ -394,7 +394,7 @@ public sealed class TechnicalActivity : Entity
     public void Decide(ApprovalDecision decision)
     {
         if (Status != ActivityStatus.PendingApproval) throw new InvalidOperationException("Activity must be pending approval.");
-        Status = decision == ApprovalDecision.Approved ? ActivityStatus.Approved : ActivityStatus.Rejected;
+        Status = decision == ApprovalDecision.Approved ? ActivityStatus.Approved : ActivityStatus.InProgress;
         StatusId = WorkflowCatalogIds.ForActivity(Status);
         Touch();
     }

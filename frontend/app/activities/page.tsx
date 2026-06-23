@@ -407,14 +407,17 @@ export default function ActivitiesPage() {
                   <button className="icon-button" type="button" title="Cerrar versiones de aprobación" onClick={() => setApprovalVersionsActivityId("")}><X size={16} /></button>
                 </div>
                 <div className="stack compact-stack top-space">
-                  {approvals.filter((approval) => approval.activityId === approvalVersionsActivityId).map((approval, index) => (
+                  {approvals
+                    .filter((approval) => approval.activityId === approvalVersionsActivityId)
+                    .sort((left, right) => new Date(left.createdAt).getTime() - new Date(right.createdAt).getTime())
+                    .map((approval, index) => (
                     <article className="card compact-card" key={approval.id}>
                       <div className="card-head">
                         <div className="compact-title">
-                          <h3>Versión {index + 1} - {approval.decision}</h3>
+                          <h3>Versión {index + 1} - {approvalDecisionLabel(approval.decision)}</h3>
                           <p>{formatDate(approval.createdAt)} | {approval.approvedBy}</p>
                         </div>
-                        <span className="badge">{approval.decision}</span>
+                        <span className="badge">{approvalDecisionLabel(approval.decision)}</span>
                       </div>
                       <div className="inline-facts">
                         <span>{approval.comments || "Sin comentarios."}</span>
@@ -435,7 +438,7 @@ export default function ActivitiesPage() {
                     <p>{highlight(`${item.requirementType} | ${item.productResponsible} | ${item.diffusionChannel}`, searchTerm)}</p>
                   </div>
                   <div className="card-meta">
-                    <span className="badge">{item.status}</span>
+                    <span className="badge">{activityStatusLabel(item.status)}</span>
                     <div className="actions">
                       <button className={workflowButtonClass(activityStepState(item, "start"))} disabled={activityStepState(item, "start") !== "ready"} title="Cambiar producto a en progreso" onClick={() => patch(`/api/activities/${item.id}/start`)}><Play size={16} /></button>
                       <button className={workflowButtonClass(activityStepState(item, "evidence"))} disabled={activityStepState(item, "evidence") !== "ready"} title="Adjuntar evidencia o archivo a este producto" onClick={() => setAttachmentActivityId(item.id)}><Paperclip size={16} /></button>
@@ -468,6 +471,22 @@ export default function ActivitiesPage() {
 function formatDate(value?: string) {
   if (!value) return "Sin fecha";
   return new Intl.DateTimeFormat("es-EC", { dateStyle: "short", timeStyle: "short" }).format(new Date(value));
+}
+
+function activityStatusLabel(status: string) {
+  const labels: Record<string, string> = {
+    Todo: "Por hacer",
+    InProgress: "Producto en proceso",
+    EvidenceAttached: "Evidencia adjunta",
+    PendingApproval: "Pendiente de aprobación",
+    Approved: "Aprobado",
+    Rejected: "Rechazado"
+  };
+  return labels[status] ?? status;
+}
+
+function approvalDecisionLabel(decision: string) {
+  return decision === "Approved" ? "Aprobado" : decision === "Rejected" ? "Rechazado" : decision;
 }
 
 function EvidencePreview({ item }: { item: EvidenceItem }) {
