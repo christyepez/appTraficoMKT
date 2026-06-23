@@ -775,6 +775,13 @@ public static class ActivitiesSchema
 
         await db.Database.ExecuteSqlRawAsync("""
             UPDATE [Activities]
+            SET [Status] = 'InProgress',
+                [StatusId] = '33333333-3333-3333-3333-333333333398'
+            WHERE [Status] = 'Rejected'
+            """);
+
+        await db.Database.ExecuteSqlRawAsync("""
+            UPDATE [Activities]
             SET [StatusId] = CASE [Status]
                 WHEN 'Todo' THEN '33333333-3333-3333-3333-333333333392'
                 WHEN 'InProgress' THEN '33333333-3333-3333-3333-333333333398'

@@ -264,7 +264,7 @@ export default function ActivitiesPage() {
   }
 
   const filtered = activities
-    .filter((item) => showCompleted || !["Approved", "Rejected"].includes(item.status))
+    .filter((item) => showCompleted || normalizedActivityStatus(item.status) !== "Approved")
     .filter((item) => matchesSearch(item, searchTerm));
 
   return (
@@ -474,19 +474,24 @@ function formatDate(value?: string) {
 }
 
 function activityStatusLabel(status: string) {
+  const normalized = normalizedActivityStatus(status);
   const labels: Record<string, string> = {
     Todo: "Por hacer",
     InProgress: "Producto en proceso",
     EvidenceAttached: "Evidencia adjunta",
     PendingApproval: "Pendiente de aprobación",
     Approved: "Aprobado",
-    Rejected: "Rechazado"
+    Rejected: "Producto en proceso"
   };
-  return labels[status] ?? status;
+  return labels[normalized] ?? normalized;
 }
 
 function approvalDecisionLabel(decision: string) {
   return decision === "Approved" ? "Aprobado" : decision === "Rejected" ? "Rechazado" : decision;
+}
+
+function normalizedActivityStatus(status: string) {
+  return status === "Rejected" ? "InProgress" : status;
 }
 
 function EvidencePreview({ item }: { item: EvidenceItem }) {
@@ -539,7 +544,7 @@ function matchesSearch(item: Activity, term: string) {
     item.productResponsible,
     item.diffusionChannel,
     item.mainKpi,
-    item.status,
+    activityStatusLabel(item.status),
     item.observations
   ].join(" ").toLowerCase().includes(query);
 }
@@ -561,13 +566,8 @@ function highlight(text: string, term: string) {
 type StepState = "pending" | "ready" | "done";
 
 function activityStepState(item: Activity, step: "start" | "evidence" | "approval"): StepState {
-  if (item.status === "Rejected") {
-    if (step === "start") return "done";
-    if (step === "evidence") return "ready";
-    return "pending";
-  }
   const order = ["Todo", "InProgress", "EvidenceAttached", "PendingApproval", "Approved", "Rejected"];
-  const current = order.indexOf(item.status);
+  const current = order.indexOf(normalizedActivityStatus(item.status));
   if (step === "start") return current <= 0 ? "ready" : "done";
   if (step === "evidence") {
     if (current <= 0) return "pending";
