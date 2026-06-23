@@ -1,0 +1,127 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: requirements-sqlserver
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "Passw0rd!Local"
+    ports:
+      - "14333:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P Passw0rd!Local -C -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  requirements-api:
+    build:
+      context: ./backend
+      dockerfile: src/Services/Requirements/Requirements.Api/Dockerfile
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__RequirementsDb: "Server=sqlserver;Database=RequirementsDb;User Id=sa;Password=Passw0rd!Local;TrustServerCertificate=True"
+      Services__Activities: "http://activities-api:8080"
+    ports:
+      - "5101:8080"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+
+  activities-api:
+    build:
+      context: ./backend
+      dockerfile: src/Services/Activities/Activities.Api/Dockerfile
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__ActivitiesDb: "Server=sqlserver;Database=ActivitiesDb;User Id=sa;Password=Passw0rd!Local;TrustServerCertificate=True"
+      Services__Evidence: "http://evidence-api:8080"
+      Notifications__PowerAutomateWebhookUrl: ""
+    ports:
+      - "5102:8080"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+
+  evidence-api:
+    build:
+      context: ./backend
+      dockerfile: src/Services/Evidence/Evidence.Api/Dockerfile
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__EvidenceDb: "Server=sqlserver;Database=EvidenceDb;User Id=sa;Password=Passw0rd!Local;TrustServerCertificate=True"
+    ports:
+      - "5103:8080"
+    volumes:
+      - evidence-uploads:/app/uploads
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+
+  identity-api:
+    build:
+      context: ./backend
+      dockerfile: src/Services/Identity/Identity.Api/Dockerfile
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__IdentityDb: "Server=sqlserver;Database=IdentityDb;User Id=sa;Password=Passw0rd!Local;TrustServerCertificate=True"
+      Jwt__Issuer: "RequirementsPlatform"
+      Jwt__Audience: "RequirementsPlatformWeb"
+      Jwt__Secret: "development-secret-change-me-please-32"
+      AzureAd__TenantId: ""
+      AzureAd__ClientId: ""
+      AzureAd__ClientSecret: ""
+      AzureAd__AllowedDomain: ""
+    ports:
+      - "5104:8080"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+
+  administration-api:
+    build:
+      context: ./backend
+      dockerfile: src/Services/Administration/Administration.Api/Dockerfile
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__AdministrationDb: "Server=sqlserver;Database=AdministrationDb;User Id=sa;Password=Passw0rd!Local;TrustServerCertificate=True"
+      ConnectionStrings__RequirementsDb: "Server=sqlserver;Database=RequirementsDb;User Id=sa;Password=Passw0rd!Local;TrustServerCertificate=True"
+      ConnectionStrings__ActivitiesDb: "Server=sqlserver;Database=ActivitiesDb;User Id=sa;Password=Passw0rd!Local;TrustServerCertificate=True"
+      ConnectionStrings__IdentityDb: "Server=sqlserver;Database=IdentityDb;User Id=sa;Password=Passw0rd!Local;TrustServerCertificate=True"
+      Jwt__Issuer: "RequirementsPlatform"
+      Jwt__Audience: "RequirementsPlatformWeb"
+      Jwt__Secret: "development-secret-change-me-please-32"
+    ports:
+      - "5105:8080"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./frontend
+      args:
+        REQUIREMENTS_API_URL: "http://requirements-api:8080"
+        ACTIVITIES_API_URL: "http://activities-api:8080"
+        EVIDENCE_API_URL: "http://evidence-api:8080"
+        IDENTITY_API_URL: "http://identity-api:8080"
+        ADMINISTRATION_API_URL: "http://administration-api:8080"
+    environment:
+      REQUIREMENTS_API_URL: "http://requirements-api:8080"
+      ACTIVITIES_API_URL: "http://activities-api:8080"
+      EVIDENCE_API_URL: "http://evidence-api:8080"
+      IDENTITY_API_URL: "http://identity-api:8080"
+      ADMINISTRATION_API_URL: "http://administration-api:8080"
+    ports:
+      - "3000:3000"
+    depends_on:
+      - requirements-api
+      - activities-api
+      - evidence-api
+      - identity-api
+      - administration-api
+
+volumes:
+  sqlserver-data:
+  evidence-uploads:

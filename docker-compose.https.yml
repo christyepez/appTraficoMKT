@@ -1,0 +1,16 @@
+services:
+  nginx:
+    image: nginx:1.27-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/nginx.local-https.conf:/etc/nginx/nginx.conf:ro
+      - ./deploy/certs/local:/etc/nginx/certs:ro
+    depends_on:
+      - web
+      - requirements-api
+      - activities-api
+      - evidence-api
+      - identity-api
+      - administration-api

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 96" role="img" aria-label="Universidad Indoamerica">
+  <rect width="420" height="96" rx="10" fill="#ffffff"/>
+  <path d="M22 18h48l-24 60z" fill="#f6b700"/>
+  <path d="M46 18h48l-48 60z" fill="#002f6c"/>
+  <path d="M70 18h48l-72 60z" fill="#d71920"/>
+  <text x="132" y="43" fill="#002f6c" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="800">INDOAMERICA</text>
+  <text x="134" y="66" fill="#d71920" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="700">UNIVERSIDAD</text>
+</svg>

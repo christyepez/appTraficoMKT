@@ -1,0 +1,88 @@
+services:
+  nginx:
+    image: nginx:1.27-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/nginx.prod-https.conf:/etc/nginx/nginx.conf:ro
+      - ${NGINX_CERTS_PATH:-./deploy/certs/prod}:/etc/nginx/certs:ro
+    depends_on:
+      - web
+      - requirements-api
+      - activities-api
+      - evidence-api
+      - identity-api
+      - administration-api
+
+  web:
+    build:
+      context: ./frontend
+      args:
+        REQUIREMENTS_API_URL: "http://requirements-api:8080"
+        ACTIVITIES_API_URL: "http://activities-api:8080"
+        EVIDENCE_API_URL: "http://evidence-api:8080"
+        IDENTITY_API_URL: "http://identity-api:8080"
+        ADMINISTRATION_API_URL: "http://administration-api:8080"
+    environment:
+      REQUIREMENTS_API_URL: "http://requirements-api:8080"
+      ACTIVITIES_API_URL: "http://activities-api:8080"
+      EVIDENCE_API_URL: "http://evidence-api:8080"
+      IDENTITY_API_URL: "http://identity-api:8080"
+      ADMINISTRATION_API_URL: "http://administration-api:8080"
+
+  requirements-api:
+    build:
+      context: ./backend
+      dockerfile: src/Services/Requirements/Requirements.Api/Dockerfile
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__RequirementsDb: "${REQUIREMENTS_DB}"
+      Services__Activities: "http://activities-api:8080"
+
+  activities-api:
+    build:
+      context: ./backend
+      dockerfile: src/Services/Activities/Activities.Api/Dockerfile
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__ActivitiesDb: "${ACTIVITIES_DB}"
+      Services__Evidence: "http://evidence-api:8080"
+      Notifications__PowerAutomateWebhookUrl: "${POWER_AUTOMATE_WEBHOOK_URL}"
+
+  evidence-api:
+    build:
+      context: ./backend
+      dockerfile: src/Services/Evidence/Evidence.Api/Dockerfile
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__EvidenceDb: "${EVIDENCE_DB}"
+    volumes:
+      - evidence-uploads:/app/uploads
+
+  identity-api:
+    build:
+      context: ./backend
+      dockerfile: src/Services/Identity/Identity.Api/Dockerfile
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__IdentityDb: "${IDENTITY_DB}"
+      Jwt__Issuer: "${JWT_ISSUER}"
+      Jwt__Audience: "${JWT_AUDIENCE}"
+      Jwt__Secret: "${JWT_SECRET}"
+      AzureAd__TenantId: "${AZURE_AD_TENANT_ID}"
+      AzureAd__ClientId: "${AZURE_AD_CLIENT_ID}"
+
+  administration-api:
+    build:
+      context: ./backend
+      dockerfile: src/Services/Administration/Administration.Api/Dockerfile
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__AdministrationDb: "${ADMINISTRATION_DB}"
+      Jwt__Issuer: "${JWT_ISSUER}"
+      Jwt__Audience: "${JWT_AUDIENCE}"
+      Jwt__Secret: "${JWT_SECRET}"
+
+volumes:
+  evidence-uploads:
