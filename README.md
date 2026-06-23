@@ -2,6 +2,15 @@
 
 Aplicacion base para recopilar requerimientos, asignar actividades al equipo tecnico, hacer tracking, adjuntar evidencias, aprobar actividades y completar el requerimiento cuando todo este aprobado.
 
+## Documentacion
+
+- [Indice documental](docs/README.md)
+- [Arquitectura C4 en 4 niveles](docs/architecture/c4.md)
+- [Arquitectura tecnica](docs/technical/technical-architecture.md)
+- [Guia funcional de usuario](docs/functional/user-guide.md)
+- [Operaciones y despliegue](docs/operations/deployment.md)
+- [Git Flow y ambientes](docs/operations/git-flow.md)
+
 ## Arquitectura
 
 - `backend/src/BuildingBlocks`: dominio compartido y reglas de negocio.
@@ -88,9 +97,13 @@ El certificado local es autofirmado, por eso el navegador mostrara una advertenc
 - `/activities`: registro y seguimiento de productos.
 - `/evidence`: adjuntar archivos de evidencia.
 - `/approvals`: aprobaciones para rol aprobador.
+- `/audit`: auditorias y tracking administrativo.
 - `/admin`: CRUD de facultades, sedes, aprobadores y catalogos.
 - `/users`: CRUD inicial de usuarios, roles y perfiles.
 - `/storage`: configuracion de carga local, Blob Storage o FTP.
+- `/branding`: manejo de marca institucional.
+- `/initial-import`: carga inicial con plantillas.
+- `/notifications`: configuracion de notificaciones Power Automate.
 
 ## Campos principales
 
@@ -196,25 +209,21 @@ multipart/form-data: activityId, uploadedBy, file
 
 Para produccion, configura provider `Blob` y completa `BlobConnectionString` y `BlobContainer`.
 
-## Repositorio GitHub
+## Repositorio GitHub y Git Flow
 
-En esta maquina no se encontro `git` ni `gh` en el PATH. Para publicar en tu cuenta:
+Repositorio:
 
-```powershell
-cd C:\Users\ChristianYepez\Documents\Codex\2026-06-18\gee\outputs\requirements-platform
-git init
-git add .
-git commit -m "Initial requirements platform"
-gh repo create requirements-platform --private --source . --remote origin --push
+```txt
+https://github.com/christyepez/appTraficoMKT
 ```
 
-Si no usas GitHub CLI:
+Ramas:
 
-```powershell
-git remote add origin https://github.com/TU_USUARIO/requirements-platform.git
-git branch -M main
-git push -u origin main
-```
+- `develop`: desarrollo.
+- `test`: pruebas.
+- `main`: produccion.
+
+Los pipelines se encuentran en `.github/workflows` y estan documentados en [Git Flow y ambientes](docs/operations/git-flow.md).
 
 ## Produccion con Nginx
 
