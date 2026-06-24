@@ -1,7 +1,7 @@
 "use client";
 
 import { AppNav } from "../nav";
-import { api, t } from "../lib";
+import { Activity, api, t } from "../lib";
 import { BarChart3, RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -65,19 +65,22 @@ export default function MetricsPage() {
   const [products, setProducts] = useState<ProductMetrics | null>(null);
   const [approvals, setApprovals] = useState<ApprovalMetrics | null>(null);
   const [usage, setUsage] = useState<UsageMetrics | null>(null);
+  const [activities, setActivities] = useState<Activity[]>([]);
   const [concept, setConcept] = useState("resumen");
 
   async function load() {
-    const [requirementData, productData, approvalData, usageData] = await Promise.all([
+    const [requirementData, productData, approvalData, usageData, activityData] = await Promise.all([
       api<RequirementMetrics>("/api/requirements/metrics"),
       api<ProductMetrics>("/api/activities/metrics"),
       api<ApprovalMetrics>("/api/approvals/metrics"),
-      api<UsageMetrics>("/api/identity/usage-metrics")
+      api<UsageMetrics>("/api/identity/usage-metrics"),
+      api<Activity[]>("/api/activities").catch(() => [])
     ]);
     setRequirements(requirementData);
     setProducts(productData);
     setApprovals(approvalData);
     setUsage(usageData);
+    setActivities(activityData);
   }
 
   useEffect(() => {
@@ -154,7 +157,7 @@ export default function MetricsPage() {
             <ParticipationStory requirements={requirements} />
           )}
           {concept === "usabilidad" && (
-            <UsageSection usage={usage} />
+            <UsageSection usage={usage} activities={activities} />
           )}
         </section>
       </section>
@@ -162,7 +165,16 @@ export default function MetricsPage() {
   );
 }
 
-function UsageSection({ usage }: { usage: UsageMetrics | null }) {
+function UsageSection({ usage, activities }: { usage: UsageMetrics | null; activities: Activity[] }) {
+  const users = usage?.recentUsers ?? [];
+  const grouped = users.map((user) => {
+    const keys = [user.email, user.name].map((value) => value.toLowerCase());
+    const assigned = activities.filter((activity) => keys.includes(activity.productResponsible.toLowerCase()));
+    const approved = assigned.filter((activity) => activity.status === "Approved").length;
+    const inProgress = assigned.filter((activity) => activity.status !== "Approved").length;
+    return { user, assigned, approved, inProgress };
+  });
+
   return (
     <section className="panel">
       <h2>Usabilidad de usuarios</h2>
@@ -173,7 +185,7 @@ function UsageSection({ usage }: { usage: UsageMetrics | null }) {
         <MetricCard label="Horas sin uso" value={usage?.averageHoursSinceLastLogin ?? 0} detail="promedio desde último login" />
       </div>
       <div className="stack compact-stack top-space">
-        {(usage?.recentUsers ?? []).map((user) => (
+        {grouped.map(({ user, assigned, approved, inProgress }) => (
           <article className="card compact-card" key={user.email}>
             <div className="card-head">
               <div className="compact-title">
@@ -182,10 +194,25 @@ function UsageSection({ usage }: { usage: UsageMetrics | null }) {
               </div>
               <span className="badge">{user.isActive ? "Activo" : "Inactivo"}</span>
             </div>
-            <div className="inline-facts">
-              <span>{user.roles}</span>
-              <span>Último ingreso: {user.lastLoginAt ? formatDate(user.lastLoginAt) : "Sin ingreso"}</span>
+            <div className="detail-grid compact-detail-grid">
+              <div className="detail-item"><span>Roles</span><strong>{user.roles}</strong></div>
+              <div className="detail-item"><span>Último ingreso</span><strong>{user.lastLoginAt ? formatDate(user.lastLoginAt) : "Sin ingreso"}</strong></div>
+              <div className="detail-item"><span>Productos asignados</span><strong>{assigned.length}</strong></div>
+              <div className="detail-item"><span>En gestión</span><strong>{inProgress}</strong></div>
+              <div className="detail-item"><span>Aprobados</span><strong>{approved}</strong></div>
             </div>
+            {assigned.length > 0 && (
+              <div className="nested-detail top-space">
+                {assigned.slice(0, 5).map((activity) => (
+                  <div className="inline-facts" key={activity.id}>
+                    <span>{activity.productId}</span>
+                    <span>{activity.productType}</span>
+                    <span>{activity.status}</span>
+                    <span>{activity.productDeliveryDate ?? "Sin entrega"}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </article>
         ))}
       </div>

@@ -3,7 +3,7 @@
 import { AppNav } from "../nav";
 import { Activity, Requirement, api, getSession, showToast } from "../lib";
 import { PaginationControls, paginate, type PaginationState } from "../pagination";
-import { Eye, FileText, Plus, RefreshCw, Trash2, Upload, X } from "lucide-react";
+import { ChevronDown, ChevronRight, Eye, FileText, Plus, RefreshCw, Trash2, Upload, X } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
 
 type EvidenceItem = {
@@ -33,6 +33,7 @@ export default function EvidencePage() {
   const [dragging, setDragging] = useState(false);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [expandedProducts, setExpandedProducts] = useState<string[]>([]);
   const [pagination, setPagination] = useState<PaginationState>({ page: 1, pageSize: 10 });
 
   async function load() {
@@ -169,38 +170,61 @@ export default function EvidencePage() {
             <div className="detail-item"><span>Aprobaciones</span><strong>{approvals.length}</strong></div>
           </div>
           <div className="stack compact-stack top-space">
-              {paginate(evidence, pagination).items.map((item) => (
-                <article className="card compact-card" key={item.id}>
-                  <div className="card-head">
-                    <div className="compact-title">
-                      <h3><FileText size={16} /> {item.fileName}</h3>
-                      <p>{activityLabel(activities, item.activityId)}</p>
-                    </div>
-                    <div className="card-meta">
-                      <span className="badge">{item.uploadedBy}</span>
-                      <div className="actions">
-                        <button className="icon-button danger" title="Eliminar lógicamente la evidencia" onClick={() => removeEvidence(item.id)}><Trash2 size={16} /></button>
+              {paginate(activities, pagination).items.map((activity) => {
+                const files = evidence.filter((item) => item.activityId === activity.id);
+                const activityApprovals = approvals.filter((approval) => approval.activityId === activity.id);
+                const isExpanded = expandedProducts.includes(activity.id);
+                return (
+                  <article className="card compact-card" key={activity.id}>
+                    <div className="card-head">
+                      <button className="collapse-title" type="button" title="Mostrar u ocultar adjuntos del producto" onClick={() => toggleExpanded(activity.id, setExpandedProducts)}>
+                        {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                        <span>{activity.productId} - {activity.productType}</span>
+                      </button>
+                      <div className="card-meta">
+                        <span className="badge">{files.length} adjunto(s)</span>
+                        <span className="badge">{activityApprovals.length} aprobación(es)</span>
+                        <button className="icon-button" title="Adjuntar evidencia a este producto" onClick={() => { setActivityId(activity.id); setIsUploadOpen(true); }}><Plus size={16} /></button>
                       </div>
                     </div>
-                  </div>
-                  <div className="detail-grid compact-detail-grid">
-                    <div className="detail-item"><span>Tipo</span><strong>{item.contentType || "Archivo"}</strong></div>
-                    <div className="detail-item"><span>Ruta</span><strong>{item.storageUrl}</strong></div>
-                    <div className="detail-item"><span>Aprobaciones</span><strong>{approvals.filter((approval) => approval.activityId === item.activityId).length}</strong></div>
-                  </div>
-                  {approvals.filter((approval) => approval.activityId === item.activityId).map((approval) => (
-                    <div className="inline-facts" key={approval.id}>
-                      <span>{approval.decision}</span>
-                      <span>{approval.approvedBy}</span>
-                      {approval.comments && <span>{approval.comments}</span>}
+                    <div className="detail-grid compact-detail-grid">
+                      <div className="detail-item"><span>Responsable</span><strong>{activity.productResponsible}</strong></div>
+                      <div className="detail-item"><span>Canal</span><strong>{activity.diffusionChannel}</strong></div>
+                      <div className="detail-item"><span>KPI</span><strong>{activity.mainKpi}</strong></div>
                     </div>
-                  ))}
-                  <EvidencePreview item={item} />
-                </article>
-              ))}
-              {evidence.length === 0 && <div className="empty">No hay adjuntos registrados.</div>}
+                    {isExpanded && (
+                      <div className="nested-detail top-space">
+                        {files.map((item) => (
+                          <article className="card compact-card" key={item.id}>
+                            <div className="card-head">
+                              <div className="compact-title">
+                                <h3><FileText size={16} /> {item.fileName}</h3>
+                                <p>{item.uploadedBy || "Equipo técnico"} | {item.contentType || "Archivo"}</p>
+                              </div>
+                              <div className="actions">
+                                <a className="icon-button" href={item.storageUrl} target="_blank" rel="noreferrer" title="Abrir adjunto"><Eye size={16} /></a>
+                                <button className="icon-button danger" title="Eliminar lógicamente la evidencia" onClick={() => removeEvidence(item.id)}><Trash2 size={16} /></button>
+                              </div>
+                            </div>
+                            <EvidencePreview item={item} />
+                          </article>
+                        ))}
+                        {files.length === 0 && <div className="empty">Este producto aún no tiene adjuntos.</div>}
+                        {activityApprovals.length > 0 && (
+                          <div className="inline-facts">
+                            {activityApprovals.map((approval) => (
+                              <span key={approval.id}>{approval.decision} | {approval.approvedBy}{approval.comments ? ` | ${approval.comments}` : ""}</span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </article>
+                );
+              })}
+              {activities.length === 0 && <div className="empty">No hay productos visibles para revisar adjuntos.</div>}
           </div>
-          <PaginationControls state={pagination} totalItems={evidence.length} onChange={setPagination} />
+          <PaginationControls state={pagination} totalItems={activities.length} onChange={setPagination} />
         </section>
       </section>
     </main>
@@ -227,6 +251,10 @@ function EvidencePreview({ item }: { item: EvidenceItem }) {
 function activityLabel(activities: Activity[], activityId: string) {
   const activity = activities.find((item) => item.id === activityId);
   return activity ? `${activity.productId} - ${activity.productType}` : "Producto no visible";
+}
+
+function toggleExpanded(id: string, setExpandedProducts: (value: string[] | ((current: string[]) => string[])) => void) {
+  setExpandedProducts((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
 }
 
 function filterRequirementsForSession(requirements: Requirement[], session: ReturnType<typeof getSession>) {

@@ -49,7 +49,7 @@ export default function LoginPage() {
     const code = params.get("code");
     const state = params.get("state");
     const error = params.get("error_description") ?? params.get("error");
-    if (error) setMessage(error);
+    if (error) setMessage(safeLoginMessage(error));
     if (!code) return;
 
     const expectedState = window.sessionStorage.getItem("msal-state");
@@ -73,7 +73,7 @@ export default function LoginPage() {
         saveSession(session);
         router.push(session.user.mustChangePassword ? `/change-password?email=${encodeURIComponent(session.user.email)}` : "/dashboard");
       })
-      .catch((err: Error) => setMessage(err.message));
+      .catch((err: Error) => setMessage(safeLoginMessage(err.message)));
   }, [router]);
 
   async function login(event: FormEvent<HTMLFormElement>) {
@@ -91,7 +91,7 @@ export default function LoginPage() {
       showToast("Inicio de sesión correcto.");
       router.push(session.user.mustChangePassword ? `/change-password?email=${encodeURIComponent(session.user.email)}` : "/dashboard");
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "No se pudo iniciar sesion.");
+      setMessage(safeLoginMessage(error instanceof Error ? error.message : "No se pudo iniciar sesion."));
     }
   }
 
@@ -115,7 +115,7 @@ export default function LoginPage() {
       authorize.searchParams.set("code_challenge_method", "S256");
       window.location.assign(authorize.toString());
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "No se pudo iniciar Microsoft SSO.");
+      setMessage(safeLoginMessage(error instanceof Error ? error.message : "No se pudo iniciar Microsoft SSO."));
     }
   }
 
@@ -297,4 +297,12 @@ async function sha256Base64Url(value: string) {
   const digest = await crypto.subtle.digest("SHA-256", data);
   const base64 = btoa(String.fromCharCode(...new Uint8Array(digest)));
   return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+function safeLoginMessage(value: string) {
+  if (/https?:\/\/|trycloudflare\.com|localhost/i.test(value)) {
+    return "No se pudo completar el inicio de sesión. Revise la URL pública vigente o vuelva a intentar.";
+  }
+  if (value.length > 180) return `${value.slice(0, 177)}...`;
+  return value;
 }

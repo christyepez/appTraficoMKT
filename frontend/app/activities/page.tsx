@@ -449,7 +449,8 @@ export default function ActivitiesPage() {
                       <button className={workflowButtonClass(activityStepState(item, "start"))} disabled={activityStepState(item, "start") !== "ready"} title="Cambiar producto a en progreso" onClick={() => patch(`/api/activities/${item.id}/start`)}><Play size={16} /></button>
                       <button className={workflowButtonClass(activityStepState(item, "evidence"))} disabled={activityStepState(item, "evidence") !== "ready"} title="Adjuntar evidencia o archivo a este producto" onClick={() => setAttachmentActivityId(item.id)}><Paperclip size={16} /></button>
                       <button className={workflowButtonClass(activityStepState(item, "approval"))} disabled={activityStepState(item, "approval") !== "ready"} title="Enviar producto a aprobación" onClick={() => patch(`/api/activities/${item.id}/submit-approval`)}><Send size={16} /></button>
-                      <button className="icon-button" title="Ver versiones enviadas a aprobación" onClick={() => setApprovalVersionsActivityId(item.id)}><Eye size={16} /></button>
+                      <button className="icon-button" title="Ver detalle y adjuntos del producto" onClick={() => setAttachmentDetailActivityId(item.id)}><Eye size={16} /></button>
+                      <button className="icon-button" title="Ver versiones enviadas a aprobación" onClick={() => setApprovalVersionsActivityId(item.id)}><FileText size={16} /></button>
                       <button className="icon-button" title="Editar datos del producto" onClick={() => openEditor(item)}><Edit3 size={16} /></button>
                       <button className="icon-button danger" title="Eliminar lógicamente el producto" onClick={() => removeActivity(item.id)}><Trash2 size={16} /></button>
                     </div>

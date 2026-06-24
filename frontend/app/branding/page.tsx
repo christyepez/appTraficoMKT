@@ -8,6 +8,7 @@ import { FormEvent, useEffect, useState } from "react";
 export default function BrandingPage() {
   const [settings, setSettings] = useState<BrandSettings>(defaultBrandSettings);
   const [message, setMessage] = useState("Parametrización visual institucional.");
+  const [activeCategory, setActiveCategory] = useState<"" | "colores" | "tipografia" | "login">("");
 
   useEffect(() => {
     load().catch(() => undefined);
@@ -29,6 +30,10 @@ export default function BrandingPage() {
 
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    await saveSettings();
+  }
+
+  async function saveSettings() {
     const saved = await api<BrandSettings>("/api/identity/brand-settings", {
       method: "PUT",
       body: JSON.stringify(settings)
@@ -38,6 +43,7 @@ export default function BrandingPage() {
     window.dispatchEvent(new Event("brand-settings-changed"));
     setMessage("Marca global guardada. Se aplicará a todos los usuarios.");
     showToast("Marca global guardada correctamente.");
+    setActiveCategory("");
   }
 
   async function restore() {
@@ -58,6 +64,66 @@ export default function BrandingPage() {
       <section className="main-grid">
         <aside className="panel">
           <h2>Manejo Marca</h2>
+          <div className="brand-category-grid">
+            <button className="button secondary" type="button" onClick={() => setActiveCategory("colores")}>Colores</button>
+            <button className="button secondary" type="button" onClick={() => setActiveCategory("tipografia")}>Tipografía</button>
+            <button className="button secondary" type="button" onClick={() => setActiveCategory("login")}>Login público</button>
+          </div>
+          {activeCategory && (
+            <div className="modal-backdrop" role="dialog" aria-modal="true">
+              <section className="modal-panel">
+                <div className="card-head">
+                  <h2>{activeCategory === "colores" ? "Colores" : activeCategory === "tipografia" ? "Tipografía" : "Login público"}</h2>
+                  <button className="icon-button" type="button" title="Cerrar parametrización" onClick={() => setActiveCategory("")}>X</button>
+                </div>
+                <div className="form top-space">
+                  {activeCategory === "colores" && (
+                    <>
+                      <ColorField label="Color principal" value={settings.primary} onChange={(primary) => setSettings({ ...settings, primary })} />
+                      <ColorField label="Color principal oscuro" value={settings.primaryDark} onChange={(primaryDark) => setSettings({ ...settings, primaryDark })} />
+                      <ColorField label="Amarillo acento" value={settings.accent} onChange={(accent) => setSettings({ ...settings, accent })} />
+                      <ColorField label="Fondo aplicación" value={settings.background} onChange={(background) => setSettings({ ...settings, background })} />
+                      <ColorField label="Paneles y tarjetas" value={settings.surface} onChange={(surface) => setSettings({ ...settings, surface })} />
+                      <ColorField label="Texto principal" value={settings.foreground} onChange={(foreground) => setSettings({ ...settings, foreground })} />
+                      <ColorField label="Botones" value={settings.buttonText} onChange={(buttonText) => setSettings({ ...settings, buttonText })} />
+                      <ColorField label="Error / peligro" value={settings.danger} onChange={(danger) => setSettings({ ...settings, danger })} />
+                    </>
+                  )}
+                  {activeCategory === "tipografia" && (
+                    <label className="field field-wide">
+                      <span>Tipografía</span>
+                      <select value={settings.fontFamily} onChange={(event) => setSettings({ ...settings, fontFamily: event.target.value })}>
+                        <option value="Segoe UI, Arial, Helvetica, sans-serif">Segoe UI</option>
+                        <option value="Arial, Helvetica, sans-serif">Arial</option>
+                        <option value="Tahoma, Arial, sans-serif">Tahoma</option>
+                        <option value="Georgia, 'Times New Roman', serif">Georgia</option>
+                      </select>
+                    </label>
+                  )}
+                  {activeCategory === "login" && (
+                    <>
+                      <label className="check-field">
+                        <input type="checkbox" checked={settings.showPublicRequirementForm} onChange={(event) => setSettings({ ...settings, showPublicRequirementForm: event.target.checked })} />
+                        Mostrar botón Crear requerimiento sin login
+                      </label>
+                      <label className="check-field">
+                        <input type="checkbox" checked={settings.showPublicRequirementFullPage} onChange={(event) => setSettings({ ...settings, showPublicRequirementFullPage: event.target.checked })} />
+                        Mostrar botón Abrir formulario completo
+                      </label>
+                      <label className="check-field">
+                        <input type="checkbox" checked={settings.showLoginChatbot} onChange={(event) => setSettings({ ...settings, showLoginChatbot: event.target.checked })} />
+                        Mostrar robot Puma en login
+                      </label>
+                    </>
+                  )}
+                  <div className="form-actions">
+                    <button className="button" type="button" onClick={saveSettings}><Save size={16} /> Guardar</button>
+                    <button className="button secondary" type="button" onClick={() => setActiveCategory("")}>Cancelar</button>
+                  </div>
+                </div>
+              </section>
+            </div>
+          )}
           <form className="form" onSubmit={save}>
             <div className="form-section-title field-wide"><h3>Textos</h3><button className="button compact" title="Guardar textos de marca"><Save size={14} /> Guardar textos</button></div>
             <label className="field">

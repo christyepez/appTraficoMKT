@@ -1091,6 +1091,37 @@ mark {
   text-decoration: underline;
 }
 
+.collapse-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  background: transparent;
+  color: var(--foreground);
+  font-weight: 700;
+  text-align: left;
+}
+
+.collapse-title span {
+  overflow-wrap: anywhere;
+}
+
+.nested-detail {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--secondary) 64%, #ffffff);
+}
+
+.brand-category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
 .story-panel {
   grid-column: 1 / -1;
 }
