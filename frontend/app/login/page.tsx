@@ -211,14 +211,16 @@ export default function LoginPage() {
         <Link className="button secondary full" href="/forgot-password" title="Recuperar contraseña con clave temporal">
           <KeyRound size={16} /> Recuperar contraseña
         </Link>
-        <div className="login-actions-grid">
-          <button className="button secondary full" type="button" title="Abrir formulario público de requerimientos" onClick={() => setIsPublicFormOpen(true)}>
-            <ClipboardList size={16} /> Crear requerimiento sin login
-          </button>
-          <Link className="button secondary full" href="/public-requirement" title="Abrir formulario público en página completa">
-            <ClipboardList size={16} /> Abrir formulario completo
-          </Link>
-        </div>
+        {brand.showPublicRequirementForm && (
+          <div className="login-actions-grid">
+            <button className="button secondary full" type="button" title="Abrir formulario público de requerimientos" onClick={() => setIsPublicFormOpen(true)}>
+              <ClipboardList size={16} /> Crear requerimiento sin login
+            </button>
+            <Link className="button secondary full" href="/public-requirement" title="Abrir formulario público en página completa">
+              <ClipboardList size={16} /> Abrir formulario completo
+            </Link>
+          </div>
+        )}
         <p className="hint"><KeyRound size={14} /> {message}</p>
       </section>
       {isPublicFormOpen && (
@@ -250,10 +252,12 @@ export default function LoginPage() {
           </section>
         </div>
       )}
-      <button className="chatbot-launcher" type="button" title="Asistente Puma para crear requerimientos" onClick={() => setIsChatOpen(true)}>
-        {brand.chatbotIcon ? <img src={brand.chatbotIcon} alt="Puma" /> : <PawPrint size={24} />}
-      </button>
-      {isChatOpen && (
+      {brand.showLoginChatbot && (
+        <button className="chatbot-launcher" type="button" title="Asistente Puma para crear requerimientos" onClick={() => setIsChatOpen(true)}>
+          {brand.chatbotIcon ? <img src={brand.chatbotIcon} alt="Puma" /> : <PawPrint size={24} />}
+        </button>
+      )}
+      {brand.showLoginChatbot && isChatOpen && (
         <section className="chatbot-panel">
           <div className="card-head">
             <div>

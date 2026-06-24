@@ -39,6 +39,8 @@ export type BrandSettings = {
   brandVersion: number;
   logo: string;
   chatbotIcon: string;
+  showPublicRequirementForm: boolean;
+  showLoginChatbot: boolean;
   title: string;
   subtitle: string;
 };
@@ -67,6 +69,8 @@ export const defaultBrandSettings: BrandSettings = {
   brandVersion: 3,
   logo: "https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/logo-gen-cuad.jpg",
   chatbotIcon: "https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/logo-gen-cuad.jpg",
+  showPublicRequirementForm: true,
+  showLoginChatbot: true,
   title: "Creamos conexiones que dejan huella",
   subtitle: "Universidad Indoamérica"
 };

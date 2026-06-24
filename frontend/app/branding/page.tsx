@@ -142,6 +142,15 @@ export default function BrandingPage() {
               <span>Icono Puma chatbot</span>
               <input value={settings.chatbotIcon?.startsWith("data:") ? "Icono cargado desde archivo" : settings.chatbotIcon} onChange={(event) => setSettings({ ...settings, chatbotIcon: event.target.value })} />
             </label>
+            <div className="form-section-title field-wide"><h3>Login público</h3><button className="button compact" title="Guardar opciones públicas del login"><Save size={14} /> Guardar login</button></div>
+            <label className="check-field">
+              <input type="checkbox" checked={settings.showPublicRequirementForm} onChange={(event) => setSettings({ ...settings, showPublicRequirementForm: event.target.checked })} />
+              Mostrar formulario público de requerimientos
+            </label>
+            <label className="check-field">
+              <input type="checkbox" checked={settings.showLoginChatbot} onChange={(event) => setSettings({ ...settings, showLoginChatbot: event.target.checked })} />
+              Mostrar robot Puma en login
+            </label>
             <label className="field field-wide">
               <span>Cargar logo</span>
               <input type="file" accept="image/*" onChange={(event) => loadLogo(event.target.files?.[0])} />
