@@ -1,0 +1,9 @@
+tunnel: apptraficomkt
+credentials-file: /etc/cloudflared/apptraficomkt.json
+
+ingress:
+  - hostname: apptraficomkt.tudominio.com
+    service: https://nginx:443
+    originRequest:
+      noTLSVerify: true
+  - service: http_status:404

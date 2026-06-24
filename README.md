@@ -134,6 +134,41 @@ Esa URL es temporal y cambia cada vez que se reinicia el tunel. La ruta local eq
 https://localhost/login
 ```
 
+### URL HTTPS fija con Cloudflare Tunnel nombrado
+
+La URL `trycloudflare.com` no es fija. Para tener una URL estable se debe usar un tunel nombrado asociado a una cuenta Cloudflare y a un dominio propio, por ejemplo:
+
+```txt
+https://apptraficomkt.tudominio.com/login
+```
+
+Archivos preparados:
+
+- `docker-compose.tunnel.named.yml`
+- `deploy/cloudflared/config.example.yml`
+
+Pasos una sola vez desde una terminal autenticada en Cloudflare:
+
+```powershell
+cloudflared tunnel login
+cloudflared tunnel create apptraficomkt
+cloudflared tunnel route dns apptraficomkt apptraficomkt.tudominio.com
+```
+
+Luego copiar el archivo de credenciales generado por Cloudflare como:
+
+```txt
+deploy/cloudflared/apptraficomkt.json
+```
+
+Crear `deploy/cloudflared/config.yml` copiando `deploy/cloudflared/config.example.yml` y reemplazar `apptraficomkt.tudominio.com` por el hostname real. Levantar con:
+
+```powershell
+docker compose -f docker-compose.yml -f docker-compose.https.yml -f docker-compose.tunnel.named.yml up --build -d
+```
+
+Con ese esquema la URL no cambia al reiniciar contenedores.
+
 ## Flujo funcional
 
 1. Crear requerimiento.
