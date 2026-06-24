@@ -30,7 +30,9 @@ const screenLabels: Record<string, string> = {
   storage: "Archivos",
   "initial-import": "Carga inicial",
   branding: "Manejo Marca",
-  notifications: "Notificaciones"
+  notifications: "Notificaciones",
+  "my-notifications": "Mis notificaciones",
+  "notification-log": "Registro notificaciones"
 };
 
 export default function UsersPage() {
@@ -112,7 +114,7 @@ export default function UsersPage() {
     setSelectedScreens(defaultScreensForRole(role));
   }
 
-  const visibleUsers = (showInactive ? users : users.filter((user) => user.isActive)).filter((user) => matchesUserSearch(user, searchTerm));
+  const visibleUsers = users.filter((user) => showInactive ? !user.isActive : user.isActive).filter((user) => matchesUserSearch(user, searchTerm));
 
   async function removeUser(id: string) {
     if (!window.confirm("¿Eliminar lógicamente este usuario? El usuario quedará inactivo.")) return;
@@ -265,10 +267,10 @@ function highlight(text: string, term: string) {
 }
 
 function defaultScreensForRole(role: string) {
-  if (role === "Administrador") return ["dashboard", "activities", "evidence", "approvals", "metrics", "audit", "admin", "users", "storage", "initial-import", "branding", "notifications"];
-  if (role === "Coordinador") return ["dashboard", "activities", "evidence", "approvals", "metrics", "audit"];
-  if (role === "Tecnico") return ["dashboard", "activities", "evidence"];
-  if (role === "Aprobador") return ["dashboard", "approvals"];
+  if (role === "Administrador") return ["dashboard", "activities", "evidence", "approvals", "metrics", "audit", "admin", "users", "storage", "initial-import", "branding", "notifications", "my-notifications", "notification-log"];
+  if (role === "Coordinador") return ["dashboard", "activities", "evidence", "approvals", "metrics", "audit", "my-notifications"];
+  if (role === "Tecnico") return ["dashboard", "activities", "evidence", "my-notifications"];
+  if (role === "Aprobador") return ["dashboard", "approvals", "my-notifications"];
   if (role === "Auditor") return ["dashboard", "activities", "evidence", "approvals", "metrics", "audit"];
   return ["dashboard"];
 }

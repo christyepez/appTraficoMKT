@@ -1,7 +1,7 @@
 "use client";
 
-import { api, saveSession, showToast, type AuthSession } from "../lib";
-import { KeyRound, LogIn, Mail } from "lucide-react";
+import { api, defaultBrandSettings, saveSession, showToast, type AuthSession, type BrandSettings } from "../lib";
+import { ClipboardList, KeyRound, LogIn, Mail, PawPrint, Send, X } from "lucide-react";
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -9,8 +9,25 @@ import { useRouter } from "next/navigation";
 export default function LoginPage() {
   const router = useRouter();
   const [message, setMessage] = useState("Usa admin@local.test / Admin123!");
+  const [brand, setBrand] = useState<BrandSettings>(defaultBrandSettings);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatMessage, setChatMessage] = useState("");
+  const [catalogDefaults, setCatalogDefaults] = useState<{ faculty?: any; campus?: any; format?: any; career?: any }>({});
 
   useEffect(() => {
+    api<BrandSettings>("/api/identity/brand-settings").then((data) => setBrand({ ...defaultBrandSettings, ...data })).catch(() => undefined);
+    Promise.all([
+      api<any[]>("/api/admin/faculties").catch(() => []),
+      api<any[]>("/api/admin/campuses").catch(() => []),
+      api<any[]>("/api/admin/catalogs/by-type/FormatoEvento").catch(() => []),
+      api<any[]>("/api/admin/careers").catch(() => [])
+    ]).then(([faculties, campuses, formats, careers]) => setCatalogDefaults({
+      faculty: faculties.find((item) => item.isActive) ?? faculties[0],
+      campus: campuses.find((item) => item.isActive) ?? campuses[0],
+      format: formats.find((item) => item.isActive) ?? formats[0],
+      career: careers.find((item) => item.isActive) ?? careers[0]
+    })).catch(() => undefined);
+
     const params = new URLSearchParams(window.location.search);
     const code = params.get("code");
     const state = params.get("state");
@@ -85,6 +102,38 @@ export default function LoginPage() {
     }
   }
 
+  async function createFromChat(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const startDate = String(form.get("startDate") || new Date().toISOString().slice(0, 10));
+    try {
+      await api("/api/requirements", {
+        method: "POST",
+        body: JSON.stringify({
+          activityOrEvent: form.get("activityOrEvent"),
+          requestedBy: form.get("requestedBy"),
+          facultyId: catalogDefaults.faculty?.id,
+          faculty: catalogDefaults.faculty?.name ?? "No definida",
+          career: catalogDefaults.career?.name ?? "No definida",
+          campusId: catalogDefaults.campus?.id,
+          campus: catalogDefaults.campus?.name ?? "No definida",
+          place: form.get("place") || "Por definir",
+          startDate,
+          endDate: form.get("endDate") || startDate,
+          eventObjective: form.get("eventObjective"),
+          eventFormatId: catalogDefaults.format?.id,
+          eventFormat: catalogDefaults.format?.name ?? "Presencial",
+          requestDate: new Date().toISOString().slice(0, 10)
+        })
+      });
+      setChatMessage("Listo, el requerimiento fue creado. El equipo lo revisará en seguimiento.");
+      showToast("Requerimiento creado desde chatbot.");
+      event.currentTarget.reset();
+    } catch (error) {
+      setChatMessage(error instanceof Error ? error.message : "No se pudo crear el requerimiento.");
+    }
+  }
+
   return (
     <main className="login-page">
       <section className="login-panel">
@@ -111,8 +160,35 @@ export default function LoginPage() {
         <Link className="button secondary full" href="/forgot-password" title="Recuperar contraseña con clave temporal">
           <KeyRound size={16} /> Recuperar contraseña
         </Link>
+        <Link className="button secondary full" href="/public-requirement" title="Crear requerimiento sin iniciar sesión">
+          <ClipboardList size={16} /> Crear requerimiento sin login
+        </Link>
         <p className="hint"><KeyRound size={14} /> {message}</p>
       </section>
+      <button className="chatbot-launcher" type="button" title="Asistente Puma para crear requerimientos" onClick={() => setIsChatOpen(true)}>
+        {brand.chatbotIcon ? <img src={brand.chatbotIcon} alt="Puma" /> : <PawPrint size={24} />}
+      </button>
+      {isChatOpen && (
+        <section className="chatbot-panel">
+          <div className="card-head">
+            <div>
+              <h2>Asistente Puma</h2>
+              <p>Crear requerimiento rápido</p>
+            </div>
+            <button className="icon-button" type="button" title="Cerrar asistente" onClick={() => setIsChatOpen(false)}><X size={16} /></button>
+          </div>
+          <form className="form top-space" onSubmit={createFromChat}>
+            <label className="field"><span>Actividad o evento</span><input name="activityOrEvent" required /></label>
+            <label className="field"><span>Solicitante</span><input name="requestedBy" required /></label>
+            <label className="field"><span>Lugar</span><input name="place" /></label>
+            <label className="field"><span>Fecha inicio</span><input name="startDate" type="date" /></label>
+            <label className="field"><span>Fecha fin</span><input name="endDate" type="date" /></label>
+            <label className="field field-wide"><span>Objetivo</span><textarea name="eventObjective" required /></label>
+            <button className="button"><Send size={16} /> Crear requerimiento</button>
+          </form>
+          {chatMessage && <p className="hint">{chatMessage}</p>}
+        </section>
+      )}
     </main>
   );
 }

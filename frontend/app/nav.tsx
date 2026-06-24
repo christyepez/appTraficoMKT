@@ -1,7 +1,7 @@
 "use client";
 
 import { api, applyBrandVariables, clearSession, defaultBrandSettings, getSession, t, type BrandSettings } from "./lib";
-import { BarChart3, Bell, CheckCircle2, ClipboardList, FileCheck2, History, Landmark, ListChecks, LogOut, Palette, Settings, ShieldCheck, UploadCloud, Users } from "lucide-react";
+import { BarChart3, Bell, CheckCircle2, ClipboardList, FileCheck2, History, Inbox, Landmark, ListChecks, LogOut, Palette, Settings, ShieldCheck, UploadCloud, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -18,7 +18,9 @@ const items = [
   { href: "/storage", label: "Archivos", icon: Settings },
   { href: "/initial-import", label: "Carga inicial", icon: UploadCloud },
   { href: "/branding", label: "Manejo Marca", icon: Palette },
-  { href: "/notifications", label: "Notificaciones", icon: Bell }
+  { href: "/notifications", label: "Notificaciones", icon: Bell },
+  { href: "/my-notifications", label: "Mis notificaciones", icon: Inbox },
+  { href: "/notification-log", label: "Registro notificaciones", icon: History }
 ];
 
 export function AppNav() {
@@ -32,6 +34,7 @@ export function AppNav() {
   const [headerTextPosition, setHeaderTextPosition] = useState<"top" | "middle" | "bottom">("middle");
   const [menuMode, setMenuMode] = useState<"horizontal" | "vertical">("horizontal");
   const [menuCollapsed, setMenuCollapsed] = useState(false);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
   const [renderTick, setRenderTick] = useState(0);
 
   useEffect(() => {
@@ -53,6 +56,8 @@ export function AppNav() {
     setLanguage(saved);
     document.documentElement.lang = saved;
     loadBrand();
+    loadUnreadNotifications();
+    const notificationTimer = window.setInterval(() => loadUnreadNotifications().catch(() => undefined), 15000);
     const onSettings = () => {
       loadBrand();
       setRenderTick((current) => current + 1);
@@ -62,6 +67,7 @@ export function AppNav() {
     return () => {
       window.removeEventListener("ui-language-changed", onSettings);
       window.removeEventListener("brand-settings-changed", onSettings);
+      window.clearInterval(notificationTimer);
     };
   }, [pathname, router]);
 
@@ -79,6 +85,13 @@ export function AppNav() {
     setMenuCollapsed(preferredMenuMode === "vertical" ? Boolean(session?.user.menuCollapsed ?? currentBrand.menuCollapsed) : false);
   }
 
+  async function loadUnreadNotifications() {
+    const session = getSession();
+    if (!session?.user.email) return;
+    const data = await api<{ count: number }>(`/api/notification-records/unread-count?email=${encodeURIComponent(session.user.email)}`).catch(() => ({ count: 0 }));
+    setUnreadNotifications(data.count);
+  }
+
   return (
     <>
       <header className="topbar">
@@ -93,6 +106,10 @@ export function AppNav() {
         <div className="session-box">
           <ShieldCheck size={16} />
           <span>{name}</span>
+          <Link className="notification-bubble" href="/my-notifications" title="Ver mis notificaciones">
+            <Bell size={15} />
+            {unreadNotifications > 0 && <b>{unreadNotifications}</b>}
+          </Link>
           <select
             className="language-select"
             value={language}

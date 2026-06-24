@@ -248,6 +248,24 @@ app.MapGet("/users/technicians", async (IdentityDbContext db) =>
     return users.Select(UserResponse.From).ToList();
 }).RequireAuthorization();
 
+app.MapGet("/usage-metrics", async (IdentityDbContext db) =>
+{
+    var users = await db.Users.ToListAsync();
+    var now = DateTimeOffset.UtcNow;
+    var active = users.Where(x => x.IsActive).ToList();
+    var withLogin = users.Where(x => x.LastLoginAt.HasValue).ToList();
+    var recent = users.Count(x => x.LastLoginAt.HasValue && x.LastLoginAt.Value >= now.AddDays(-7));
+    return Results.Ok(new UsageMetricsResponse(
+        users.Count,
+        active.Count,
+        recent,
+        withLogin.Count == 0 ? 0 : Math.Round((decimal)withLogin.Average(x => (now - x.LastLoginAt!.Value).TotalHours), 2),
+        users.OrderByDescending(x => x.LastLoginAt ?? DateTimeOffset.MinValue)
+            .Take(10)
+            .Select(x => new UsageUserMetric(x.Name, x.Email, x.Roles, x.LastLoginAt, x.IsActive))
+            .ToList()));
+}).RequireAuthorization();
+
 app.MapPost("/users", async (CreateUserRequest request, IdentityDbContext db) =>
 {
     var normalized = request.Email.Trim().ToLowerInvariant();
@@ -369,6 +387,7 @@ public sealed record UpsertBrandSettingsRequest(
     string HeaderTextPosition,
     int BrandVersion,
     string Logo,
+    string ChatbotIcon,
     string Title,
     string Subtitle);
 public sealed record CreateUserRequest(string Name, string Email, string Password, string AuthProvider, bool AllowMicrosoftLogin, string[] Roles, string[] ScreenPermissions, Guid? FacultyId, Guid? CampusId, string MenuMode, bool MenuCollapsed);
@@ -390,6 +409,8 @@ public sealed record UserResponse(Guid Id, string Name, string Email, string Aut
         user.IsActive,
         user.MustChangePassword);
 }
+public sealed record UsageMetricsResponse(int TotalUsers, int ActiveUsers, int UsersLoggedLast7Days, decimal AverageHoursSinceLastLogin, IReadOnlyList<UsageUserMetric> RecentUsers);
+public sealed record UsageUserMetric(string Name, string Email, string Roles, DateTimeOffset? LastLoginAt, bool IsActive);
 
 public sealed class AppUser
 {
@@ -484,6 +505,7 @@ public sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> option
             entity.Property(x => x.HeaderTextAlign).HasMaxLength(20);
             entity.Property(x => x.HeaderTextPosition).HasMaxLength(20);
             entity.Property(x => x.Logo).HasMaxLength(1200);
+            entity.Property(x => x.ChatbotIcon).HasMaxLength(1200);
             entity.Property(x => x.Title).HasMaxLength(180);
             entity.Property(x => x.Subtitle).HasMaxLength(240);
         });
@@ -515,6 +537,7 @@ public sealed class BrandSettings
     public string HeaderTextPosition { get; set; } = "middle";
     public int BrandVersion { get; set; } = 3;
     public string Logo { get; set; } = "https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/logo-gen-cuad.jpg";
+    public string ChatbotIcon { get; set; } = "https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/logo-gen-cuad.jpg";
     public string Title { get; set; } = "Creamos conexiones que dejan huella";
     public string Subtitle { get; set; } = "Universidad Indoamérica";
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
@@ -556,6 +579,7 @@ public sealed class BrandSettings
         };
         BrandVersion = Math.Max(3, request.BrandVersion);
         Logo = request.Logo.Trim();
+        ChatbotIcon = request.ChatbotIcon.Trim();
         Title = request.Title.Trim();
         Subtitle = request.Subtitle.Trim();
         UpdatedAt = DateTimeOffset.UtcNow;
@@ -564,16 +588,16 @@ public sealed class BrandSettings
 
 public static class ScreenAccess
 {
-    public static readonly string[] All = ["dashboard", "activities", "evidence", "approvals", "metrics", "audit", "admin", "users", "storage", "initial-import", "branding", "notifications"];
+    public static readonly string[] All = ["dashboard", "activities", "evidence", "approvals", "metrics", "audit", "admin", "users", "storage", "initial-import", "branding", "notifications", "my-notifications", "notification-log"];
 
     public static string[] DefaultForRoles(IEnumerable<string> roles)
     {
         var roleSet = roles.Select(x => x.Trim()).ToHashSet(StringComparer.OrdinalIgnoreCase);
         if (roleSet.Contains("Administrador")) return All;
         var screens = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "dashboard" };
-        if (roleSet.Contains("Tecnico")) screens.UnionWith(["activities", "evidence"]);
-        if (roleSet.Contains("Aprobador")) screens.UnionWith(["approvals"]);
-        if (roleSet.Contains("Coordinador")) screens.UnionWith(["activities", "evidence", "approvals", "metrics", "audit"]);
+        if (roleSet.Contains("Tecnico")) screens.UnionWith(["activities", "evidence", "my-notifications"]);
+        if (roleSet.Contains("Aprobador")) screens.UnionWith(["approvals", "my-notifications"]);
+        if (roleSet.Contains("Coordinador")) screens.UnionWith(["activities", "evidence", "approvals", "metrics", "audit", "my-notifications"]);
         if (roleSet.Contains("Auditor")) screens.UnionWith(["dashboard", "activities", "evidence", "approvals", "metrics", "audit"]);
         return screens.ToArray();
     }
@@ -775,17 +799,22 @@ public static class IdentitySchema
             BEGIN
                 ALTER TABLE [BrandSettings] ADD [HeaderTextPosition] nvarchar(20) NOT NULL DEFAULT('middle')
             END
+            IF COL_LENGTH('BrandSettings', 'ChatbotIcon') IS NULL
+            BEGIN
+                ALTER TABLE [BrandSettings] ADD [ChatbotIcon] nvarchar(1200) NOT NULL DEFAULT('https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/logo-gen-cuad.jpg')
+            END
             IF NOT EXISTS (SELECT 1 FROM [BrandSettings])
             BEGIN
                 INSERT INTO [BrandSettings] (
                     [Id], [Primary], [PrimaryDark], [Accent], [Background], [Surface], [Foreground], [Muted], [Line],
                     [ButtonText], [Secondary], [SecondaryText], [Success], [Warning], [Danger], [TopbarText],
-                    [FontFamily], [MenuMode], [MenuCollapsed], [BrandVersion], [Logo], [Title], [Subtitle],
+                    [FontFamily], [MenuMode], [MenuCollapsed], [BrandVersion], [Logo], [ChatbotIcon], [Title], [Subtitle],
                     [CreatedAt], [UpdatedAt])
                 VALUES (
                     NEWID(), '#3c235f', '#2a1844', '#f6b700', '#f5f7fb', '#ffffff', '#101b2d', '#697386', '#d9deea',
                     '#ffffff', '#eef4f7', '#001f49', '#207044', '#f6b700', '#b42318', '#ffffff',
                     'Segoe UI, Arial, Helvetica, sans-serif', 'horizontal', 0, 3,
+                    'https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/logo-gen-cuad.jpg',
                     'https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/logo-gen-cuad.jpg',
                     'Creamos conexiones que dejan huella', 'Universidad Indoamérica',
                     SYSDATETIMEOFFSET(), NULL)

@@ -249,6 +249,17 @@ app.MapPost("/activities/{id:guid}/approvals", async (Guid id, ApproveActivityRe
     {
         var notificationSettings = await db.NotificationSettings.Where(x => x.IsActive).OrderByDescending(x => x.UpdatedAt ?? x.CreatedAt).FirstOrDefaultAsync();
         await ProductNotification.SendApprovedAsync(activity, request, httpClientFactory, configuration, notificationSettings);
+        var record = NotificationRecord.Create(
+            "ProductApproved",
+            "Producto aprobado",
+            $"El producto {activity.ProductId} fue aprobado.",
+            activity.ProductResponsible,
+            request.ApprovedBy,
+            activity.RequirementId,
+            activity.Id,
+            AuditJson.Build("Notificaciones", "Producto aprobado", request.ApprovedBy, new { activity.Id, activity.ProductId, request.Comments }));
+        db.NotificationRecords.Add(record);
+        await db.SaveChangesAsync();
         await RequirementWorkflowSync.CompleteIfReadyAsync(activity.RequirementId, httpClientFactory);
     }
 
@@ -286,6 +297,44 @@ app.MapDelete("/notification-settings/{id:guid}", async (Guid id, ActivitiesDbCo
     settings.UpdatedAt = DateTimeOffset.UtcNow;
     await db.SaveChangesAsync();
     return Results.NoContent();
+});
+
+app.MapGet("/notification-records", async (ActivitiesDbContext db) =>
+    await db.NotificationRecords.OrderByDescending(x => x.CreatedAt).ToListAsync());
+
+app.MapGet("/notification-records/by-user", async (string email, ActivitiesDbContext db) =>
+{
+    var normalized = email.Trim().ToLowerInvariant();
+    return await db.NotificationRecords
+        .Where(x => x.RecipientEmail == normalized || x.RecipientEmail == "todos")
+        .OrderByDescending(x => x.CreatedAt)
+        .ToListAsync();
+});
+
+app.MapGet("/notification-records/unread-count", async (string email, ActivitiesDbContext db) =>
+{
+    var normalized = email.Trim().ToLowerInvariant();
+    var total = await db.NotificationRecords.CountAsync(x => !x.IsAcknowledged && (x.RecipientEmail == normalized || x.RecipientEmail == "todos"));
+    return Results.Ok(new NotificationCountResponse(total));
+});
+
+app.MapPatch("/notification-records/{id:guid}/ack", async (Guid id, AcknowledgeNotificationRequest request, ActivitiesDbContext db) =>
+{
+    var record = await db.NotificationRecords.FindAsync(id);
+    if (record is null) return Results.NotFound();
+    record.Acknowledge(request.AcknowledgedBy);
+    await db.SaveChangesAsync();
+    return Results.Ok(record);
+});
+
+app.MapPost("/notification-records/system", async (SystemNotificationRequest request, ActivitiesDbContext db, IHttpClientFactory httpClientFactory, IConfiguration configuration) =>
+{
+    var settings = await db.NotificationSettings.Where(x => x.IsActive).OrderByDescending(x => x.UpdatedAt ?? x.CreatedAt).FirstOrDefaultAsync();
+    var record = NotificationRecord.Create(request.EventType, request.Title, request.Message, request.RecipientEmail, request.CreatedBy, request.RequirementId, request.ActivityId, request.PayloadJson);
+    db.NotificationRecords.Add(record);
+    await db.SaveChangesAsync();
+    await NotificationDelivery.SendAsync(record, settings, httpClientFactory, configuration);
+    return Results.Created($"/notification-records/{record.Id}", record);
 });
 
 app.Run();
@@ -336,6 +385,10 @@ public sealed record UpsertNotificationSettingsRequest(
     string PowerAutomateWebhookUrl,
     string HtmlTemplate,
     bool IsActive);
+public sealed record SystemNotificationRequest(string EventType, string Title, string Message, string RecipientEmail, string CreatedBy, Guid? RequirementId, Guid? ActivityId, string PayloadJson);
+public sealed record NotificationCountResponse(int Count);
+public sealed record AcknowledgeNotificationRequest(string AcknowledgedBy);
+public sealed record EvidenceItemDto(Guid Id, Guid ActivityId, string FileName, string StorageUrl, string UploadedBy);
 
 public static class ProductNotification
 {
@@ -349,6 +402,7 @@ public static class ProductNotification
         var webhookUrl = settings?.PowerAutomateWebhookUrl;
         if (string.IsNullOrWhiteSpace(webhookUrl)) webhookUrl = configuration["Notifications:PowerAutomateWebhookUrl"];
         if (string.IsNullOrWhiteSpace(webhookUrl)) return;
+        var evidence = await httpClientFactory.CreateClient("evidence").GetFromJsonAsync<List<EvidenceItemDto>>($"/evidence?activityId={activity.Id}") ?? [];
 
         var payload = new
         {
@@ -377,6 +431,7 @@ public static class ProductNotification
                 activity.ProductResponsible,
                 activity.ProductDeliveryDate,
                 activity.Observations,
+                evidence,
                 approval.ApprovedBy,
                 approval.Comments
             }
@@ -417,6 +472,7 @@ public sealed class ActivitiesDbContext(DbContextOptions<ActivitiesDbContext> op
     public DbSet<TechnicalActivity> Activities => Set<TechnicalActivity>();
     public DbSet<CatalogReference> CatalogReferences => Set<CatalogReference>();
     public DbSet<NotificationSettings> NotificationSettings => Set<NotificationSettings>();
+    public DbSet<NotificationRecord> NotificationRecords => Set<NotificationRecord>();
     public DbSet<ActivityAuditEvent> AuditEvents => Set<ActivityAuditEvent>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -477,6 +533,21 @@ public sealed class ActivitiesDbContext(DbContextOptions<ActivitiesDbContext> op
             entity.Property(x => x.TeamsChannel).HasMaxLength(300);
             entity.Property(x => x.PowerAutomateWebhookUrl).HasMaxLength(1200);
             entity.Property(x => x.HtmlTemplate).HasColumnType("nvarchar(max)");
+        });
+
+        modelBuilder.Entity<NotificationRecord>(entity =>
+        {
+            entity.ToTable("NotificationRecords");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.EventType).HasMaxLength(80).IsRequired();
+            entity.Property(x => x.Title).HasMaxLength(180).IsRequired();
+            entity.Property(x => x.Message).HasMaxLength(1000).IsRequired();
+            entity.Property(x => x.RecipientEmail).HasMaxLength(180).IsRequired();
+            entity.Property(x => x.CreatedBy).HasMaxLength(160).IsRequired();
+            entity.Property(x => x.AcknowledgedBy).HasMaxLength(160);
+            entity.Property(x => x.PayloadJson).HasColumnType("nvarchar(max)");
+            entity.HasIndex(x => x.RecipientEmail);
+            entity.HasIndex(x => x.CreatedAt);
         });
     }
 }
@@ -660,6 +731,72 @@ public sealed class NotificationSettings
     }
 }
 
+public sealed class NotificationRecord
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public string EventType { get; set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
+    public string Message { get; set; } = string.Empty;
+    public string RecipientEmail { get; set; } = string.Empty;
+    public string CreatedBy { get; set; } = "Sistema";
+    public Guid? RequirementId { get; set; }
+    public Guid? ActivityId { get; set; }
+    public string PayloadJson { get; set; } = string.Empty;
+    public bool IsAcknowledged { get; set; }
+    public string AcknowledgedBy { get; set; } = string.Empty;
+    public DateTimeOffset? AcknowledgedAt { get; set; }
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+
+    public static NotificationRecord Create(string eventType, string title, string message, string recipientEmail, string createdBy, Guid? requirementId, Guid? activityId, string payloadJson) =>
+        new()
+        {
+            EventType = eventType.Trim(),
+            Title = title.Trim(),
+            Message = message.Trim(),
+            RecipientEmail = string.IsNullOrWhiteSpace(recipientEmail) ? "todos" : recipientEmail.Trim().ToLowerInvariant(),
+            CreatedBy = string.IsNullOrWhiteSpace(createdBy) ? "Sistema" : createdBy.Trim(),
+            RequirementId = requirementId,
+            ActivityId = activityId,
+            PayloadJson = payloadJson
+        };
+
+    public void Acknowledge(string acknowledgedBy)
+    {
+        IsAcknowledged = true;
+        AcknowledgedBy = string.IsNullOrWhiteSpace(acknowledgedBy) ? "Usuario" : acknowledgedBy.Trim();
+        AcknowledgedAt = DateTimeOffset.UtcNow;
+    }
+}
+
+public static class NotificationDelivery
+{
+    public static async Task SendAsync(NotificationRecord record, NotificationSettings? settings, IHttpClientFactory httpClientFactory, IConfiguration configuration)
+    {
+        var webhookUrl = settings?.PowerAutomateWebhookUrl;
+        if (string.IsNullOrWhiteSpace(webhookUrl)) webhookUrl = configuration["Notifications:PowerAutomateWebhookUrl"];
+        if (string.IsNullOrWhiteSpace(webhookUrl)) return;
+
+        var payload = new
+        {
+            eventType = record.EventType,
+            subject = record.Title,
+            teamsTitle = record.Title,
+            html = $"<h2>{System.Net.WebUtility.HtmlEncode(record.Title)}</h2><p>{System.Net.WebUtility.HtmlEncode(record.Message)}</p>",
+            data = new
+            {
+                record.Id,
+                record.RecipientEmail,
+                record.RequirementId,
+                record.ActivityId,
+                record.PayloadJson
+            }
+        };
+
+        var client = httpClientFactory.CreateClient("notifications");
+        await client.PostAsJsonAsync(webhookUrl, payload);
+    }
+}
+
 public static class NotificationTemplate
 {
     public const string Default = """
@@ -840,6 +977,30 @@ public static class ActivitiesSchema
             IF COL_LENGTH('NotificationSettings', 'HtmlTemplate') IS NULL
             BEGIN
                 ALTER TABLE [NotificationSettings] ADD [HtmlTemplate] nvarchar(max) NOT NULL DEFAULT('<h2>Producto aprobado</h2><p>{{productId}}</p>')
+            END
+            """);
+
+        await db.Database.ExecuteSqlRawAsync("""
+            IF OBJECT_ID('NotificationRecords', 'U') IS NULL
+            BEGIN
+                CREATE TABLE [NotificationRecords] (
+                    [Id] uniqueidentifier NOT NULL,
+                    [EventType] nvarchar(80) NOT NULL,
+                    [Title] nvarchar(180) NOT NULL,
+                    [Message] nvarchar(1000) NOT NULL,
+                    [RecipientEmail] nvarchar(180) NOT NULL,
+                    [CreatedBy] nvarchar(160) NOT NULL,
+                    [RequirementId] uniqueidentifier NULL,
+                    [ActivityId] uniqueidentifier NULL,
+                    [PayloadJson] nvarchar(max) NOT NULL,
+                    [IsAcknowledged] bit NOT NULL,
+                    [AcknowledgedBy] nvarchar(160) NOT NULL,
+                    [AcknowledgedAt] datetimeoffset NULL,
+                    [CreatedAt] datetimeoffset NOT NULL,
+                    CONSTRAINT [PK_NotificationRecords] PRIMARY KEY ([Id])
+                )
+                CREATE INDEX [IX_NotificationRecords_RecipientEmail] ON [NotificationRecords] ([RecipientEmail])
+                CREATE INDEX [IX_NotificationRecords_CreatedAt] ON [NotificationRecords] ([CreatedAt])
             END
             """);
 

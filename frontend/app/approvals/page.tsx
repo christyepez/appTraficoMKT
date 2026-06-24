@@ -36,7 +36,7 @@ export default function ApprovalsPage() {
       api<EvidenceItem[]>("/api/evidence").catch(() => []),
       api<Approval[]>("/api/approvals").catch(() => [])
     ]);
-    setActivities(data.filter((item) => item.status === "PendingApproval" || (showApproved && item.status === "Approved")));
+    setActivities(data.filter((item) => showApproved ? item.status === "Approved" : item.status === "PendingApproval"));
     setEvidence(evs);
     setApprovals(aps);
   }
@@ -74,6 +74,7 @@ export default function ApprovalsPage() {
                     <h2>Adjuntos del producto</h2>
                     <p>{activities.find((item) => item.id === attachmentActivityId)?.productId ?? "Producto seleccionado"}</p>
                   </div>
+                  <span className="badge">{activityStatusLabel(activities.find((item) => item.id === attachmentActivityId)?.status ?? "")}</span>
                   <button className="icon-button" type="button" title="Cerrar adjuntos" onClick={() => setAttachmentActivityId("")}><XCircle size={16} /></button>
                 </div>
                 <div className="stack compact-stack top-space">
@@ -107,7 +108,7 @@ export default function ApprovalsPage() {
                     <p>{item.productResponsible} | {item.mainKpi}</p>
                   </div>
                   <div className="card-meta">
-                    <span className="badge">{item.status}</span>
+                    <span className="badge">{activityStatusLabel(item.status)}</span>
                     <div className="actions">
                       <button className="icon-button success" disabled={item.status !== "PendingApproval"} title="Aprobar producto y disparar notificación configurada" onClick={() => decide(item.id, "Approved")}><CheckCircle2 size={16} /></button>
                       <button className="icon-button danger" disabled={item.status !== "PendingApproval"} title="Rechazar producto y registrar decisión" onClick={() => decide(item.id, "Rejected")}><XCircle size={16} /></button>
@@ -150,4 +151,16 @@ function EvidencePreview({ item }: { item: EvidenceItem }) {
 function formatDate(value?: string) {
   if (!value) return "Sin fecha";
   return new Intl.DateTimeFormat("es-EC", { dateStyle: "short", timeStyle: "short" }).format(new Date(value));
+}
+
+function activityStatusLabel(status: string) {
+  const labels: Record<string, string> = {
+    Todo: "Por hacer",
+    InProgress: "Producto en proceso",
+    EvidenceAttached: "Evidencia adjunta",
+    PendingApproval: "Pendiente de aprobación",
+    Approved: "Aprobado",
+    Rejected: "Producto en proceso"
+  };
+  return labels[status] ?? status;
 }

@@ -11,6 +11,16 @@ Aplicacion base para recopilar requerimientos, asignar actividades al equipo tec
 - [Operaciones y despliegue](docs/operations/deployment.md)
 - [Git Flow y ambientes](docs/operations/git-flow.md)
 
+## Pantallas de ejemplo
+
+Vista de seguimiento de requerimientos:
+
+![Seguimiento de requerimientos](docs/screenshots/requerimientos.svg)
+
+Bandeja y globo de notificaciones:
+
+![Notificaciones](docs/screenshots/notificaciones.svg)
+
 ## Arquitectura
 
 - `backend/src/BuildingBlocks`: dominio compartido y reglas de negocio.

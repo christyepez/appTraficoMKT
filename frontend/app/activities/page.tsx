@@ -264,7 +264,7 @@ export default function ActivitiesPage() {
   }
 
   const filtered = activities
-    .filter((item) => showCompleted || normalizedActivityStatus(item.status) !== "Approved")
+    .filter((item) => showCompleted ? normalizedActivityStatus(item.status) === "Approved" : normalizedActivityStatus(item.status) !== "Approved")
     .filter((item) => matchesSearch(item, searchTerm));
 
   return (
@@ -373,6 +373,7 @@ export default function ActivitiesPage() {
                     <h2>Adjuntos del producto</h2>
                     <p>{activities.find((item) => item.id === attachmentDetailActivityId)?.productId ?? "Producto seleccionado"}</p>
                   </div>
+                  <span className="badge">{activityStatusLabel(activities.find((item) => item.id === attachmentDetailActivityId)?.status ?? "")}</span>
                   <button className="icon-button" type="button" title="Cerrar detalle de adjuntos" onClick={() => setAttachmentDetailActivityId("")}><X size={16} /></button>
                 </div>
                 <div className="stack compact-stack top-space">
@@ -421,6 +422,9 @@ export default function ActivitiesPage() {
                       </div>
                       <div className="inline-facts">
                         <span>{approval.comments || "Sin comentarios."}</span>
+                        <button className="button secondary compact-button" type="button" title="Ver adjuntos enviados para esta aprobación" onClick={() => setAttachmentDetailActivityId(approval.activityId)}>
+                          <Paperclip size={14} /> Ver adjuntos
+                        </button>
                       </div>
                     </article>
                   ))}

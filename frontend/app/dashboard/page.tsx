@@ -169,7 +169,7 @@ export default function DashboardPage() {
           </label>
           <label className="check-field top-space"><input type="checkbox" checked={showCompleted} onChange={(event) => setShowCompleted(event.target.checked)} /> Ver requerimientos finalizados</label>
           <div className="stack compact-stack top-space">
-            {requirements.filter((item) => showCompleted || item.status !== "Completed").filter((item) => matchesRequirementSearch(item, searchTerm)).map((item) => (
+            {requirements.filter((item) => showCompleted ? isFinalRequirement(item.status) : !isFinalRequirement(item.status)).filter((item) => matchesRequirementSearch(item, searchTerm)).map((item) => (
               <article className="card compact-card" key={item.id}>
                 <div className="card-head">
                   <div className="compact-title">
@@ -177,7 +177,7 @@ export default function DashboardPage() {
                     <p>{highlight(`${item.requestedBy} | ${item.faculty} | ${item.career}`, searchTerm)}</p>
                   </div>
                   <div className="card-meta">
-                    <span className="badge">{item.status}</span>
+                    <span className="badge">{requirementStatusLabel(item.status)}</span>
                     <div className="actions">
                       <button className={workflowButtonClass(requirementStepState(item, "analysis"))} disabled={requirementStepState(item, "analysis") !== "ready"} title="Cambiar requerimiento a análisis" onClick={() => patch(`/api/requirements/${item.id}/analysis`)}><Search size={16} /></button>
                       <button className={workflowButtonClass(requirementStepState(item, "execution"))} disabled={requirementStepState(item, "execution") !== "ready"} title="Cambiar requerimiento a ejecución" onClick={() => patch(`/api/requirements/${item.id}/execution`)}><Play size={16} /></button>
@@ -215,7 +215,7 @@ function filterRequirementsForSession(requirements: Requirement[], activities: A
 type StepState = "pending" | "ready" | "done";
 
 function requirementStepState(item: Requirement, step: "analysis" | "execution" | "complete"): StepState {
-  const order = ["Draft", "InAnalysis", "InExecution", "PendingApproval", "Completed"];
+  const order = ["Draft", "InAnalysis", "InExecution", "PendingApproval", "Completed", "Rejected"];
   const current = order.indexOf(item.status);
   if (step === "analysis") return current <= 0 ? "ready" : "done";
   if (step === "execution") {
@@ -224,6 +224,22 @@ function requirementStepState(item: Requirement, step: "analysis" | "execution" 
   }
   if (current < 2) return "pending";
   return current === 2 || current === 3 ? "ready" : "done";
+}
+
+function isFinalRequirement(status: string) {
+  return ["Completed", "Rejected"].includes(status);
+}
+
+function requirementStatusLabel(status: string) {
+  const labels: Record<string, string> = {
+    Draft: "Borrador",
+    InAnalysis: "En análisis",
+    InExecution: "En ejecución",
+    PendingApproval: "Pendiente de aprobación",
+    Completed: "Finalizado",
+    Rejected: "Finalizado rechazado"
+  };
+  return labels[status] ?? status;
 }
 
 function workflowButtonClass(state: StepState) {

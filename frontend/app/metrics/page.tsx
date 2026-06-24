@@ -52,21 +52,32 @@ type ApprovalMetrics = {
   lastAuditAt?: string;
 };
 
+type UsageMetrics = {
+  totalUsers: number;
+  activeUsers: number;
+  usersLoggedLast7Days: number;
+  averageHoursSinceLastLogin: number;
+  recentUsers: { name: string; email: string; roles: string; lastLoginAt?: string; isActive: boolean }[];
+};
+
 export default function MetricsPage() {
   const [requirements, setRequirements] = useState<RequirementMetrics | null>(null);
   const [products, setProducts] = useState<ProductMetrics | null>(null);
   const [approvals, setApprovals] = useState<ApprovalMetrics | null>(null);
+  const [usage, setUsage] = useState<UsageMetrics | null>(null);
   const [concept, setConcept] = useState("resumen");
 
   async function load() {
-    const [requirementData, productData, approvalData] = await Promise.all([
+    const [requirementData, productData, approvalData, usageData] = await Promise.all([
       api<RequirementMetrics>("/api/requirements/metrics"),
       api<ProductMetrics>("/api/activities/metrics"),
-      api<ApprovalMetrics>("/api/approvals/metrics")
+      api<ApprovalMetrics>("/api/approvals/metrics"),
+      api<UsageMetrics>("/api/identity/usage-metrics")
     ]);
     setRequirements(requirementData);
     setProducts(productData);
     setApprovals(approvalData);
+    setUsage(usageData);
   }
 
   useEffect(() => {
@@ -94,6 +105,7 @@ export default function MetricsPage() {
                   <option value="tiempos">Tiempos y esfuerzo</option>
                   <option value="incidencia">Incidencia institucional</option>
                   <option value="participacion">Participación por áreas</option>
+                  <option value="usabilidad">Usabilidad de usuarios</option>
                 </select>
               </label>
               <button className="button secondary" title="Actualizar métricas" onClick={load}><RefreshCw size={16} /> Actualizar</button>
@@ -106,6 +118,7 @@ export default function MetricsPage() {
             <MetricCard label="Ciclo prod." value={products?.averageCycleDays ?? 0} detail="días promedio" />
             <MetricCard label="Eventos auditados" value={auditEvents(requirements, products, approvals)} detail="acciones registradas" />
             <MetricCard label="Esfuerzo estimado" value={estimatedEffortHours(requirements, products)} detail="horas por auditoría" />
+            <MetricCard label="Usuarios activos" value={usage?.activeUsers ?? 0} detail={`${usage?.usersLoggedLast7Days ?? 0} con ingreso en 7 días`} />
           </div>
         </section>
 
@@ -140,10 +153,48 @@ export default function MetricsPage() {
           {concept === "participacion" && (
             <ParticipationStory requirements={requirements} />
           )}
+          {concept === "usabilidad" && (
+            <UsageSection usage={usage} />
+          )}
         </section>
       </section>
     </main>
   );
+}
+
+function UsageSection({ usage }: { usage: UsageMetrics | null }) {
+  return (
+    <section className="panel">
+      <h2>Usabilidad de usuarios</h2>
+      <div className="metric-grid top-space">
+        <MetricCard label="Usuarios" value={usage?.totalUsers ?? 0} detail="registrados" />
+        <MetricCard label="Activos" value={usage?.activeUsers ?? 0} detail="habilitados" />
+        <MetricCard label="Uso reciente" value={usage?.usersLoggedLast7Days ?? 0} detail="últimos 7 días" />
+        <MetricCard label="Horas sin uso" value={usage?.averageHoursSinceLastLogin ?? 0} detail="promedio desde último login" />
+      </div>
+      <div className="stack compact-stack top-space">
+        {(usage?.recentUsers ?? []).map((user) => (
+          <article className="card compact-card" key={user.email}>
+            <div className="card-head">
+              <div className="compact-title">
+                <h3>{user.name}</h3>
+                <p>{user.email}</p>
+              </div>
+              <span className="badge">{user.isActive ? "Activo" : "Inactivo"}</span>
+            </div>
+            <div className="inline-facts">
+              <span>{user.roles}</span>
+              <span>Último ingreso: {user.lastLoginAt ? formatDate(user.lastLoginAt) : "Sin ingreso"}</span>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat("es-EC", { dateStyle: "short", timeStyle: "short" }).format(new Date(value));
 }
 
 function ParticipationStory({ requirements }: { requirements: RequirementMetrics | null }) {

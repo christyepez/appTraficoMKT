@@ -15,6 +15,10 @@ builder.Services.AddHttpClient("activities", client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["Services:Activities"] ?? "http://activities-api:8080");
 });
+builder.Services.AddHttpClient("notifications", client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["Services:Activities"] ?? "http://activities-api:8080");
+});
 builder.Services.AddDbContext<RequirementsDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("RequirementsDb")));
 
@@ -78,7 +82,7 @@ app.MapGet("/requirements/{id:guid}/audit", async (Guid id, RequirementsDbContex
 app.MapGet("/requirements/{id:guid}", async (Guid id, RequirementsDbContext db) =>
     await db.Requirements.FindAsync(id) is { IsDeleted: false } requirement ? Results.Ok(requirement) : Results.NotFound());
 
-app.MapPost("/requirements", async (CreateRequirementRequest request, RequirementsDbContext db) =>
+app.MapPost("/requirements", async (CreateRequirementRequest request, RequirementsDbContext db, IHttpClientFactory httpClientFactory) =>
 {
     CatalogReferenceWriter.UpsertReferences(db, request);
     var requirement = new Requirement(
@@ -100,6 +104,15 @@ app.MapPost("/requirements", async (CreateRequirementRequest request, Requiremen
     db.Requirements.Add(requirement);
     db.AuditEvents.Add(RequirementAuditEvent.Created(requirement.Id, null, requirement.Status.ToString(), "Creación del requerimiento", request.RequestedBy, AuditJson.Build("Requerimientos", "Crear", request.RequestedBy, request)));
     await db.SaveChangesAsync();
+    await RequirementNotifications.NotifyAsync(httpClientFactory, new SystemNotificationRequest(
+        "RequirementCreated",
+        "Requerimiento creado",
+        $"Se creó el requerimiento {requirement.Code}: {requirement.ActivityOrEvent}",
+        requirement.RequestedBy,
+        "Sistema",
+        requirement.Id,
+        null,
+        AuditJson.Build("Notificaciones", "Requerimiento creado", request.RequestedBy, requirement)));
     return Results.Created($"/requirements/{requirement.Id}", requirement);
 });
 
@@ -136,18 +149,12 @@ app.MapDelete("/requirements/{id:guid}", async (Guid id, RequirementsDbContext d
     var requirement = await db.Requirements.FindAsync(id);
     if (requirement is null || requirement.IsDeleted) return Results.NotFound();
 
-    var client = httpClientFactory.CreateClient("activities");
-    var response = await client.DeleteAsync($"/activities/by-requirement/{id}");
-    if (!response.IsSuccessStatusCode)
-    {
-        return Results.Problem("No se pudieron eliminar lógicamente los productos asociados al requerimiento.");
-    }
-
     var previousStatus = requirement.Status.ToString();
-    requirement.Delete("Sistema");
-    db.AuditEvents.Add(RequirementAuditEvent.Changed(id, previousStatus, requirement.Status.ToString(), "Eliminación lógica del requerimiento", "Sistema", AuditJson.Build("Requerimientos", "Eliminar lógico", "Sistema", new { id })));
+    requirement.Reject();
+    CatalogReferenceWriter.UpsertStatusReference(db, requirement.Status);
+    db.AuditEvents.Add(RequirementAuditEvent.Changed(id, previousStatus, requirement.Status.ToString(), "Requerimiento finalizado rechazado", "Sistema", AuditJson.Build("Requerimientos", "Finalizar rechazado", "Sistema", new { id })));
     await db.SaveChangesAsync();
-    return Results.NoContent();
+    return Results.Ok(requirement);
 });
 
 app.MapPatch("/requirements/{id:guid}/analysis", async (Guid id, RequirementsDbContext db) =>
@@ -163,7 +170,7 @@ app.MapPatch("/requirements/{id:guid}/analysis", async (Guid id, RequirementsDbC
     return Results.Ok(requirement);
 });
 
-app.MapPatch("/requirements/{id:guid}/execution", async (Guid id, RequirementsDbContext db) =>
+app.MapPatch("/requirements/{id:guid}/execution", async (Guid id, RequirementsDbContext db, IHttpClientFactory httpClientFactory) =>
 {
     var requirement = await db.Requirements.FindAsync(id);
     if (requirement is null || requirement.IsDeleted) return Results.NotFound();
@@ -173,6 +180,15 @@ app.MapPatch("/requirements/{id:guid}/execution", async (Guid id, RequirementsDb
     CatalogReferenceWriter.UpsertStatusReference(db, requirement.Status);
     db.AuditEvents.Add(RequirementAuditEvent.Changed(id, previousStatus, requirement.Status.ToString(), "Inicio de ejecución", "Sistema", AuditJson.Build("Requerimientos", "Inicio de ejecución", "Sistema", new { id })));
     await db.SaveChangesAsync();
+    await RequirementNotifications.NotifyAsync(httpClientFactory, new SystemNotificationRequest(
+        "RequirementExecution",
+        "Requerimiento en ejecución",
+        $"El requerimiento {requirement.Code}: {requirement.ActivityOrEvent} pasó a ejecución.",
+        requirement.RequestedBy,
+        "Sistema",
+        requirement.Id,
+        null,
+        AuditJson.Build("Notificaciones", "Requerimiento en ejecución", "Sistema", requirement)));
     return Results.Ok(requirement);
 });
 
@@ -213,6 +229,7 @@ public sealed record CreateRequirementRequest(
     Guid? StatusId = null);
 public sealed record ActivitySummary(int Total, int Approved, int Pending);
 public sealed record AssignmentCountResponse(int Count);
+public sealed record SystemNotificationRequest(string EventType, string Title, string Message, string RecipientEmail, string CreatedBy, Guid? RequirementId, Guid? ActivityId, string PayloadJson);
 public sealed record MetricSlice(string Name, int Count, decimal Percentage);
 public sealed record StageMetric(string Stage, decimal AverageHours, int Events);
 public sealed record RequirementMetricsResponse(
@@ -320,6 +337,22 @@ public static class AuditJson
             descripcion = $"{action} en {process}",
             datos = data
         });
+}
+
+public static class RequirementNotifications
+{
+    public static async Task NotifyAsync(IHttpClientFactory httpClientFactory, SystemNotificationRequest request)
+    {
+        try
+        {
+            var client = httpClientFactory.CreateClient("notifications");
+            await client.PostAsJsonAsync("/notification-records/system", request);
+        }
+        catch
+        {
+            // La gestión del requerimiento no debe fallar si la notificación está temporalmente no disponible.
+        }
+    }
 }
 
 public static class AssignmentKeys

@@ -15,6 +15,10 @@ const nextConfig = {
         destination: `${process.env.ACTIVITIES_API_URL ?? "http://localhost:5102"}/notification-settings/:path*`
       },
       {
+        source: "/api/notification-records/:path*",
+        destination: `${process.env.ACTIVITIES_API_URL ?? "http://localhost:5102"}/notification-records/:path*`
+      },
+      {
         source: "/api/evidence/:path*",
         destination: `${process.env.EVIDENCE_API_URL ?? "http://localhost:5103"}/evidence/:path*`
       },

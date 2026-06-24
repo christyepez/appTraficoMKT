@@ -38,6 +38,7 @@ export type BrandSettings = {
   headerTextPosition: "top" | "middle" | "bottom";
   brandVersion: number;
   logo: string;
+  chatbotIcon: string;
   title: string;
   subtitle: string;
 };
@@ -65,6 +66,7 @@ export const defaultBrandSettings: BrandSettings = {
   headerTextPosition: "middle",
   brandVersion: 3,
   logo: "https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/logo-gen-cuad.jpg",
+  chatbotIcon: "https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/logo-gen-cuad.jpg",
   title: "Creamos conexiones que dejan huella",
   subtitle: "Universidad Indoamérica"
 };
@@ -191,14 +193,18 @@ export function t(text: string) {
 }
 
 function defaultScreensForRoles(roles: string[]) {
-  if (roles.includes("Administrador")) return ["dashboard", "activities", "evidence", "approvals", "metrics", "audit", "admin", "users", "storage", "initial-import", "branding", "notifications"];
-  if (roles.includes("Coordinador")) return ["dashboard", "activities", "evidence", "approvals", "metrics", "audit"];
+  if (roles.includes("Administrador")) return ["dashboard", "activities", "evidence", "approvals", "metrics", "audit", "admin", "users", "storage", "initial-import", "branding", "notifications", "my-notifications", "notification-log"];
+  if (roles.includes("Coordinador")) return ["dashboard", "activities", "evidence", "approvals", "metrics", "audit", "my-notifications"];
   const screens = new Set(["dashboard"]);
   if (roles.includes("Tecnico")) {
     screens.add("activities");
     screens.add("evidence");
+    screens.add("my-notifications");
   }
-  if (roles.includes("Aprobador")) screens.add("approvals");
+  if (roles.includes("Aprobador")) {
+    screens.add("approvals");
+    screens.add("my-notifications");
+  }
   if (roles.includes("Auditor")) {
     screens.add("activities");
     screens.add("evidence");

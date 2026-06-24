@@ -138,6 +138,10 @@ export default function BrandingPage() {
               <span>URL del logo</span>
               <input value={settings.logo.startsWith("data:") ? "Logo cargado desde archivo" : settings.logo} onChange={(event) => setSettings({ ...settings, logo: event.target.value })} />
             </label>
+            <label className="field">
+              <span>Icono Puma chatbot</span>
+              <input value={settings.chatbotIcon?.startsWith("data:") ? "Icono cargado desde archivo" : settings.chatbotIcon} onChange={(event) => setSettings({ ...settings, chatbotIcon: event.target.value })} />
+            </label>
             <label className="field field-wide">
               <span>Cargar logo</span>
               <input type="file" accept="image/*" onChange={(event) => loadLogo(event.target.files?.[0])} />

@@ -229,6 +229,13 @@ public sealed class Requirement : Entity
         Touch();
     }
 
+    public void Reject()
+    {
+        Status = RequirementStatus.Rejected;
+        StatusId = WorkflowCatalogIds.ForRequirement(Status);
+        Touch();
+    }
+
     public void SetStatusReference(Guid statusId)
     {
         if (statusId == Guid.Empty) throw new ArgumentException("Estado es requerido.", nameof(statusId));
