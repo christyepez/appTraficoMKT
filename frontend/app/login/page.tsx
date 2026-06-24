@@ -211,14 +211,18 @@ export default function LoginPage() {
         <Link className="button secondary full" href="/forgot-password" title="Recuperar contraseña con clave temporal">
           <KeyRound size={16} /> Recuperar contraseña
         </Link>
-        {brand.showPublicRequirementForm && (
+        {(brand.showPublicRequirementForm || brand.showPublicRequirementFullPage) && (
           <div className="login-actions-grid">
-            <button className="button secondary full" type="button" title="Abrir formulario público de requerimientos" onClick={() => setIsPublicFormOpen(true)}>
-              <ClipboardList size={16} /> Crear requerimiento sin login
-            </button>
-            <Link className="button secondary full" href="/public-requirement" title="Abrir formulario público en página completa">
-              <ClipboardList size={16} /> Abrir formulario completo
-            </Link>
+            {brand.showPublicRequirementForm && (
+              <button className="button secondary full" type="button" title="Abrir formulario público de requerimientos" onClick={() => setIsPublicFormOpen(true)}>
+                <ClipboardList size={16} /> Crear requerimiento sin login
+              </button>
+            )}
+            {brand.showPublicRequirementFullPage && (
+              <Link className="button secondary full" href="/public-requirement" title="Abrir formulario público en página completa">
+                <ClipboardList size={16} /> Abrir formulario completo
+              </Link>
+            )}
           </div>
         )}
         <p className="hint"><KeyRound size={14} /> {message}</p>

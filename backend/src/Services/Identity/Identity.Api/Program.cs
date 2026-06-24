@@ -389,6 +389,7 @@ public sealed record UpsertBrandSettingsRequest(
     string Logo,
     string ChatbotIcon,
     bool ShowPublicRequirementForm,
+    bool ShowPublicRequirementFullPage,
     bool ShowLoginChatbot,
     string Title,
     string Subtitle);
@@ -509,6 +510,7 @@ public sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> option
             entity.Property(x => x.Logo).HasMaxLength(1200);
             entity.Property(x => x.ChatbotIcon).HasMaxLength(1200);
             entity.Property(x => x.ShowPublicRequirementForm).HasDefaultValue(true);
+            entity.Property(x => x.ShowPublicRequirementFullPage).HasDefaultValue(true);
             entity.Property(x => x.ShowLoginChatbot).HasDefaultValue(true);
             entity.Property(x => x.Title).HasMaxLength(180);
             entity.Property(x => x.Subtitle).HasMaxLength(240);
@@ -543,6 +545,7 @@ public sealed class BrandSettings
     public string Logo { get; set; } = "https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/logo-gen-cuad.jpg";
     public string ChatbotIcon { get; set; } = "https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/logo-gen-cuad.jpg";
     public bool ShowPublicRequirementForm { get; set; } = true;
+    public bool ShowPublicRequirementFullPage { get; set; } = true;
     public bool ShowLoginChatbot { get; set; } = true;
     public string Title { get; set; } = "Creamos conexiones que dejan huella";
     public string Subtitle { get; set; } = "Universidad Indoamérica";
@@ -587,6 +590,7 @@ public sealed class BrandSettings
         Logo = request.Logo.Trim();
         ChatbotIcon = request.ChatbotIcon.Trim();
         ShowPublicRequirementForm = request.ShowPublicRequirementForm;
+        ShowPublicRequirementFullPage = request.ShowPublicRequirementFullPage;
         ShowLoginChatbot = request.ShowLoginChatbot;
         Title = request.Title.Trim();
         Subtitle = request.Subtitle.Trim();
@@ -794,6 +798,7 @@ public static class IdentitySchema
                     [Logo] nvarchar(1200) NOT NULL,
                     [ChatbotIcon] nvarchar(1200) NOT NULL DEFAULT('https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/logo-gen-cuad.jpg'),
                     [ShowPublicRequirementForm] bit NOT NULL DEFAULT(1),
+                    [ShowPublicRequirementFullPage] bit NOT NULL DEFAULT(1),
                     [ShowLoginChatbot] bit NOT NULL DEFAULT(1),
                     [Title] nvarchar(180) NOT NULL,
                     [Subtitle] nvarchar(240) NOT NULL,
@@ -818,6 +823,10 @@ public static class IdentitySchema
             BEGIN
                 ALTER TABLE [BrandSettings] ADD [ShowPublicRequirementForm] bit NOT NULL DEFAULT(1)
             END
+            IF COL_LENGTH('BrandSettings', 'ShowPublicRequirementFullPage') IS NULL
+            BEGIN
+                ALTER TABLE [BrandSettings] ADD [ShowPublicRequirementFullPage] bit NOT NULL DEFAULT(1)
+            END
             IF COL_LENGTH('BrandSettings', 'ShowLoginChatbot') IS NULL
             BEGIN
                 ALTER TABLE [BrandSettings] ADD [ShowLoginChatbot] bit NOT NULL DEFAULT(1)
@@ -827,7 +836,7 @@ public static class IdentitySchema
                 EXEC('INSERT INTO [BrandSettings] (
                     [Id], [Primary], [PrimaryDark], [Accent], [Background], [Surface], [Foreground], [Muted], [Line],
                     [ButtonText], [Secondary], [SecondaryText], [Success], [Warning], [Danger], [TopbarText],
-                    [FontFamily], [MenuMode], [MenuCollapsed], [BrandVersion], [Logo], [ChatbotIcon], [ShowPublicRequirementForm], [ShowLoginChatbot], [Title], [Subtitle],
+                    [FontFamily], [MenuMode], [MenuCollapsed], [BrandVersion], [Logo], [ChatbotIcon], [ShowPublicRequirementForm], [ShowPublicRequirementFullPage], [ShowLoginChatbot], [Title], [Subtitle],
                     [CreatedAt], [UpdatedAt])
                 VALUES (
                     NEWID(), ''#3c235f'', ''#2a1844'', ''#f6b700'', ''#f5f7fb'', ''#ffffff'', ''#101b2d'', ''#697386'', ''#d9deea'',
@@ -835,7 +844,7 @@ public static class IdentitySchema
                     ''Segoe UI, Arial, Helvetica, sans-serif'', ''horizontal'', 0, 3,
                     ''https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/logo-gen-cuad.jpg'',
                     ''https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/logo-gen-cuad.jpg'',
-                    1, 1, ''Creamos conexiones que dejan huella'', ''Universidad Indoamérica'',
+                    1, 1, 1, ''Creamos conexiones que dejan huella'', ''Universidad Indoamérica'',
                     SYSDATETIMEOFFSET(), NULL)')
             END
             """);

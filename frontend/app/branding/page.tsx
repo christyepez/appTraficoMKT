@@ -145,7 +145,11 @@ export default function BrandingPage() {
             <div className="form-section-title field-wide"><h3>Login público</h3><button className="button compact" title="Guardar opciones públicas del login"><Save size={14} /> Guardar login</button></div>
             <label className="check-field">
               <input type="checkbox" checked={settings.showPublicRequirementForm} onChange={(event) => setSettings({ ...settings, showPublicRequirementForm: event.target.checked })} />
-              Mostrar formulario público de requerimientos
+              Mostrar botón Crear requerimiento sin login
+            </label>
+            <label className="check-field">
+              <input type="checkbox" checked={settings.showPublicRequirementFullPage} onChange={(event) => setSettings({ ...settings, showPublicRequirementFullPage: event.target.checked })} />
+              Mostrar botón Abrir formulario completo
             </label>
             <label className="check-field">
               <input type="checkbox" checked={settings.showLoginChatbot} onChange={(event) => setSettings({ ...settings, showLoginChatbot: event.target.checked })} />
