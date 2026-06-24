@@ -1,0 +1,31 @@
+{
+  "name": "AppTraficoMKT-AprobacionProducto",
+  "owner": "christianyepez@uti.edu.ec",
+  "trigger": "When an HTTP request is received",
+  "steps": [
+    {
+      "name": "Enviar correo aprobador",
+      "connector": "Office 365 Outlook",
+      "operation": "Send an email (V2)",
+      "subject": "Aprobacion producto @{triggerBody()?['data']?['productId']}",
+      "body": "@{triggerBody()?['html']}"
+    },
+    {
+      "name": "Publicar tarjeta Teams y esperar respuesta",
+      "connector": "Microsoft Teams",
+      "operation": "Post adaptive card and wait for a response",
+      "card": "adaptive-card-product-approval.json"
+    },
+    {
+      "name": "Retornar decision a la aplicacion",
+      "connector": "HTTP",
+      "operation": "POST",
+      "url": "https://TU_URL_PUBLICA/api/activities/@{triggerBody()?['data']?['id']}/approvals",
+      "body": {
+        "decision": "@{outputs('Publicar_tarjeta_Teams_y_esperar_respuesta')?['body']?['data']?['decision']}",
+        "approvedBy": "christianyepez@uti.edu.ec",
+        "comments": "@{outputs('Publicar_tarjeta_Teams_y_esperar_respuesta')?['body']?['data']?['comments']}"
+      }
+    }
+  ]
+}

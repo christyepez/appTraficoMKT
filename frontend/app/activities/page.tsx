@@ -2,6 +2,7 @@
 
 import { AppNav } from "../nav";
 import { Activity, Requirement, api, getSession, showToast } from "../lib";
+import { PaginationControls, paginate, type PaginationState } from "../pagination";
 import { Edit3, Eye, FileText, Paperclip, Play, Plus, RefreshCw, Save, Send, Trash2, Upload, X } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
 
@@ -74,6 +75,7 @@ export default function ActivitiesPage() {
   const [message, setMessage] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [showCompleted, setShowCompleted] = useState(false);
+  const [pagination, setPagination] = useState<PaginationState>({ page: 1, pageSize: 10 });
 
   async function load() {
     const session = getSession();
@@ -434,7 +436,7 @@ export default function ActivitiesPage() {
             </div>
           )}
           <div className="stack compact-stack top-space">
-            {filtered.map((item) => (
+            {paginate(filtered, pagination).items.map((item) => (
               <article className="card compact-card" key={item.id}>
                 <div className="card-head">
                   <div className="compact-title">
@@ -466,6 +468,7 @@ export default function ActivitiesPage() {
               </article>
             ))}
           </div>
+          <PaginationControls state={pagination} totalItems={filtered.length} onChange={setPagination} />
         </section>
       </section>
     </main>

@@ -2,6 +2,7 @@
 
 import { AppNav } from "../nav";
 import { Approver, NamedCatalog, api, showToast } from "../lib";
+import { PaginationControls, paginate, type PaginationState } from "../pagination";
 import { Edit3, Plus, RefreshCw, Save, Trash2, X } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 
@@ -49,6 +50,7 @@ export default function AdminPage() {
   const [editing, setEditing] = useState<CatalogRow | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [pagination, setPagination] = useState<PaginationState>({ page: 1, pageSize: 10 });
 
   const visibleCatalogGroups = useMemo(() => {
     const hasCustom = catalogGroups.some((group) => group.kind === "catalogs" && group.type === catalogType);
@@ -227,7 +229,7 @@ export default function AdminPage() {
           </div>
 
           <div className="stack compact-stack top-space">
-            {items.map((item) => (
+            {paginate(items, pagination).items.map((item) => (
               <article className="card compact-card" key={item.id}>
                 <div className="card-head">
                   <div className="compact-title">
@@ -254,6 +256,7 @@ export default function AdminPage() {
               </article>
             ))}
           </div>
+          <PaginationControls state={pagination} totalItems={items.length} onChange={setPagination} />
         </section>
       </section>
     </main>

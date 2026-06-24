@@ -2,6 +2,7 @@
 
 import { AppNav } from "../nav";
 import { Activity, api, getSession, showToast } from "../lib";
+import { PaginationControls, paginate, type PaginationState } from "../pagination";
 import { CheckCircle2, Eye, FileText, RefreshCw, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -29,6 +30,7 @@ export default function ApprovalsPage() {
   const [approvals, setApprovals] = useState<Approval[]>([]);
   const [showApproved, setShowApproved] = useState(false);
   const [attachmentActivityId, setAttachmentActivityId] = useState("");
+  const [pagination, setPagination] = useState<PaginationState>({ page: 1, pageSize: 10 });
 
   async function load() {
     const [data, evs, aps] = await Promise.all([
@@ -100,7 +102,7 @@ export default function ApprovalsPage() {
             </div>
           </div>
           <div className="stack compact-stack top-space">
-            {activities.map((item) => (
+            {paginate(activities, pagination).items.map((item) => (
               <article className="card compact-card" key={item.id}>
                 <div className="card-head">
                   <div className="compact-title">
@@ -135,6 +137,7 @@ export default function ApprovalsPage() {
             ))}
             {activities.length === 0 && <div className="empty">No hay productos pendientes de aprobación.</div>}
           </div>
+          <PaginationControls state={pagination} totalItems={activities.length} onChange={setPagination} />
         </div>
       </section>
     </main>

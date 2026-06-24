@@ -1,0 +1,16 @@
+{
+  "version": "4.0",
+  "themeCollection": {
+    "baseTheme": {
+      "name": "Universidad Indoamerica",
+      "version": "1.0",
+      "type": 2
+    }
+  },
+  "sections": [
+    { "name": "ResumenEjecutivo", "displayName": "Resumen ejecutivo" },
+    { "name": "CargaOperativa", "displayName": "Carga operativa" },
+    { "name": "TiemposGestion", "displayName": "Tiempos de gestión" },
+    { "name": "Usabilidad", "displayName": "Usabilidad de usuarios" }
+  ]
+}

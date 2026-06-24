@@ -13,9 +13,33 @@ Aplicacion base para recopilar requerimientos, asignar actividades al equipo tec
 
 ## Pantallas de ejemplo
 
+Login con acceso local, Office 365, formulario publico y chatbot:
+
+![Login](docs/screenshots/login.svg)
+
 Vista de seguimiento de requerimientos:
 
 ![Seguimiento de requerimientos](docs/screenshots/requerimientos.svg)
+
+Seguimiento de productos:
+
+![Productos](docs/screenshots/productos.svg)
+
+Aprobaciones con adjuntos:
+
+![Aprobaciones](docs/screenshots/aprobaciones.svg)
+
+Administracion de catalogos:
+
+![Administracion](docs/screenshots/admin.svg)
+
+Metricas:
+
+![Metricas](docs/screenshots/metricas.svg)
+
+Manejo Marca:
+
+![Manejo Marca](docs/screenshots/marca.svg)
 
 Bandeja y globo de notificaciones:
 
@@ -45,6 +69,8 @@ URLs locales:
 
 - Frontend: http://localhost:3000
 - Frontend HTTPS con Nginx: https://localhost
+- Login con formulario publico y chatbot: https://localhost/login
+- Formulario publico directo: https://localhost/public-requirement
 - Requirements API Swagger: http://localhost:5101/swagger
 - Activities API Swagger: http://localhost:5102/swagger
 - Evidence API Swagger: http://localhost:5103/swagger
@@ -87,6 +113,26 @@ https://localhost
 ```
 
 El certificado local es autofirmado, por eso el navegador mostrara una advertencia de seguridad. Para desarrollo puedes continuar manualmente en el navegador o instalar el certificado `deploy/certs/local/cert.pem` como confiable en tu equipo.
+
+## URL HTTPS externa con Cloudflare Tunnel
+
+Para exponer la aplicacion temporalmente a internet y verla desde Teams:
+
+```powershell
+docker compose -f docker-compose.yml -f docker-compose.https.yml -f docker-compose.tunnel.yml up --build
+```
+
+En la consola del servicio `cloudflared` aparecera una URL similar a:
+
+```txt
+https://xxxx.trycloudflare.com
+```
+
+Esa URL es temporal y cambia cada vez que se reinicia el tunel. La ruta local equivalente siempre es:
+
+```txt
+https://localhost/login
+```
 
 ## Flujo funcional
 

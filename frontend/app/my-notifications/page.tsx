@@ -2,6 +2,7 @@
 
 import { AppNav } from "../nav";
 import { api, getSession, showToast } from "../lib";
+import { PaginationControls, paginate, type PaginationState } from "../pagination";
 import { CheckCircle2, RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -19,6 +20,7 @@ type NotificationRecord = {
 
 export default function MyNotificationsPage() {
   const [items, setItems] = useState<NotificationRecord[]>([]);
+  const [pagination, setPagination] = useState<PaginationState>({ page: 1, pageSize: 10 });
   const session = getSession();
 
   async function load() {
@@ -51,7 +53,7 @@ export default function MyNotificationsPage() {
             <button className="button secondary" title="Actualizar mis notificaciones" onClick={load}><RefreshCw size={16} /> Actualizar</button>
           </div>
           <div className="stack compact-stack top-space">
-            {items.map((item) => (
+            {paginate(items, pagination).items.map((item) => (
               <article className="card compact-card" key={item.id}>
                 <div className="card-head">
                   <div className="compact-title">
@@ -72,6 +74,7 @@ export default function MyNotificationsPage() {
             ))}
             {items.length === 0 && <div className="empty">Sin notificaciones.</div>}
           </div>
+          <PaginationControls state={pagination} totalItems={items.length} onChange={setPagination} />
         </section>
       </section>
     </main>

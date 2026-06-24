@@ -11,7 +11,13 @@ export default function LoginPage() {
   const [message, setMessage] = useState("Usa admin@local.test / Admin123!");
   const [brand, setBrand] = useState<BrandSettings>(defaultBrandSettings);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isPublicFormOpen, setIsPublicFormOpen] = useState(false);
   const [chatMessage, setChatMessage] = useState("");
+  const [faculties, setFaculties] = useState<any[]>([]);
+  const [campuses, setCampuses] = useState<any[]>([]);
+  const [formats, setFormats] = useState<any[]>([]);
+  const [careers, setCareers] = useState<any[]>([]);
+  const [publicFacultyId, setPublicFacultyId] = useState("");
   const [catalogDefaults, setCatalogDefaults] = useState<{ faculty?: any; campus?: any; format?: any; career?: any }>({});
 
   useEffect(() => {
@@ -21,12 +27,23 @@ export default function LoginPage() {
       api<any[]>("/api/admin/campuses").catch(() => []),
       api<any[]>("/api/admin/catalogs/by-type/FormatoEvento").catch(() => []),
       api<any[]>("/api/admin/careers").catch(() => [])
-    ]).then(([faculties, campuses, formats, careers]) => setCatalogDefaults({
-      faculty: faculties.find((item) => item.isActive) ?? faculties[0],
-      campus: campuses.find((item) => item.isActive) ?? campuses[0],
-      format: formats.find((item) => item.isActive) ?? formats[0],
-      career: careers.find((item) => item.isActive) ?? careers[0]
-    })).catch(() => undefined);
+    ]).then(([facultyData, campusData, formatData, careerData]) => {
+      const activeFaculties = facultyData.filter((item) => item.isActive);
+      const activeCampuses = campusData.filter((item) => item.isActive);
+      const activeFormats = formatData.filter((item) => item.isActive);
+      const activeCareers = careerData.filter((item) => item.isActive);
+      setFaculties(activeFaculties);
+      setCampuses(activeCampuses);
+      setFormats(activeFormats);
+      setCareers(activeCareers);
+      setCatalogDefaults({
+        faculty: activeFaculties[0] ?? facultyData[0],
+        campus: activeCampuses[0] ?? campusData[0],
+        format: activeFormats[0] ?? formatData[0],
+        career: activeCareers[0] ?? careerData[0]
+      });
+      setPublicFacultyId(activeFaculties[0]?.id ?? "");
+    }).catch(() => undefined);
 
     const params = new URLSearchParams(window.location.search);
     const code = params.get("code");
@@ -134,6 +151,40 @@ export default function LoginPage() {
     }
   }
 
+  async function createPublicRequirement(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const faculty = faculties.find((item) => item.id === publicFacultyId);
+    const campusId = String(form.get("campusId") ?? "");
+    const eventFormatId = String(form.get("eventFormatId") ?? "");
+    const careerId = String(form.get("careerId") ?? "");
+    const campus = campuses.find((item) => item.id === campusId);
+    const eventFormat = formats.find((item) => item.id === eventFormatId);
+    const career = careers.find((item) => item.id === careerId);
+    await api("/api/requirements", {
+      method: "POST",
+      body: JSON.stringify({
+        activityOrEvent: form.get("activityOrEvent"),
+        requestedBy: form.get("requestedBy"),
+        facultyId: publicFacultyId,
+        faculty: faculty?.name ?? "",
+        career: career?.name ?? "",
+        campusId,
+        campus: campus?.name ?? "",
+        place: form.get("place"),
+        startDate: form.get("startDate"),
+        endDate: form.get("endDate"),
+        eventObjective: form.get("eventObjective"),
+        eventFormatId,
+        eventFormat: eventFormat?.name ?? "",
+        requestDate: new Date().toISOString().slice(0, 10)
+      })
+    });
+    showToast("Requerimiento creado correctamente.");
+    event.currentTarget.reset();
+    setIsPublicFormOpen(false);
+  }
+
   return (
     <main className="login-page">
       <section className="login-panel">
@@ -160,11 +211,45 @@ export default function LoginPage() {
         <Link className="button secondary full" href="/forgot-password" title="Recuperar contraseña con clave temporal">
           <KeyRound size={16} /> Recuperar contraseña
         </Link>
-        <Link className="button secondary full" href="/public-requirement" title="Crear requerimiento sin iniciar sesión">
-          <ClipboardList size={16} /> Crear requerimiento sin login
-        </Link>
+        <div className="login-actions-grid">
+          <button className="button secondary full" type="button" title="Abrir formulario público de requerimientos" onClick={() => setIsPublicFormOpen(true)}>
+            <ClipboardList size={16} /> Crear requerimiento sin login
+          </button>
+          <Link className="button secondary full" href="/public-requirement" title="Abrir formulario público en página completa">
+            <ClipboardList size={16} /> Abrir formulario completo
+          </Link>
+        </div>
         <p className="hint"><KeyRound size={14} /> {message}</p>
       </section>
+      {isPublicFormOpen && (
+        <div className="modal-backdrop" role="dialog" aria-modal="true">
+          <section className="modal-panel login-public-panel">
+            <div className="card-head">
+              <div>
+                <h2>Crear requerimiento</h2>
+                <p>Formulario público sin inicio de sesión</p>
+              </div>
+              <button className="icon-button" type="button" title="Cerrar formulario público" onClick={() => setIsPublicFormOpen(false)}><X size={16} /></button>
+            </div>
+            <form className="form top-space" onSubmit={createPublicRequirement}>
+              <label className="field"><span>Actividad o evento</span><input name="activityOrEvent" required /></label>
+              <label className="field"><span>Solicitante</span><input name="requestedBy" type="email" required placeholder="correo@uti.edu.ec" /></label>
+              <label className="field"><span>Facultad</span><select required value={publicFacultyId} onChange={(event) => setPublicFacultyId(event.target.value)}><option value="">Seleccione...</option>{faculties.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
+              <label className="field"><span>Carrera</span><select name="careerId" required><option value="">Seleccione...</option>{careers.filter((item) => !item.facultyId || item.facultyId === publicFacultyId).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
+              <label className="field"><span>Sede</span><select name="campusId" required><option value="">Seleccione...</option>{campuses.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
+              <label className="field"><span>Lugar</span><input name="place" required /></label>
+              <label className="field"><span>Fecha inicio</span><input name="startDate" type="date" required /></label>
+              <label className="field"><span>Fecha fin</span><input name="endDate" type="date" required /></label>
+              <label className="field"><span>Formato</span><select name="eventFormatId" required><option value="">Seleccione...</option>{formats.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
+              <label className="field field-wide"><span>Objetivo del evento</span><textarea name="eventObjective" required /></label>
+              <div className="form-actions">
+                <button className="button"><Send size={16} /> Enviar requerimiento</button>
+                <button className="button secondary" type="button" onClick={() => setIsPublicFormOpen(false)}><X size={16} /> Cancelar</button>
+              </div>
+            </form>
+          </section>
+        </div>
+      )}
       <button className="chatbot-launcher" type="button" title="Asistente Puma para crear requerimientos" onClick={() => setIsChatOpen(true)}>
         {brand.chatbotIcon ? <img src={brand.chatbotIcon} alt="Puma" /> : <PawPrint size={24} />}
       </button>

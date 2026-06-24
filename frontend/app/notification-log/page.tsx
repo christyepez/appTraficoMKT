@@ -2,6 +2,7 @@
 
 import { AppNav } from "../nav";
 import { api } from "../lib";
+import { PaginationControls, paginate, type PaginationState } from "../pagination";
 import { RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -21,6 +22,7 @@ type NotificationRecord = {
 export default function NotificationLogPage() {
   const [items, setItems] = useState<NotificationRecord[]>([]);
   const [search, setSearch] = useState("");
+  const [pagination, setPagination] = useState<PaginationState>({ page: 1, pageSize: 10 });
 
   async function load() {
     setItems(await api<NotificationRecord[]>("/api/notification-records"));
@@ -48,7 +50,7 @@ export default function NotificationLogPage() {
             <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Evento, destinatario, título..." />
           </label>
           <div className="stack compact-stack top-space">
-            {visible.map((item) => (
+            {paginate(visible, pagination).items.map((item) => (
               <article className="card compact-card" key={item.id}>
                 <div className="card-head">
                   <div className="compact-title">
@@ -67,6 +69,7 @@ export default function NotificationLogPage() {
             ))}
             {visible.length === 0 && <div className="empty">Sin registros.</div>}
           </div>
+          <PaginationControls state={pagination} totalItems={visible.length} onChange={setPagination} />
         </section>
       </section>
     </main>

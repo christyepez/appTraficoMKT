@@ -2,6 +2,7 @@
 
 import { AppNav } from "../nav";
 import { Activity, NamedCatalog, Requirement, api, getSession, showToast } from "../lib";
+import { PaginationControls, paginate, type PaginationState } from "../pagination";
 import { Edit3, FileCheck2, Play, Plus, RefreshCw, Save, Search, Trash2, X } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
 
@@ -18,6 +19,7 @@ export default function DashboardPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [showCompleted, setShowCompleted] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [pagination, setPagination] = useState<PaginationState>({ page: 1, pageSize: 10 });
 
   async function load() {
     const session = getSession();
@@ -169,7 +171,7 @@ export default function DashboardPage() {
           </label>
           <label className="check-field top-space"><input type="checkbox" checked={showCompleted} onChange={(event) => setShowCompleted(event.target.checked)} /> Ver requerimientos finalizados</label>
           <div className="stack compact-stack top-space">
-            {requirements.filter((item) => showCompleted ? isFinalRequirement(item.status) : !isFinalRequirement(item.status)).filter((item) => matchesRequirementSearch(item, searchTerm)).map((item) => (
+            {paginate(requirements.filter((item) => showCompleted ? isFinalRequirement(item.status) : !isFinalRequirement(item.status)).filter((item) => matchesRequirementSearch(item, searchTerm)), pagination).items.map((item) => (
               <article className="card compact-card" key={item.id}>
                 <div className="card-head">
                   <div className="compact-title">
@@ -194,6 +196,7 @@ export default function DashboardPage() {
               </article>
             ))}
           </div>
+          <PaginationControls state={pagination} totalItems={requirements.filter((item) => showCompleted ? isFinalRequirement(item.status) : !isFinalRequirement(item.status)).filter((item) => matchesRequirementSearch(item, searchTerm)).length} onChange={setPagination} />
         </section>
       </section>
     </main>

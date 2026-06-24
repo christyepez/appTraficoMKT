@@ -1,0 +1,46 @@
+{
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "type": "AdaptiveCard",
+  "version": "1.5",
+  "body": [
+    {
+      "type": "TextBlock",
+      "text": "Aprobación de producto",
+      "weight": "Bolder",
+      "size": "Large"
+    },
+    {
+      "type": "FactSet",
+      "facts": [
+        { "title": "Producto", "value": "${productId}" },
+        { "title": "Tipo", "value": "${productType}" },
+        { "title": "Responsable", "value": "${productResponsible}" },
+        { "title": "KPI", "value": "${mainKpi}" },
+        { "title": "Canal", "value": "${diffusionChannel}" }
+      ]
+    },
+    {
+      "type": "TextBlock",
+      "text": "Adjuntos disponibles en la aplicación.",
+      "wrap": true
+    },
+    {
+      "type": "Input.Text",
+      "id": "comments",
+      "label": "Comentarios",
+      "isMultiline": true
+    }
+  ],
+  "actions": [
+    {
+      "type": "Action.Submit",
+      "title": "Aprobar",
+      "data": { "decision": "Approved" }
+    },
+    {
+      "type": "Action.Submit",
+      "title": "Rechazar",
+      "data": { "decision": "Rejected" }
+    }
+  ]
+}

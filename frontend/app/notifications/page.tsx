@@ -2,6 +2,7 @@
 
 import { AppNav } from "../nav";
 import { api, showToast, t } from "../lib";
+import { PaginationControls, paginate, type PaginationState } from "../pagination";
 import { Edit3, Plus, RefreshCw, Save, Trash2, X } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
 
@@ -41,6 +42,7 @@ export default function NotificationsPage() {
   const [editing, setEditing] = useState<NotificationSettings>(empty);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [pagination, setPagination] = useState<PaginationState>({ page: 1, pageSize: 10 });
 
   async function load() {
     setItems(await api<NotificationSettings[]>("/api/notification-settings"));
@@ -132,7 +134,7 @@ export default function NotificationsPage() {
             </div>
           </div>
           <div className="stack compact-stack top-space">
-            {items.map((item) => (
+            {paginate(items, pagination).items.map((item) => (
               <article className="card compact-card" key={item.id}>
                 <div className="card-head">
                   <div className="compact-title">
@@ -155,6 +157,7 @@ export default function NotificationsPage() {
               </article>
             ))}
           </div>
+          <PaginationControls state={pagination} totalItems={items.length} onChange={setPagination} />
         </section>
       </section>
     </main>

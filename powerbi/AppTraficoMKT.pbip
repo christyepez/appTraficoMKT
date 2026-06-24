@@ -1,0 +1,18 @@
+{
+  "version": "1.0",
+  "artifacts": [
+    {
+      "report": {
+        "path": "AppTraficoMKT.Report"
+      }
+    },
+    {
+      "semanticModel": {
+        "path": "AppTraficoMKT.SemanticModel"
+      }
+    }
+  ],
+  "settings": {
+    "enableAutoRecovery": true
+  }
+}

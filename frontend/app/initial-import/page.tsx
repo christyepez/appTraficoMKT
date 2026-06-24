@@ -2,6 +2,7 @@
 
 import { AppNav } from "../nav";
 import { api, showToast, t } from "../lib";
+import { PaginationControls, paginate, type PaginationState } from "../pagination";
 import { Download, FileSpreadsheet, Plus, RefreshCw, Trash2, UploadCloud, X } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
 
@@ -47,6 +48,7 @@ export default function InitialImportPage() {
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [result, setResult] = useState<ImportResult | null>(null);
   const [runs, setRuns] = useState<ImportRun[]>([]);
+  const [pagination, setPagination] = useState<PaginationState>({ page: 1, pageSize: 10 });
 
   async function load() {
     setRuns(await api<ImportRun[]>("/api/admin/initial-import/runs"));
@@ -190,7 +192,7 @@ export default function InitialImportPage() {
           )}
 
           <div className="stack compact-stack top-space">
-            {runs.map((run) => (
+            {paginate(runs, pagination).items.map((run) => (
               <article className="card compact-card" key={run.id}>
                 <div className="card-head">
                   <div className="compact-title">
@@ -218,6 +220,7 @@ export default function InitialImportPage() {
               </div>
             )}
           </div>
+          <PaginationControls state={pagination} totalItems={runs.length} onChange={setPagination} />
         </section>
       </section>
     </main>

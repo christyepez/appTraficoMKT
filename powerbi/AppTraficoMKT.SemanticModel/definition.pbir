@@ -1,0 +1,11 @@
+{
+  "version": "1.0",
+  "datasetReference": {
+    "byConnection": {
+      "connectionString": "Data Source=localhost,14333;Initial Catalog=RequirementsDb;Encrypt=True;Trust Server Certificate=True",
+      "pbiServiceModelId": null,
+      "pbiModelVirtualServerName": "sobe_wowvirtualserver",
+      "pbiModelDatabaseName": "AppTraficoMKT"
+    }
+  }
+}

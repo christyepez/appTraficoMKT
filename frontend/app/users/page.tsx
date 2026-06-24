@@ -2,6 +2,7 @@
 
 import { AppNav } from "../nav";
 import { api, showToast } from "../lib";
+import { PaginationControls, paginate, type PaginationState } from "../pagination";
 import { Edit3, Plus, RefreshCw, Save, ShieldCheck, Trash2, X } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
 
@@ -47,6 +48,7 @@ export default function UsersPage() {
   const [selectedRole, setSelectedRole] = useState("Solicitante");
   const [selectedScreens, setSelectedScreens] = useState<string[]>(["dashboard"]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [pagination, setPagination] = useState<PaginationState>({ page: 1, pageSize: 10 });
 
   async function load() {
     const [userData, roleData, screenData] = await Promise.all([
@@ -213,7 +215,7 @@ export default function UsersPage() {
             <input value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="Buscar por nombre, correo, rol, pantalla..." />
           </label>
           <div className="stack compact-stack top-space">
-            {visibleUsers.map((user) => (
+            {paginate(visibleUsers, pagination).items.map((user) => (
               <article className="card compact-card" key={user.id}>
                 <div className="card-head">
                   <div className="compact-title">
@@ -237,6 +239,7 @@ export default function UsersPage() {
               </article>
             ))}
           </div>
+          <PaginationControls state={pagination} totalItems={visibleUsers.length} onChange={setPagination} />
         </section>
       </section>
     </main>

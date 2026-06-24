@@ -2,6 +2,7 @@
 
 import { AppNav } from "../nav";
 import { Activity, Requirement, api, getSession, showToast } from "../lib";
+import { PaginationControls, paginate, type PaginationState } from "../pagination";
 import { Eye, FileText, Plus, RefreshCw, Trash2, Upload, X } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
 
@@ -32,6 +33,7 @@ export default function EvidencePage() {
   const [dragging, setDragging] = useState(false);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [pagination, setPagination] = useState<PaginationState>({ page: 1, pageSize: 10 });
 
   async function load() {
     const session = getSession();
@@ -167,7 +169,7 @@ export default function EvidencePage() {
             <div className="detail-item"><span>Aprobaciones</span><strong>{approvals.length}</strong></div>
           </div>
           <div className="stack compact-stack top-space">
-              {evidence.map((item) => (
+              {paginate(evidence, pagination).items.map((item) => (
                 <article className="card compact-card" key={item.id}>
                   <div className="card-head">
                     <div className="compact-title">
@@ -198,6 +200,7 @@ export default function EvidencePage() {
               ))}
               {evidence.length === 0 && <div className="empty">No hay adjuntos registrados.</div>}
           </div>
+          <PaginationControls state={pagination} totalItems={evidence.length} onChange={setPagination} />
         </section>
       </section>
     </main>

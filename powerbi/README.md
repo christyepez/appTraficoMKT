@@ -1,5 +1,18 @@
 # Power BI - métricas de requerimientos y productos
 
+Proyecto PBIR/PBIP base:
+
+- `AppTraficoMKT.pbip`
+- `AppTraficoMKT.Report/report.json`
+- `AppTraficoMKT.SemanticModel/definition.pbir`
+
+Publicación sugerida:
+
+1. Abrir `AppTraficoMKT.pbip` con Power BI Desktop.
+2. Iniciar sesión con `christianyepez@uti.edu.ec`.
+3. Cambiar origen de datos si usas SQL Server local: `localhost,14333`.
+4. Publicar al workspace institucional.
+
 Fuente recomendada: API publicada por Nginx o Cloudflare.
 
 Parámetro sugerido en Power BI:
@@ -58,4 +71,3 @@ DIVIDE(
     CALCULATE(COUNTROWS(Productos), ALL(Productos[productResponsible]))
 )
 ```
-
