@@ -3,6 +3,7 @@
 import { AppNav } from "../nav";
 import { api, showToast, t } from "../lib";
 import { PaginationControls, paginate, type PaginationState } from "../pagination";
+import { Highlight, matchesSearch } from "../search";
 import { Edit3, Plus, RefreshCw, Save, Trash2, X } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
 
@@ -43,6 +44,7 @@ export default function NotificationsPage() {
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [pagination, setPagination] = useState<PaginationState>({ page: 1, pageSize: 10 });
+  const [search, setSearch] = useState("");
 
   async function load() {
     setItems(await api<NotificationSettings[]>("/api/notification-settings"));
@@ -83,6 +85,8 @@ export default function NotificationsPage() {
     showToast("Configuración de notificaciones eliminada lógicamente.");
     await load();
   }
+
+  const visibleItems = items.filter((item) => matchesSearch([item.name, item.emailTo, item.teamsChannel, item.powerAutomateWebhookUrl, item.isActive ? "Activo" : "Inactivo"], search));
 
   return (
     <main className="app-shell">
@@ -133,12 +137,13 @@ export default function NotificationsPage() {
               <button className="button secondary" title="Actualizar detalle de configuraciones" onClick={load}><RefreshCw size={16} /> Actualizar</button>
             </div>
           </div>
+          <label className="field top-space"><span>Buscar configuraciones</span><input value={search} onChange={(event) => { setSearch(event.target.value); setPagination((current) => ({ ...current, page: 1 })); }} placeholder="Nombre, correo, Teams, webhook, estado..." /></label>
           <div className="stack compact-stack top-space">
-            {paginate(items, pagination).items.map((item) => (
+            {paginate(visibleItems, pagination).items.map((item) => (
               <article className="card compact-card" key={item.id}>
                 <div className="card-head">
                   <div className="compact-title">
-                    <h3>{item.name}</h3>
+                    <h3><Highlight search={search}>{item.name}</Highlight></h3>
                     <p>{item.powerAutomateWebhookUrl ? "Power Automate configurado" : "Webhook pendiente"}</p>
                   </div>
                   <div className="card-meta">
@@ -150,14 +155,14 @@ export default function NotificationsPage() {
                   </div>
                 </div>
                 <div className="detail-grid compact-detail-grid">
-                  <div className="detail-item"><span>Correo</span><strong>{item.emailEnabled ? item.emailTo || "Habilitado" : "Deshabilitado"}</strong></div>
-                  <div className="detail-item"><span>Teams</span><strong>{item.teamsEnabled ? item.teamsChannel || "Habilitado" : "Deshabilitado"}</strong></div>
+                  <div className="detail-item"><span>Correo</span><strong><Highlight search={search}>{item.emailEnabled ? item.emailTo || "Habilitado" : "Deshabilitado"}</Highlight></strong></div>
+                  <div className="detail-item"><span>Teams</span><strong><Highlight search={search}>{item.teamsEnabled ? item.teamsChannel || "Habilitado" : "Deshabilitado"}</Highlight></strong></div>
                   <div className="detail-item"><span>Webhook</span><strong>{item.powerAutomateWebhookUrl ? "Configurado" : "N/A"}</strong></div>
                 </div>
               </article>
             ))}
           </div>
-          <PaginationControls state={pagination} totalItems={items.length} onChange={setPagination} />
+          <PaginationControls state={pagination} totalItems={visibleItems.length} onChange={setPagination} />
         </section>
       </section>
     </main>

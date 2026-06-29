@@ -42,6 +42,7 @@ export type BrandSettings = {
   showPublicRequirementForm: boolean;
   showPublicRequirementFullPage: boolean;
   showLoginChatbot: boolean;
+  showDemoCredentials: boolean;
   title: string;
   subtitle: string;
 };
@@ -73,6 +74,7 @@ export const defaultBrandSettings: BrandSettings = {
   showPublicRequirementForm: true,
   showPublicRequirementFullPage: true,
   showLoginChatbot: true,
+  showDemoCredentials: true,
   title: "Creamos conexiones que dejan huella",
   subtitle: "Universidad Indoamérica"
 };
@@ -136,11 +138,17 @@ export function getSession(): AuthSession | null {
 }
 
 export function saveSession(session: AuthSession) {
+  window.sessionStorage.removeItem("requirements-explicit-logout");
   window.localStorage.setItem("requirements-session", JSON.stringify(session));
 }
 
 export function clearSession() {
   window.localStorage.removeItem("requirements-session");
+}
+
+export function logoutSession() {
+  window.sessionStorage.setItem("requirements-explicit-logout", "1");
+  clearSession();
 }
 
 export type ToastType = "success" | "error" | "info";
@@ -231,7 +239,8 @@ export async function api<T>(url: string, init: RequestInit = {}): Promise<T> {
   if (!response.ok) {
     const text = await response.text();
     const message = friendlyHttpMessage(response.status, text);
-    showToast(message, "error");
+    const explicitLogout = typeof window !== "undefined" && window.sessionStorage.getItem("requirements-explicit-logout") === "1";
+    if (!(response.status === 401 && explicitLogout)) showToast(message, "error");
     throw new Error(message);
   }
 

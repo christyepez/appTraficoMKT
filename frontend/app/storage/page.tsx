@@ -3,6 +3,7 @@
 import { AppNav } from "../nav";
 import { api, showToast, t } from "../lib";
 import { Edit3, Plus, RefreshCw, Save, Trash2, X } from "lucide-react";
+import { Highlight, matchesSearch } from "../search";
 import { FormEvent, useEffect, useState } from "react";
 
 type StorageSettings = {
@@ -38,6 +39,7 @@ export default function StoragePage() {
   const [editing, setEditing] = useState<StorageSettings>(emptySettings);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [search, setSearch] = useState("");
 
   async function load() {
     setSettings(await api<StorageSettings[]>("/api/storage-settings/all"));
@@ -78,6 +80,8 @@ export default function StoragePage() {
     showToast("Configuración de archivos eliminada lógicamente.");
     await load();
   }
+
+  const visibleSettings = settings.filter((item) => matchesSearch([item.name, item.provider, item.localPath, item.blobContainer, item.ftpHost, item.isActive ? "Activo" : "Inactivo"], search));
 
   return (
     <main className="app-shell">
@@ -126,13 +130,14 @@ export default function StoragePage() {
               <button className="button secondary" title="Actualizar detalle de configuraciones de archivo" onClick={load}><RefreshCw size={16} /> Actualizar</button>
             </div>
           </div>
+          <label className="field top-space"><span>Buscar configuraciones</span><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Nombre, proveedor, ruta, contenedor, estado..." /></label>
           <div className="stack compact-stack top-space">
-            {settings.map((item) => (
+            {visibleSettings.map((item) => (
               <article className="card compact-card" key={item.id}>
                 <div className="card-head">
                   <div className="compact-title">
-                    <h3>{item.name}</h3>
-                    <p>{item.provider} | {item.isProductionCloudEnabled ? "Cloud prod habilitado" : "Cloud prod deshabilitado"}</p>
+                    <h3><Highlight search={search}>{item.name}</Highlight></h3>
+                    <p><Highlight search={search}>{`${item.provider} | ${item.isProductionCloudEnabled ? "Cloud prod habilitado" : "Cloud prod deshabilitado"}`}</Highlight></p>
                   </div>
                   <div className="card-meta">
                     <span className="badge">{item.isActive ? "Activo" : "Inactivo"}</span>
@@ -143,9 +148,9 @@ export default function StoragePage() {
                   </div>
                 </div>
                 <div className="detail-grid compact-detail-grid">
-                  <div className="detail-item"><span>Local</span><strong>{item.localPath || "N/A"}</strong></div>
-                  <div className="detail-item"><span>Blob</span><strong>{item.blobContainer || "N/A"}</strong></div>
-                  <div className="detail-item"><span>FTP</span><strong>{item.ftpHost || "N/A"}</strong></div>
+                  <div className="detail-item"><span>Local</span><strong><Highlight search={search}>{item.localPath || "N/A"}</Highlight></strong></div>
+                  <div className="detail-item"><span>Blob</span><strong><Highlight search={search}>{item.blobContainer || "N/A"}</Highlight></strong></div>
+                  <div className="detail-item"><span>FTP</span><strong><Highlight search={search}>{item.ftpHost || "N/A"}</Highlight></strong></div>
                 </div>
               </article>
             ))}

@@ -1,6 +1,6 @@
 "use client";
 
-import { api, applyBrandVariables, clearSession, defaultBrandSettings, getSession, t, type BrandSettings } from "./lib";
+import { api, applyBrandVariables, defaultBrandSettings, getSession, logoutSession, t, type BrandSettings } from "./lib";
 import { BarChart3, Bell, CheckCircle2, ClipboardList, FileCheck2, History, Inbox, Landmark, ListChecks, LogOut, Palette, Settings, ShieldCheck, UploadCloud, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -128,7 +128,7 @@ export function AppNav() {
             className="icon-button"
             title="Cerrar sesión y volver al login"
             onClick={() => {
-              clearSession();
+              logoutSession();
               router.push("/login");
             }}
           >

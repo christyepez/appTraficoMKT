@@ -3,6 +3,7 @@
 import { AppNav } from "../nav";
 import { api, getSession, showToast } from "../lib";
 import { PaginationControls, paginate, type PaginationState } from "../pagination";
+import { Highlight, matchesSearch } from "../search";
 import { CheckCircle2, RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -21,6 +22,7 @@ type NotificationRecord = {
 export default function MyNotificationsPage() {
   const [items, setItems] = useState<NotificationRecord[]>([]);
   const [pagination, setPagination] = useState<PaginationState>({ page: 1, pageSize: 10 });
+  const [search, setSearch] = useState("");
   const session = getSession();
 
   async function load() {
@@ -43,6 +45,8 @@ export default function MyNotificationsPage() {
     await load();
   }
 
+  const visibleItems = items.filter((item) => matchesSearch([item.eventType, item.title, item.message, item.createdBy, item.isAcknowledged ? "Recibido" : "Pendiente"], search));
+
   return (
     <main className="app-shell">
       <AppNav />
@@ -52,13 +56,14 @@ export default function MyNotificationsPage() {
             <h2>Mis notificaciones</h2>
             <button className="button secondary" title="Actualizar mis notificaciones" onClick={load}><RefreshCw size={16} /> Actualizar</button>
           </div>
+          <label className="field top-space"><span>Buscar notificaciones</span><input value={search} onChange={(event) => { setSearch(event.target.value); setPagination((current) => ({ ...current, page: 1 })); }} placeholder="Título, mensaje, evento, remitente, estado..." /></label>
           <div className="stack compact-stack top-space">
-            {paginate(items, pagination).items.map((item) => (
+            {paginate(visibleItems, pagination).items.map((item) => (
               <article className="card compact-card" key={item.id}>
                 <div className="card-head">
                   <div className="compact-title">
-                    <h3>{item.title}</h3>
-                    <p>{item.message}</p>
+                    <h3><Highlight search={search}>{item.title}</Highlight></h3>
+                    <p><Highlight search={search}>{item.message}</Highlight></p>
                   </div>
                   <div className="card-meta">
                     <span className="badge">{item.isAcknowledged ? "Recibido" : "Pendiente"}</span>
@@ -66,15 +71,15 @@ export default function MyNotificationsPage() {
                   </div>
                 </div>
                 <div className="inline-facts">
-                  <span>{item.eventType}</span>
+                  <span><Highlight search={search}>{item.eventType}</Highlight></span>
                   <span>{formatDate(item.createdAt)}</span>
-                  <span>{item.createdBy}</span>
+                  <span><Highlight search={search}>{item.createdBy}</Highlight></span>
                 </div>
               </article>
             ))}
-            {items.length === 0 && <div className="empty">Sin notificaciones.</div>}
+            {visibleItems.length === 0 && <div className="empty">Sin notificaciones que coincidan con el filtro.</div>}
           </div>
-          <PaginationControls state={pagination} totalItems={items.length} onChange={setPagination} />
+          <PaginationControls state={pagination} totalItems={visibleItems.length} onChange={setPagination} />
         </section>
       </section>
     </main>

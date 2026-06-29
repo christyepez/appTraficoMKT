@@ -3,6 +3,7 @@
 import { AppNav } from "../nav";
 import { api, showToast } from "../lib";
 import { PaginationControls, paginate, type PaginationState } from "../pagination";
+import { Highlight } from "../search";
 import { Edit3, Plus, RefreshCw, Save, ShieldCheck, Trash2, X } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
 
@@ -256,17 +257,7 @@ function matchesUserSearch(user: User, term: string) {
 }
 
 function highlight(text: string, term: string) {
-  const query = term.trim();
-  if (!query) return text;
-  const index = text.toLowerCase().indexOf(query.toLowerCase());
-  if (index < 0) return text;
-  return (
-    <>
-      {text.slice(0, index)}
-      <mark>{text.slice(index, index + query.length)}</mark>
-      {text.slice(index + query.length)}
-    </>
-  );
+  return <Highlight search={term}>{text}</Highlight>;
 }
 
 function defaultScreensForRole(role: string) {

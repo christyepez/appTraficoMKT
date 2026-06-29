@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [message, setMessage] = useState("Usa admin@local.test / Admin123!");
+  const [message, setMessage] = useState("");
   const [brand, setBrand] = useState<BrandSettings>(defaultBrandSettings);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isPublicFormOpen, setIsPublicFormOpen] = useState(false);
@@ -225,7 +225,7 @@ export default function LoginPage() {
             )}
           </div>
         )}
-        <p className="hint"><KeyRound size={14} /> {message}</p>
+        {(message || brand.showDemoCredentials) && <p className="hint"><KeyRound size={14} /> {message || "Usa admin@local.test / Admin123!"}</p>}
       </section>
       {isPublicFormOpen && (
         <div className="modal-backdrop" role="dialog" aria-modal="true">

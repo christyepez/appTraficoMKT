@@ -3,6 +3,7 @@
 import { AppNav } from "../nav";
 import { Activity, api, getSession, showToast } from "../lib";
 import { PaginationControls, paginate, type PaginationState } from "../pagination";
+import { Highlight, matchesSearch } from "../search";
 import { CheckCircle2, Eye, FileText, RefreshCw, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -30,6 +31,7 @@ export default function ApprovalsPage() {
   const [approvals, setApprovals] = useState<Approval[]>([]);
   const [showApproved, setShowApproved] = useState(false);
   const [attachmentActivityId, setAttachmentActivityId] = useState("");
+  const [search, setSearch] = useState("");
   const [pagination, setPagination] = useState<PaginationState>({ page: 1, pageSize: 10 });
 
   async function load() {
@@ -62,6 +64,8 @@ export default function ApprovalsPage() {
     showToast(decision === "Approved" ? "Producto aprobado correctamente." : "Producto rechazado correctamente.");
     await load();
   }
+
+  const visibleActivities = activities.filter((item) => matchesSearch([item.productId, item.productType, item.productResponsible, item.mainKpi, item.requirementType, item.diffusionChannel, item.strategicObjective, item.status], search));
 
   return (
     <main className="app-shell">
@@ -101,13 +105,14 @@ export default function ApprovalsPage() {
               <button className="button secondary" title="Actualizar productos pendientes de aprobación" onClick={load}><RefreshCw size={16} /> Actualizar</button>
             </div>
           </div>
+          <label className="field top-space"><span>Buscar en aprobaciones</span><input value={search} onChange={(event) => { setSearch(event.target.value); setPagination((current) => ({ ...current, page: 1 })); }} placeholder="Producto, responsable, tipo, canal, KPI, estado..." /></label>
           <div className="stack compact-stack top-space">
-            {paginate(activities, pagination).items.map((item) => (
+            {paginate(visibleActivities, pagination).items.map((item) => (
               <article className="card compact-card" key={item.id}>
                 <div className="card-head">
                   <div className="compact-title">
-                    <h3>{item.productId} - {item.productType}</h3>
-                    <p>{item.productResponsible} | {item.mainKpi}</p>
+                    <h3><Highlight search={search}>{`${item.productId} - ${item.productType}`}</Highlight></h3>
+                    <p><Highlight search={search}>{`${item.productResponsible} | ${item.mainKpi}`}</Highlight></p>
                   </div>
                   <div className="card-meta">
                     <span className="badge">{activityStatusLabel(item.status)}</span>
@@ -119,12 +124,12 @@ export default function ApprovalsPage() {
                   </div>
                 </div>
                 <div className="detail-grid compact-detail-grid">
-                  <div className="detail-item"><span>Responsable</span><strong>{item.productResponsible}</strong></div>
+                  <div className="detail-item"><span>Responsable</span><strong><Highlight search={search}>{item.productResponsible}</Highlight></strong></div>
                   <div className="detail-item"><span>Entrega</span><strong>{item.productDeliveryDate ?? "Sin fecha"}</strong></div>
-                  <div className="detail-item"><span>Tipo</span><strong>{item.requirementType}</strong></div>
-                  <div className="detail-item"><span>Canal</span><strong>{item.diffusionChannel}</strong></div>
-                  <div className="detail-item"><span>KPI</span><strong>{item.mainKpi || "N/A"}</strong></div>
-                  <div className="detail-item"><span>Objetivo estratégico</span><strong>{item.strategicObjective || "Sin detalle"}</strong></div>
+                  <div className="detail-item"><span>Tipo</span><strong><Highlight search={search}>{item.requirementType}</Highlight></strong></div>
+                  <div className="detail-item"><span>Canal</span><strong><Highlight search={search}>{item.diffusionChannel}</Highlight></strong></div>
+                  <div className="detail-item"><span>KPI</span><strong><Highlight search={search}>{item.mainKpi || "N/A"}</Highlight></strong></div>
+                  <div className="detail-item"><span>Objetivo estratégico</span><strong><Highlight search={search}>{item.strategicObjective || "Sin detalle"}</Highlight></strong></div>
                 </div>
                 {approvals.filter((approval) => approval.activityId === item.id).map((approval) => (
                   <div className="inline-facts" key={approval.id}>
@@ -135,9 +140,9 @@ export default function ApprovalsPage() {
                 ))}
               </article>
             ))}
-            {activities.length === 0 && <div className="empty">No hay productos pendientes de aprobación.</div>}
+            {visibleActivities.length === 0 && <div className="empty">No hay productos que coincidan con el filtro.</div>}
           </div>
-          <PaginationControls state={pagination} totalItems={activities.length} onChange={setPagination} />
+          <PaginationControls state={pagination} totalItems={visibleActivities.length} onChange={setPagination} />
         </div>
       </section>
     </main>

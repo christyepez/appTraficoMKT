@@ -198,6 +198,7 @@ export default function BrandingPage() {
                     <label className="check-field"><input type="checkbox" checked={settings.showPublicRequirementForm} onChange={(event) => setSettings({ ...settings, showPublicRequirementForm: event.target.checked })} /> Mostrar botón Crear requerimiento sin login</label>
                     <label className="check-field"><input type="checkbox" checked={settings.showPublicRequirementFullPage} onChange={(event) => setSettings({ ...settings, showPublicRequirementFullPage: event.target.checked })} /> Mostrar botón Abrir formulario completo</label>
                     <label className="check-field"><input type="checkbox" checked={settings.showLoginChatbot} onChange={(event) => setSettings({ ...settings, showLoginChatbot: event.target.checked })} /> Mostrar robot Puma en login</label>
+                    <label className="check-field"><input type="checkbox" checked={settings.showDemoCredentials} onChange={(event) => setSettings({ ...settings, showDemoCredentials: event.target.checked })} /> Mostrar credenciales de prueba en login</label>
                   </>
                 )}
                 <div className="form-actions">
@@ -232,7 +233,8 @@ function categorySummary(category: BrandCategory, settings: BrandSettings) {
     login: [
       settings.showPublicRequirementForm ? "Popup" : "",
       settings.showPublicRequirementFullPage ? "Formulario" : "",
-      settings.showLoginChatbot ? "Robot" : ""
+      settings.showLoginChatbot ? "Robot" : "",
+      settings.showDemoCredentials ? "Credenciales" : ""
     ].filter(Boolean).join(" | ") || "Oculto"
   };
   return summaries[category];

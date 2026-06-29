@@ -391,6 +391,7 @@ public sealed record UpsertBrandSettingsRequest(
     bool ShowPublicRequirementForm,
     bool ShowPublicRequirementFullPage,
     bool ShowLoginChatbot,
+    bool ShowDemoCredentials,
     string Title,
     string Subtitle);
 public sealed record CreateUserRequest(string Name, string Email, string Password, string AuthProvider, bool AllowMicrosoftLogin, string[] Roles, string[] ScreenPermissions, Guid? FacultyId, Guid? CampusId, string MenuMode, bool MenuCollapsed);
@@ -512,6 +513,7 @@ public sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> option
             entity.Property(x => x.ShowPublicRequirementForm).HasDefaultValue(true);
             entity.Property(x => x.ShowPublicRequirementFullPage).HasDefaultValue(true);
             entity.Property(x => x.ShowLoginChatbot).HasDefaultValue(true);
+            entity.Property(x => x.ShowDemoCredentials).HasDefaultValue(true);
             entity.Property(x => x.Title).HasMaxLength(180);
             entity.Property(x => x.Subtitle).HasMaxLength(240);
         });
@@ -547,6 +549,7 @@ public sealed class BrandSettings
     public bool ShowPublicRequirementForm { get; set; } = true;
     public bool ShowPublicRequirementFullPage { get; set; } = true;
     public bool ShowLoginChatbot { get; set; } = true;
+    public bool ShowDemoCredentials { get; set; } = true;
     public string Title { get; set; } = "Creamos conexiones que dejan huella";
     public string Subtitle { get; set; } = "Universidad Indoamérica";
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
@@ -592,6 +595,7 @@ public sealed class BrandSettings
         ShowPublicRequirementForm = request.ShowPublicRequirementForm;
         ShowPublicRequirementFullPage = request.ShowPublicRequirementFullPage;
         ShowLoginChatbot = request.ShowLoginChatbot;
+        ShowDemoCredentials = request.ShowDemoCredentials;
         Title = request.Title.Trim();
         Subtitle = request.Subtitle.Trim();
         UpdatedAt = DateTimeOffset.UtcNow;
@@ -800,6 +804,7 @@ public static class IdentitySchema
                     [ShowPublicRequirementForm] bit NOT NULL DEFAULT(1),
                     [ShowPublicRequirementFullPage] bit NOT NULL DEFAULT(1),
                     [ShowLoginChatbot] bit NOT NULL DEFAULT(1),
+                    [ShowDemoCredentials] bit NOT NULL DEFAULT(1),
                     [Title] nvarchar(180) NOT NULL,
                     [Subtitle] nvarchar(240) NOT NULL,
                     [CreatedAt] datetimeoffset NOT NULL,
@@ -831,12 +836,16 @@ public static class IdentitySchema
             BEGIN
                 ALTER TABLE [BrandSettings] ADD [ShowLoginChatbot] bit NOT NULL DEFAULT(1)
             END
+            IF COL_LENGTH('BrandSettings', 'ShowDemoCredentials') IS NULL
+            BEGIN
+                ALTER TABLE [BrandSettings] ADD [ShowDemoCredentials] bit NOT NULL DEFAULT(1)
+            END
             IF NOT EXISTS (SELECT 1 FROM [BrandSettings])
             BEGIN
                 EXEC('INSERT INTO [BrandSettings] (
                     [Id], [Primary], [PrimaryDark], [Accent], [Background], [Surface], [Foreground], [Muted], [Line],
                     [ButtonText], [Secondary], [SecondaryText], [Success], [Warning], [Danger], [TopbarText],
-                    [FontFamily], [MenuMode], [MenuCollapsed], [BrandVersion], [Logo], [ChatbotIcon], [ShowPublicRequirementForm], [ShowPublicRequirementFullPage], [ShowLoginChatbot], [Title], [Subtitle],
+                    [FontFamily], [MenuMode], [MenuCollapsed], [BrandVersion], [Logo], [ChatbotIcon], [ShowPublicRequirementForm], [ShowPublicRequirementFullPage], [ShowLoginChatbot], [ShowDemoCredentials], [Title], [Subtitle],
                     [CreatedAt], [UpdatedAt])
                 VALUES (
                     NEWID(), ''#3c235f'', ''#2a1844'', ''#f6b700'', ''#f5f7fb'', ''#ffffff'', ''#101b2d'', ''#697386'', ''#d9deea'',
@@ -844,7 +853,7 @@ public static class IdentitySchema
                     ''Segoe UI, Arial, Helvetica, sans-serif'', ''horizontal'', 0, 3,
                     ''https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/logo-gen-cuad.jpg'',
                     ''https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/logo-gen-cuad.jpg'',
-                    1, 1, 1, ''Creamos conexiones que dejan huella'', ''Universidad Indoamérica'',
+                    1, 1, 1, 1, ''Creamos conexiones que dejan huella'', ''Universidad Indoamérica'',
                     SYSDATETIMEOFFSET(), NULL)')
             END
             """);

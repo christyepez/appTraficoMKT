@@ -3,6 +3,7 @@
 import { AppNav } from "../nav";
 import { Activity, Requirement, api, getSession, showToast } from "../lib";
 import { PaginationControls, paginate, type PaginationState } from "../pagination";
+import { Highlight } from "../search";
 import { Edit3, Eye, FileText, Paperclip, Play, Plus, RefreshCw, Save, Send, Trash2, Upload, X } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
 
@@ -68,6 +69,8 @@ export default function ActivitiesPage() {
   const [approvalVersionsActivityId, setApprovalVersionsActivityId] = useState("");
   const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
   const [attachmentPreview, setAttachmentPreview] = useState("");
+  const [attachmentMode, setAttachmentMode] = useState<"file" | "url">("file");
+  const [attachmentUrl, setAttachmentUrl] = useState("");
   const [dragging, setDragging] = useState(false);
   const [suggestedProductId, setSuggestedProductId] = useState("PROD-0001");
   const [isSaving, setIsSaving] = useState(false);
@@ -244,20 +247,36 @@ export default function ActivitiesPage() {
   async function uploadAttachment(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (isUploading) return;
-    if (!attachmentActivityId || !attachmentFile) {
-      showToast("Seleccione un producto y un archivo.", "error");
+    if (!attachmentActivityId || (attachmentMode === "file" && !attachmentFile) || (attachmentMode === "url" && !attachmentUrl.trim())) {
+      showToast("Seleccione un producto y complete el origen del adjunto.", "error");
       return;
     }
     setIsUploading(true);
     const form = new FormData(event.currentTarget);
     try {
-      form.set("activityId", attachmentActivityId);
-      form.set("file", attachmentFile);
-      await api<EvidenceItem>("/api/evidence/upload", { method: "POST", body: form });
+      if (attachmentMode === "file" && attachmentFile) {
+        form.set("activityId", attachmentActivityId);
+        form.set("file", attachmentFile);
+        await api<EvidenceItem>("/api/evidence/upload", { method: "POST", body: form });
+      } else {
+        const url = new URL(attachmentUrl.trim());
+        await api<EvidenceItem>("/api/evidence", {
+          method: "POST",
+          body: JSON.stringify({
+            activityId: attachmentActivityId,
+            fileName: form.get("urlName") || url.pathname.split("/").filter(Boolean).pop() || url.hostname,
+            contentType: "text/uri-list",
+            storageUrl: url.toString(),
+            uploadedBy: form.get("uploadedBy")
+          })
+        });
+      }
       await api(`/api/activities/${attachmentActivityId}/evidence-attached`, { method: "PATCH" });
       setAttachmentActivityId("");
       setAttachmentFile(null);
       setAttachmentPreview("");
+      setAttachmentUrl("");
+      setAttachmentMode("file");
       showToast("Adjunto cargado en el producto.");
       await load();
     } finally {
@@ -336,7 +355,8 @@ export default function ActivitiesPage() {
                 </div>
                 <button className="icon-button" type="button" title="Cerrar carga de adjunto" onClick={() => { setAttachmentActivityId(""); setAttachmentFile(null); setAttachmentPreview(""); }}><X size={16} /></button>
               </div>
-              <label
+              <label className="field"><span>Origen del adjunto</span><select value={attachmentMode} onChange={(event) => { setAttachmentMode(event.target.value as "file" | "url"); setAttachmentFile(null); setAttachmentPreview(""); setAttachmentUrl(""); }}><option value="file">Subir archivo</option><option value="url">Ingresar URL</option></select></label>
+              {attachmentMode === "file" && <label
                 className={dragging ? "drop-zone active" : "drop-zone"}
                 onDragOver={(event) => { event.preventDefault(); setDragging(true); }}
                 onDragLeave={() => setDragging(false)}
@@ -348,8 +368,9 @@ export default function ActivitiesPage() {
               >
                 <input name="file" type="file" hidden onChange={(event) => pickAttachment(event.target.files?.[0])} />
                 <span><Upload size={18} /> Arrastra un archivo o haz clic para seleccionar. Máximo 50 MB.</span>
-              </label>
-              {attachmentFile && (
+              </label>}
+              {attachmentMode === "url" && <><label className="field field-wide"><span>URL del adjunto</span><input type="url" value={attachmentUrl} onChange={(event) => setAttachmentUrl(event.target.value)} placeholder="https://..." required /></label><label className="field"><span>Nombre descriptivo</span><input name="urlName" maxLength={240} placeholder="Video, diseño o archivo externo" /></label></>}
+              {attachmentMode === "file" && attachmentFile && (
                 <div className="file-preview">
                   <div className="card-head">
                     <div>
@@ -364,7 +385,7 @@ export default function ActivitiesPage() {
                 </div>
               )}
               <label className="field"><span>Subido por</span><input name="uploadedBy" required defaultValue="Equipo técnico" /></label>
-              <button className="button compact" title="Cargar adjunto al producto seleccionado" disabled={!attachmentFile || isUploading}><Upload size={16} /> {isUploading ? "Cargando" : "Cargar adjunto"}</button>
+              <button className="button compact" title="Cargar adjunto al producto seleccionado" disabled={(attachmentMode === "file" ? !attachmentFile : !attachmentUrl.trim()) || isUploading}><Upload size={16} /> {isUploading ? "Cargando" : "Agregar adjunto"}</button>
             </form>
           )}
           {attachmentDetailActivityId && (
@@ -380,19 +401,19 @@ export default function ActivitiesPage() {
                 </div>
                 <div className="stack compact-stack top-space">
                   {evidence.filter((file) => file.activityId === attachmentDetailActivityId).map((file) => (
-                    <article className="card compact-card" key={file.id}>
-                      <div className="card-head">
+                    <details className="card compact-card" key={file.id}>
+                      <summary className="card-head collapse-title">
                         <div className="compact-title">
                           <h3><FileText size={16} /> {file.fileName}</h3>
                           <p>Subido por {file.uploadedBy || "Equipo técnico"}</p>
                         </div>
-                        <div className="actions">
-                          <a className="icon-button" href={file.storageUrl} target="_blank" rel="noreferrer" title="Abrir adjunto"><Eye size={16} /></a>
-                          <button className="icon-button danger" type="button" title="Eliminar adjunto" onClick={() => removeEvidence(file.id)}><Trash2 size={16} /></button>
-                        </div>
+                      </summary>
+                      <div className="actions top-space">
+                        <a className="icon-button" href={file.storageUrl} target="_blank" rel="noreferrer" title="Abrir adjunto"><Eye size={16} /></a>
+                        <button className="icon-button danger" type="button" title="Eliminar adjunto" onClick={() => removeEvidence(file.id)}><Trash2 size={16} /></button>
                       </div>
                       <EvidencePreview item={file} />
-                    </article>
+                    </details>
                   ))}
                   {evidence.filter((file) => file.activityId === attachmentDetailActivityId).length === 0 && <div className="empty">Sin adjuntos.</div>}
                 </div>
@@ -558,17 +579,7 @@ function matchesSearch(item: Activity, term: string) {
 }
 
 function highlight(text: string, term: string) {
-  const query = term.trim();
-  if (!query) return text;
-  const index = text.toLowerCase().indexOf(query.toLowerCase());
-  if (index < 0) return text;
-  return (
-    <>
-      {text.slice(0, index)}
-      <mark>{text.slice(index, index + query.length)}</mark>
-      {text.slice(index + query.length)}
-    </>
-  );
+  return <Highlight search={term}>{text}</Highlight>;
 }
 
 type StepState = "pending" | "ready" | "done";

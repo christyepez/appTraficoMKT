@@ -30,6 +30,8 @@ export default function EvidencePage() {
   const [activityId, setActivityId] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState("");
+  const [attachmentMode, setAttachmentMode] = useState<"file" | "url">("file");
+  const [externalUrl, setExternalUrl] = useState("");
   const [dragging, setDragging] = useState(false);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -72,23 +74,27 @@ export default function EvidencePage() {
   async function create(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (isUploading) return;
-    if (!file) {
-      showToast("Seleccione o arrastre un archivo.", "error");
+    if ((attachmentMode === "file" && !file) || (attachmentMode === "url" && !externalUrl.trim())) {
+      showToast("Complete el origen del adjunto.", "error");
       return;
     }
     setIsUploading(true);
     const form = new FormData(event.currentTarget);
     try {
-      form.set("file", file);
-      form.set("activityId", activityId);
-      await api<EvidenceItem>("/api/evidence/upload", {
-        method: "POST",
-        body: form
-      });
+      if (attachmentMode === "file" && file) {
+        form.set("file", file);
+        form.set("activityId", activityId);
+        await api<EvidenceItem>("/api/evidence/upload", { method: "POST", body: form });
+      } else {
+        const url = new URL(externalUrl.trim());
+        await api<EvidenceItem>("/api/evidence", { method: "POST", body: JSON.stringify({ activityId, fileName: form.get("urlName") || url.pathname.split("/").filter(Boolean).pop() || url.hostname, contentType: "text/uri-list", storageUrl: url.toString(), uploadedBy: form.get("uploadedBy") }) });
+      }
       await api(`/api/activities/${activityId}/evidence-attached`, { method: "PATCH" });
       event.currentTarget.reset();
       setFile(null);
       setPreviewUrl("");
+      setExternalUrl("");
+      setAttachmentMode("file");
       setIsUploadOpen(false);
       showToast("Evidencia adjuntada correctamente.");
       await load();
@@ -122,7 +128,8 @@ export default function EvidencePage() {
                 {activities.map((item) => <option key={item.id} value={item.id}>{item.productId} - {item.productType}</option>)}
               </select>
             </label>
-            <div className="field field-wide">
+            <label className="field"><span>Origen del adjunto</span><select value={attachmentMode} onChange={(event) => { setAttachmentMode(event.target.value as "file" | "url"); setFile(null); setPreviewUrl(""); setExternalUrl(""); }}><option value="file">Subir archivo</option><option value="url">Ingresar URL</option></select></label>
+            {attachmentMode === "file" && <div className="field field-wide">
               <span>Archivo</span>
               <label
                 className={dragging ? "drop-zone active" : "drop-zone"}
@@ -137,8 +144,9 @@ export default function EvidencePage() {
                 <input name="file" type="file" hidden onChange={(event) => pickFile(event.target.files?.[0])} />
                 <span><Upload size={18} /> Arrastra un archivo o haz clic para seleccionar. Máximo 50 MB.</span>
               </label>
-            </div>
-            {file && (
+            </div>}
+            {attachmentMode === "url" && <><label className="field field-wide"><span>URL del adjunto</span><input type="url" value={externalUrl} onChange={(event) => setExternalUrl(event.target.value)} placeholder="https://..." required /></label><label className="field"><span>Nombre descriptivo</span><input name="urlName" maxLength={240} /></label></>}
+            {attachmentMode === "file" && file && (
               <div className="file-preview field-wide">
                 <strong>{file.name}</strong>
                 <span>{Math.round(file.size / 1024)} KB</span>

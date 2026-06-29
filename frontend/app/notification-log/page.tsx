@@ -3,6 +3,7 @@
 import { AppNav } from "../nav";
 import { api } from "../lib";
 import { PaginationControls, paginate, type PaginationState } from "../pagination";
+import { Highlight, matchesSearch } from "../search";
 import { RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -34,7 +35,7 @@ export default function NotificationLogPage() {
     return () => window.clearInterval(timer);
   }, []);
 
-  const visible = items.filter((item) => [item.eventType, item.title, item.message, item.recipientEmail, item.createdBy].join(" ").toLowerCase().includes(search.trim().toLowerCase()));
+  const visible = items.filter((item) => matchesSearch([item.eventType, item.title, item.message, item.recipientEmail, item.createdBy, item.isAcknowledged ? "Recibido" : "Pendiente"], search));
 
   return (
     <main className="app-shell">
@@ -47,21 +48,21 @@ export default function NotificationLogPage() {
           </div>
           <label className="field top-space">
             <span>Buscar</span>
-            <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Evento, destinatario, título..." />
+            <input value={search} onChange={(event) => { setSearch(event.target.value); setPagination((current) => ({ ...current, page: 1 })); }} placeholder="Evento, destinatario, título..." />
           </label>
           <div className="stack compact-stack top-space">
             {paginate(visible, pagination).items.map((item) => (
               <article className="card compact-card" key={item.id}>
                 <div className="card-head">
                   <div className="compact-title">
-                    <h3>{item.title}</h3>
-                    <p>{item.message}</p>
+                    <h3><Highlight search={search}>{item.title}</Highlight></h3>
+                    <p><Highlight search={search}>{item.message}</Highlight></p>
                   </div>
                   <span className="badge">{item.isAcknowledged ? "Recibido" : "Pendiente"}</span>
                 </div>
                 <div className="inline-facts">
-                  <span>{item.eventType}</span>
-                  <span>{item.recipientEmail}</span>
+                  <span><Highlight search={search}>{item.eventType}</Highlight></span>
+                  <span><Highlight search={search}>{item.recipientEmail}</Highlight></span>
                   <span>{formatDate(item.createdAt)}</span>
                   {item.acknowledgedAt && <span>Recibido: {formatDate(item.acknowledgedAt)}</span>}
                 </div>
