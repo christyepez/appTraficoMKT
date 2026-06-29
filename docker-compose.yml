@@ -2,6 +2,7 @@ services:
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: requirements-sqlserver
+    restart: unless-stopped
     environment:
       ACCEPT_EULA: "Y"
       MSSQL_SA_PASSWORD: "Passw0rd!Local"
@@ -16,6 +17,7 @@ services:
       retries: 20
 
   requirements-api:
+    restart: unless-stopped
     build:
       context: ./backend
       dockerfile: src/Services/Requirements/Requirements.Api/Dockerfile
@@ -30,6 +32,7 @@ services:
         condition: service_healthy
 
   activities-api:
+    restart: unless-stopped
     build:
       context: ./backend
       dockerfile: src/Services/Activities/Activities.Api/Dockerfile
@@ -45,6 +48,7 @@ services:
         condition: service_healthy
 
   evidence-api:
+    restart: unless-stopped
     build:
       context: ./backend
       dockerfile: src/Services/Evidence/Evidence.Api/Dockerfile
@@ -60,6 +64,7 @@ services:
         condition: service_healthy
 
   identity-api:
+    restart: unless-stopped
     build:
       context: ./backend
       dockerfile: src/Services/Identity/Identity.Api/Dockerfile
@@ -80,6 +85,7 @@ services:
         condition: service_healthy
 
   administration-api:
+    restart: unless-stopped
     build:
       context: ./backend
       dockerfile: src/Services/Administration/Administration.Api/Dockerfile
@@ -99,6 +105,7 @@ services:
         condition: service_healthy
 
   web:
+    restart: unless-stopped
     build:
       context: ./frontend
       args:

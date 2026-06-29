@@ -1,6 +1,7 @@
 services:
   cloudflared:
     image: cloudflare/cloudflared:latest
+    restart: unless-stopped
     command: tunnel --no-autoupdate run apptraficomkt
     volumes:
       - ./deploy/cloudflared:/etc/cloudflared:ro
