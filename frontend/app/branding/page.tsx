@@ -199,6 +199,7 @@ export default function BrandingPage() {
                     <label className="check-field"><input type="checkbox" checked={settings.showPublicRequirementFullPage} onChange={(event) => setSettings({ ...settings, showPublicRequirementFullPage: event.target.checked })} /> Mostrar botón Abrir formulario completo</label>
                     <label className="check-field"><input type="checkbox" checked={settings.showLoginChatbot} onChange={(event) => setSettings({ ...settings, showLoginChatbot: event.target.checked })} /> Mostrar robot Puma en login</label>
                     <label className="check-field"><input type="checkbox" checked={settings.showDemoCredentials} onChange={(event) => setSettings({ ...settings, showDemoCredentials: event.target.checked })} /> Mostrar credenciales de prueba en login</label>
+                    <label className="check-field"><input type="checkbox" checked={settings.showOffice365Login} onChange={(event) => setSettings({ ...settings, showOffice365Login: event.target.checked })} /> Mostrar ingreso con Office 365</label>
                   </>
                 )}
                 <div className="form-actions">
@@ -234,7 +235,8 @@ function categorySummary(category: BrandCategory, settings: BrandSettings) {
       settings.showPublicRequirementForm ? "Popup" : "",
       settings.showPublicRequirementFullPage ? "Formulario" : "",
       settings.showLoginChatbot ? "Robot" : "",
-      settings.showDemoCredentials ? "Credenciales" : ""
+      settings.showDemoCredentials ? "Credenciales" : "",
+      settings.showOffice365Login ? "Office 365" : ""
     ].filter(Boolean).join(" | ") || "Oculto"
   };
   return summaries[category];

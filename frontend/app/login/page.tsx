@@ -205,9 +205,11 @@ export default function LoginPage() {
             <LogIn size={16} /> Ingresar
           </button>
         </form>
-        <button className="button secondary full" type="button" title="Iniciar flujo de autenticación Microsoft Entra ID" onClick={microsoftLogin}>
-          <Mail size={16} /> Ingresar con Office 365
-        </button>
+        {brand.showOffice365Login && (
+          <button className="button secondary full" type="button" title="Iniciar flujo de autenticación Microsoft Entra ID" onClick={microsoftLogin}>
+            <Mail size={16} /> Ingresar con Office 365
+          </button>
+        )}
         <Link className="button secondary full" href="/forgot-password" title="Recuperar contraseña con clave temporal">
           <KeyRound size={16} /> Recuperar contraseña
         </Link>
