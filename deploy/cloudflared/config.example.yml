@@ -2,7 +2,7 @@ tunnel: apptraficomkt
 credentials-file: /etc/cloudflared/apptraficomkt.json
 
 ingress:
-  - hostname: apptraficomkt.tudominio.com
+  - hostname: marketingtrafico.indoamerica.edu.ec
     service: https://nginx:443
     originRequest:
       noTLSVerify: true
