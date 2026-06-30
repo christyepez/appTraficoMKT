@@ -8,6 +8,7 @@ Aplicacion base para recopilar requerimientos, asignar actividades al equipo tec
 - [Arquitectura C4 en 4 niveles](docs/architecture/c4.md)
 - [Arquitectura tecnica](docs/technical/technical-architecture.md)
 - [Especificacion funcional](docs/functional/functional-specification.md)
+- [Manual completo del Administrador](docs/functional/administrator-guide.md)
 - [Guia funcional de usuario](docs/functional/user-guide.md)
 - [Operaciones y despliegue](docs/operations/deployment.md)
 - [Git Flow y ambientes](docs/operations/git-flow.md)

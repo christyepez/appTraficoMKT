@@ -1244,9 +1244,33 @@ mark {
 }
 
 @media (max-width: 980px) {
+  .app-shell {
+    padding-top: 0;
+  }
+
   .main-grid,
   .split {
     grid-template-columns: 1fr;
+  }
+
+  .main-grid,
+  .content-shell {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 12px;
+  }
+
+  .navlinks-horizontal ~ .main-grid,
+  .navlinks-horizontal ~ .content-shell {
+    padding-top: 12px;
+  }
+
+  .navlinks-vertical ~ .main-grid,
+  .navlinks-vertical ~ .content-shell,
+  .navlinks-vertical.collapsed ~ .main-grid,
+  .navlinks-vertical.collapsed ~ .content-shell {
+    margin-left: 0;
   }
 
   .form {
@@ -1254,19 +1278,22 @@ mark {
   }
 
   .topbar {
-    grid-template-columns: 1fr;
-    align-items: flex-start;
+    position: sticky;
+    grid-template-columns: 92px minmax(0, 1fr);
+    align-items: center;
+    gap: 8px 12px;
     min-height: auto;
-    padding: 14px;
+    padding: 10px 12px;
   }
 
   .brand-link {
-    width: 100%;
+    grid-column: 1;
+    width: auto;
     align-items: center;
   }
 
   .brand-title-slot {
-    grid-column: 1;
+    grid-column: 2;
     justify-content: flex-start;
     text-align: left;
   }
@@ -1286,9 +1313,88 @@ mark {
   }
 
   .session-box {
-    grid-column: 1;
+    grid-column: 1 / -1;
     justify-self: start;
     flex-wrap: wrap;
+  }
+
+  .navlinks,
+  .navlinks-horizontal,
+  .navlinks-vertical,
+  .navlinks-vertical.collapsed {
+    position: static;
+    inset: auto;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    padding: 10px 12px;
+    overflow: visible;
+  }
+
+  .navlinks a,
+  .navlinks-vertical a,
+  .navlinks-vertical.collapsed a {
+    width: 100%;
+    min-width: 0;
+    justify-content: flex-start;
+  }
+
+  .navlinks-vertical.collapsed a span {
+    display: inline;
+  }
+
+  .modal-backdrop {
+    place-items: center;
+    padding: 12px;
+  }
+
+  .modal-panel,
+  .login-public-panel {
+    width: 100%;
+    max-height: calc(100vh - 24px);
+    padding: 14px;
+  }
+
+  .modal-panel > .card-head {
+    align-items: flex-start;
+    flex-direction: row;
+  }
+
+  .card-head,
+  .compact-card .card-head {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .card-meta {
+    width: 100%;
+    flex-shrink: 1;
+    justify-content: space-between;
+  }
+
+  .card-head > .actions,
+  .card-meta .actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .detail-grid,
+  .compact-detail-grid,
+  .brand-settings-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .catalog-tabs-horizontal,
+  .brand-category-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pagination-bar {
+    justify-content: center;
+  }
+
+  .metric-row {
+    grid-template-columns: 1fr;
   }
 
   .brand-preview {
@@ -1299,5 +1405,80 @@ mark {
   .story-card,
   .story-bar {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .topbar {
+    grid-template-columns: 72px minmax(0, 1fr);
+  }
+
+  .brand-mark {
+    width: 72px;
+    height: 44px;
+    padding: 4px 6px;
+  }
+
+  .brand-logo {
+    width: 62px;
+    height: 34px;
+  }
+
+  .brand-text {
+    font-size: 0.88rem;
+  }
+
+  .session-box {
+    gap: 6px;
+    font-size: 12px;
+  }
+
+  .session-box > span {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .panel,
+  .card {
+    padding: 12px;
+  }
+
+  .form-actions .button {
+    flex: 1 1 140px;
+  }
+
+  .catalog-tabs-horizontal,
+  .brand-category-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .login-page {
+    padding: 12px;
+  }
+
+  .login-panel {
+    padding: 18px;
+  }
+
+  .chatbot-panel {
+    right: 12px;
+    left: 12px;
+    bottom: 88px;
+    width: auto;
+  }
+
+  .chatbot-launcher {
+    right: 14px;
+    bottom: 14px;
+    width: 56px;
+    height: 56px;
+  }
+
+  .toast {
+    right: 12px;
+    left: 12px;
+    max-width: none;
   }
 }
