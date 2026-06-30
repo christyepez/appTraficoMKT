@@ -43,6 +43,8 @@ Todas viven en SQL Server local dentro de Docker Compose. Cada servicio aplica s
 - El menu horizontal/vertical puede configurarse por usuario.
 - Usuarios inactivos no pueden autenticarse.
 - Microsoft SSO se controla con `AllowMicrosoftLogin` por usuario.
+- La visibilidad global del botón Office 365 se controla con `ShowOffice365Login` en `BrandSettings`.
+- La sesión se almacena en el navegador con expiración JWT y cierre explícito silencioso.
 
 ## Workflows principales
 
@@ -106,6 +108,46 @@ Provider soportados:
 - `FTP`
 
 En local se usa `/app/uploads` con volumen Docker.
+
+Los adjuntos aceptan dos orígenes:
+
+- Archivo multipart de hasta 50 MB.
+- URL HTTPS registrada como evidencia externa.
+
+## Entrada HTTP/HTTPS
+
+Nginx publica frontend y APIs con resolución DNS dinámica de Docker:
+
+| Prefijo público | Destino |
+| --- | --- |
+| `/` | Next.js |
+| `/api/auth`, `/api/identity` | Identity API |
+| `/api/requirements` | Requirements API |
+| `/api/activities`, `/api/notification-settings` | Activities API |
+| `/api/evidence`, `/api/approvals`, `/api/storage-settings`, `/api/files` | Evidence API |
+| `/api/admin` | Administration API |
+
+Nombres internos admitidos: `MarketingIndo`, `DESKTOP-Q1VCG41`, `localhost` y `172.20.20.66`. La CSP permite `frame-ancestors` de Teams y Microsoft 365.
+
+## Persistencia y evolución
+
+Cada servicio ejecuta una rutina idempotente de esquema al iniciar. Estas rutinas:
+
+- Crean tablas faltantes.
+- Agregan columnas nuevas con valores predeterminados.
+- Conservan datos existentes.
+- Inicializan catálogos y configuraciones mínimas.
+
+En producción se recomienda reemplazar este mecanismo por migraciones versionadas y aprobadas por ambiente.
+
+## Observabilidad y continuidad
+
+- Cada API expone `/health`.
+- SQL Server tiene healthcheck Docker.
+- Todos los servicios usan `restart: unless-stopped`.
+- Nginx resuelve nuevamente las IP internas cuando Docker recrea servicios.
+- Auditoría funcional y logs de contenedor permiten investigar fallas.
+- El túnel rápido es temporal; producción debe usar Cloudflare Named Tunnel.
 
 ## Pipelines
 

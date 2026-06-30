@@ -7,6 +7,7 @@ Aplicacion base para recopilar requerimientos, asignar actividades al equipo tec
 - [Indice documental](docs/README.md)
 - [Arquitectura C4 en 4 niveles](docs/architecture/c4.md)
 - [Arquitectura tecnica](docs/technical/technical-architecture.md)
+- [Especificacion funcional](docs/functional/functional-specification.md)
 - [Guia funcional de usuario](docs/functional/user-guide.md)
 - [Operaciones y despliegue](docs/operations/deployment.md)
 - [Git Flow y ambientes](docs/operations/git-flow.md)
@@ -15,23 +16,23 @@ Aplicacion base para recopilar requerimientos, asignar actividades al equipo tec
 
 Login con acceso local, Office 365, formulario publico y chatbot:
 
-![Login](docs/screenshots/login.svg)
+![Login](docs/screenshots/current/01-login.png)
 
 Vista de seguimiento de requerimientos:
 
-![Seguimiento de requerimientos](docs/screenshots/requerimientos.svg)
+![Seguimiento de requerimientos](docs/screenshots/current/02-requerimientos.png)
 
 Seguimiento de productos:
 
-![Productos](docs/screenshots/productos.svg)
+![Productos](docs/screenshots/current/03-productos.png)
 
 Aprobaciones con adjuntos:
 
-![Aprobaciones](docs/screenshots/aprobaciones.svg)
+![Aprobaciones](docs/screenshots/current/05-aprobaciones.png)
 
 Administracion de catalogos:
 
-![Administracion](docs/screenshots/admin.svg)
+![Administracion](docs/screenshots/current/08-catalogos.png)
 
 Metricas:
 
@@ -139,7 +140,7 @@ https://localhost/login
 La URL `trycloudflare.com` no es fija. Para tener una URL estable se debe usar un tunel nombrado asociado a una cuenta Cloudflare y a un dominio propio, por ejemplo:
 
 ```txt
-https://apptraficomkt.tudominio.com/login
+https://marketingtrafico.indoamerica.edu.ec/login
 ```
 
 Archivos preparados:
@@ -152,7 +153,7 @@ Pasos una sola vez desde una terminal autenticada en Cloudflare:
 ```powershell
 cloudflared tunnel login
 cloudflared tunnel create apptraficomkt
-cloudflared tunnel route dns apptraficomkt apptraficomkt.tudominio.com
+cloudflared tunnel route dns apptraficomkt marketingtrafico.indoamerica.edu.ec
 ```
 
 Luego copiar el archivo de credenciales generado por Cloudflare como:
@@ -161,7 +162,7 @@ Luego copiar el archivo de credenciales generado por Cloudflare como:
 deploy/cloudflared/apptraficomkt.json
 ```
 
-Crear `deploy/cloudflared/config.yml` copiando `deploy/cloudflared/config.example.yml` y reemplazar `apptraficomkt.tudominio.com` por el hostname real. Levantar con:
+Crear `deploy/cloudflared/config.yml` copiando `deploy/cloudflared/config.example.yml`. El ejemplo ya usa `marketingtrafico.indoamerica.edu.ec`. Levantar con:
 
 ```powershell
 docker compose -f docker-compose.yml -f docker-compose.https.yml -f docker-compose.tunnel.named.yml up --build -d
