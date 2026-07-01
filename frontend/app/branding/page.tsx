@@ -183,6 +183,7 @@ export default function BrandingPage() {
                     <label className="field"><span>Alineación texto cabecera</span><select value={settings.headerTextAlign} onChange={(event) => setSettings({ ...settings, headerTextAlign: event.target.value as BrandSettings["headerTextAlign"] })}><option value="center">Centrado</option><option value="left">Izquierda</option><option value="right">Derecha</option></select></label>
                     <label className="field"><span>Ubicación vertical texto</span><select value={settings.headerTextPosition} onChange={(event) => setSettings({ ...settings, headerTextPosition: event.target.value as BrandSettings["headerTextPosition"] })}><option value="middle">Centro</option><option value="top">Arriba</option><option value="bottom">Abajo</option></select></label>
                     {settings.menuMode === "vertical" && <label className="check-field"><input type="checkbox" checked={settings.menuCollapsed} onChange={(event) => setSettings({ ...settings, menuCollapsed: event.target.checked })} /> Menú vertical plegado</label>}
+                    <label className="check-field"><input type="checkbox" checked={settings.mobileMenuCollapsed} onChange={(event) => setSettings({ ...settings, mobileMenuCollapsed: event.target.checked })} /> Menú móvil lateral plegado por defecto</label>
                   </>
                 )}
                 {activeCategory === "logo" && (
@@ -229,7 +230,7 @@ function categorySummary(category: BrandCategory, settings: BrandSettings) {
     colores: `${settings.primary} | ${settings.accent}`,
     botones: `Principal ${settings.primary} | Éxito ${settings.success}`,
     tipografia: settings.fontFamily.split(",")[0],
-    cabecera: `${settings.menuMode} | ${settings.headerTextAlign}`,
+    cabecera: `${settings.menuMode} | ${settings.headerTextAlign} | móvil ${settings.mobileMenuCollapsed ? "plegado" : "abierto"}`,
     logo: settings.logo.startsWith("data:") ? "Logo cargado" : "URL configurada",
     login: [
       settings.showPublicRequirementForm ? "Popup" : "",

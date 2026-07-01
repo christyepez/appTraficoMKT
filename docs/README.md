@@ -7,6 +7,7 @@ GitHub renderiza los diagramas Mermaid directamente en los archivos Markdown.
 
 - [Arquitectura C4](architecture/c4.md)
 - [Arquitectura tecnica](technical/technical-architecture.md)
+- [Acceso desde LAN y WLAN](technical/lan-access.md)
 - [Guia funcional de usuario](functional/user-guide.md)
 - [Especificación funcional](functional/functional-specification.md)
 - [Manual completo del Administrador](functional/administrator-guide.md)

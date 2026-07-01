@@ -1,7 +1,7 @@
 "use client";
 
 import { api, applyBrandVariables, defaultBrandSettings, getSession, logoutSession, t, type BrandSettings } from "./lib";
-import { BarChart3, Bell, CheckCircle2, ClipboardList, FileCheck2, History, Inbox, Landmark, ListChecks, LogOut, Palette, Settings, ShieldCheck, UploadCloud, Users } from "lucide-react";
+import { BarChart3, Bell, CheckCircle2, ClipboardList, FileCheck2, History, Inbox, Landmark, ListChecks, LogOut, Menu, Palette, PanelLeftClose, PanelLeftOpen, Settings, ShieldCheck, UploadCloud, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -34,6 +34,8 @@ export function AppNav() {
   const [headerTextPosition, setHeaderTextPosition] = useState<"top" | "middle" | "bottom">("middle");
   const [menuMode, setMenuMode] = useState<"horizontal" | "vertical">("horizontal");
   const [menuCollapsed, setMenuCollapsed] = useState(false);
+  const [desktopMenuVisible, setDesktopMenuVisible] = useState(true);
+  const [mobileMenuExpanded, setMobileMenuExpanded] = useState(false);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
   const [renderTick, setRenderTick] = useState(0);
 
@@ -83,6 +85,7 @@ export function AppNav() {
     const preferredMenuMode = session?.user.menuMode ?? currentBrand.menuMode;
     setMenuMode(preferredMenuMode === "vertical" ? "vertical" : "horizontal");
     setMenuCollapsed(preferredMenuMode === "vertical" ? Boolean(session?.user.menuCollapsed ?? currentBrand.menuCollapsed) : false);
+    setMobileMenuExpanded(!currentBrand.mobileMenuCollapsed);
   }
 
   async function loadUnreadNotifications() {
@@ -104,6 +107,26 @@ export function AppNav() {
           <span className="brand-text">{brandTitle}</span>
         </div>
         <div className="session-box">
+          <button
+            className="icon-button desktop-menu-toggle"
+            type="button"
+            title={desktopMenuVisible ? "Ocultar menú" : "Mostrar menú en línea"}
+            aria-label={desktopMenuVisible ? "Ocultar menú" : "Mostrar menú en línea"}
+            aria-expanded={desktopMenuVisible}
+            onClick={() => setDesktopMenuVisible((visible) => !visible)}
+          >
+            {desktopMenuVisible ? <PanelLeftClose size={16} /> : <PanelLeftOpen size={16} />}
+          </button>
+          <button
+            className="icon-button mobile-menu-toggle"
+            type="button"
+            title={mobileMenuExpanded ? "Plegar menú" : "Abrir menú"}
+            aria-label={mobileMenuExpanded ? "Plegar menú" : "Abrir menú"}
+            aria-expanded={mobileMenuExpanded}
+            onClick={() => setMobileMenuExpanded((expanded) => !expanded)}
+          >
+            <Menu size={17} />
+          </button>
           <ShieldCheck size={16} />
           <span>{name}</span>
           <Link className="notification-bubble" href="/my-notifications" title="Ver mis notificaciones">
@@ -136,7 +159,7 @@ export function AppNav() {
           </button>
         </div>
       </header>
-      <nav className={`navlinks ${menuMode === "vertical" ? "navlinks-vertical" : "navlinks-horizontal"} ${menuMode === "vertical" && menuCollapsed ? "collapsed" : ""}`}>
+      <nav className={`navlinks ${menuMode === "vertical" ? "navlinks-vertical" : "navlinks-horizontal"} ${menuMode === "vertical" && menuCollapsed ? "collapsed" : ""} ${desktopMenuVisible ? "" : "nav-hidden-desktop"} ${mobileMenuExpanded ? "mobile-expanded" : "mobile-collapsed"}`}>
           {items.map((item) => {
             const Icon = item.icon;
             const session = getSession();

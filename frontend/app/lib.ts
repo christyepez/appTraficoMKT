@@ -34,6 +34,7 @@ export type BrandSettings = {
   fontFamily: string;
   menuMode: "horizontal" | "vertical";
   menuCollapsed: boolean;
+  mobileMenuCollapsed: boolean;
   headerTextAlign: "left" | "center" | "right";
   headerTextPosition: "top" | "middle" | "bottom";
   brandVersion: number;
@@ -67,6 +68,7 @@ export const defaultBrandSettings: BrandSettings = {
   fontFamily: "Segoe UI, Arial, Helvetica, sans-serif",
   menuMode: "horizontal",
   menuCollapsed: false,
+  mobileMenuCollapsed: true,
   headerTextAlign: "center",
   headerTextPosition: "middle",
   brandVersion: 3,

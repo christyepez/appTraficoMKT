@@ -3,8 +3,8 @@ services:
     image: nginx:1.27-alpine
     restart: unless-stopped
     ports:
-      - "80:80"
-      - "443:443"
+      - "0.0.0.0:80:80"
+      - "0.0.0.0:443:443"
     volumes:
       - ./deploy/nginx.local-https.conf:/etc/nginx/nginx.conf:ro
       - ./deploy/certs/local:/etc/nginx/certs:ro

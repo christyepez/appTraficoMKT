@@ -383,6 +383,7 @@ public sealed record UpsertBrandSettingsRequest(
     string FontFamily,
     string MenuMode,
     bool MenuCollapsed,
+    bool MobileMenuCollapsed,
     string HeaderTextAlign,
     string HeaderTextPosition,
     int BrandVersion,
@@ -507,6 +508,7 @@ public sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> option
             entity.Property(x => x.TopbarText).HasMaxLength(20);
             entity.Property(x => x.FontFamily).HasMaxLength(180);
             entity.Property(x => x.MenuMode).HasMaxLength(20);
+            entity.Property(x => x.MobileMenuCollapsed).HasDefaultValue(true);
             entity.Property(x => x.HeaderTextAlign).HasMaxLength(20);
             entity.Property(x => x.HeaderTextPosition).HasMaxLength(20);
             entity.Property(x => x.Logo).HasMaxLength(1200);
@@ -543,6 +545,7 @@ public sealed class BrandSettings
     public string FontFamily { get; set; } = "Segoe UI, Arial, Helvetica, sans-serif";
     public string MenuMode { get; set; } = "horizontal";
     public bool MenuCollapsed { get; set; }
+    public bool MobileMenuCollapsed { get; set; } = true;
     public string HeaderTextAlign { get; set; } = "center";
     public string HeaderTextPosition { get; set; } = "middle";
     public int BrandVersion { get; set; } = 3;
@@ -580,6 +583,7 @@ public sealed class BrandSettings
         FontFamily = request.FontFamily.Trim();
         MenuMode = request.MenuMode.Equals("vertical", StringComparison.OrdinalIgnoreCase) ? "vertical" : "horizontal";
         MenuCollapsed = request.MenuCollapsed;
+        MobileMenuCollapsed = request.MobileMenuCollapsed;
         HeaderTextAlign = request.HeaderTextAlign.ToLowerInvariant() switch
         {
             "left" => "left",
@@ -800,6 +804,7 @@ public static class IdentitySchema
                     [FontFamily] nvarchar(180) NOT NULL,
                     [MenuMode] nvarchar(20) NOT NULL,
                     [MenuCollapsed] bit NOT NULL,
+                    [MobileMenuCollapsed] bit NOT NULL DEFAULT(1),
                     [HeaderTextAlign] nvarchar(20) NOT NULL DEFAULT('center'),
                     [HeaderTextPosition] nvarchar(20) NOT NULL DEFAULT('middle'),
                     [BrandVersion] int NOT NULL,
@@ -849,17 +854,21 @@ public static class IdentitySchema
             BEGIN
                 ALTER TABLE [BrandSettings] ADD [ShowOffice365Login] bit NOT NULL DEFAULT(1)
             END
+            IF COL_LENGTH('BrandSettings', 'MobileMenuCollapsed') IS NULL
+            BEGIN
+                ALTER TABLE [BrandSettings] ADD [MobileMenuCollapsed] bit NOT NULL DEFAULT(1)
+            END
             IF NOT EXISTS (SELECT 1 FROM [BrandSettings])
             BEGIN
                 EXEC('INSERT INTO [BrandSettings] (
                     [Id], [Primary], [PrimaryDark], [Accent], [Background], [Surface], [Foreground], [Muted], [Line],
                     [ButtonText], [Secondary], [SecondaryText], [Success], [Warning], [Danger], [TopbarText],
-                    [FontFamily], [MenuMode], [MenuCollapsed], [BrandVersion], [Logo], [ChatbotIcon], [ShowPublicRequirementForm], [ShowPublicRequirementFullPage], [ShowLoginChatbot], [ShowDemoCredentials], [ShowOffice365Login], [Title], [Subtitle],
+                    [FontFamily], [MenuMode], [MenuCollapsed], [MobileMenuCollapsed], [BrandVersion], [Logo], [ChatbotIcon], [ShowPublicRequirementForm], [ShowPublicRequirementFullPage], [ShowLoginChatbot], [ShowDemoCredentials], [ShowOffice365Login], [Title], [Subtitle],
                     [CreatedAt], [UpdatedAt])
                 VALUES (
                     NEWID(), ''#3c235f'', ''#2a1844'', ''#f6b700'', ''#f5f7fb'', ''#ffffff'', ''#101b2d'', ''#697386'', ''#d9deea'',
                     ''#ffffff'', ''#eef4f7'', ''#001f49'', ''#207044'', ''#f6b700'', ''#b42318'', ''#ffffff'',
-                    ''Segoe UI, Arial, Helvetica, sans-serif'', ''horizontal'', 0, 3,
+                    ''Segoe UI, Arial, Helvetica, sans-serif'', ''horizontal'', 0, 1, 3,
                     ''https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/logo-gen-cuad.jpg'',
                     ''https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/logo-gen-cuad.jpg'',
                     1, 1, 1, 1, 1, ''Creamos conexiones que dejan huella'', ''Universidad Indoamérica'',

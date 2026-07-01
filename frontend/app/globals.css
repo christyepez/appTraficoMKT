@@ -200,6 +200,20 @@ button:disabled {
   display: none;
 }
 
+.mobile-menu-toggle {
+  display: none;
+}
+
+.navlinks.nav-hidden-desktop {
+  display: none;
+}
+
+.navlinks.nav-hidden-desktop ~ .main-grid,
+.navlinks.nav-hidden-desktop ~ .content-shell {
+  margin-left: 0;
+  padding-top: 0;
+}
+
 .navlinks-horizontal ~ .main-grid,
 .navlinks-horizontal ~ .content-shell {
   padding-top: 66px;
@@ -1257,8 +1271,9 @@ mark {
   .content-shell {
     width: 100%;
     max-width: none;
-    margin: 0;
+    margin: 0 0 0 58px;
     padding: 12px;
+    width: calc(100% - 58px);
   }
 
   .navlinks-horizontal ~ .main-grid,
@@ -1270,7 +1285,7 @@ mark {
   .navlinks-vertical ~ .content-shell,
   .navlinks-vertical.collapsed ~ .main-grid,
   .navlinks-vertical.collapsed ~ .content-shell {
-    margin-left: 0;
+    margin-left: 58px;
   }
 
   .form {
@@ -1318,17 +1333,40 @@ mark {
     flex-wrap: wrap;
   }
 
+  .desktop-menu-toggle {
+    display: none;
+  }
+
+  .mobile-menu-toggle {
+    display: inline-flex;
+  }
+
   .navlinks,
   .navlinks-horizontal,
   .navlinks-vertical,
   .navlinks-vertical.collapsed {
-    position: static;
-    inset: auto;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    width: 100%;
-    padding: 10px 12px;
-    overflow: visible;
+    position: fixed;
+    inset: 118px auto 0 0;
+    z-index: 48;
+    display: flex;
+    width: 58px;
+    padding: 8px;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    overflow-x: hidden;
+    overflow-y: auto;
+    border-right: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 5px 0 16px rgba(16, 27, 45, 0.12);
+    transition: width 180ms ease;
+  }
+
+  .navlinks.nav-hidden-desktop {
+    display: flex;
+  }
+
+  .navlinks.mobile-expanded {
+    width: min(280px, calc(100vw - 28px));
   }
 
   .navlinks a,
@@ -1336,11 +1374,30 @@ mark {
   .navlinks-vertical.collapsed a {
     width: 100%;
     min-width: 0;
+    justify-content: center;
+    flex: 0 0 auto;
+  }
+
+  .navlinks a span,
+  .navlinks-vertical a span,
+  .navlinks-vertical.collapsed a span {
+    display: none;
+  }
+
+  .navlinks.mobile-expanded a {
     justify-content: flex-start;
   }
 
-  .navlinks-vertical.collapsed a span {
+  .navlinks.mobile-expanded a span,
+  .navlinks-vertical.mobile-expanded a span,
+  .navlinks-vertical.collapsed.mobile-expanded a span {
     display: inline;
+  }
+
+  .navlinks.nav-hidden-desktop ~ .main-grid,
+  .navlinks.nav-hidden-desktop ~ .content-shell {
+    margin-left: 58px;
+    padding-top: 12px;
   }
 
   .modal-backdrop {
