@@ -1,7 +1,7 @@
 "use client";
 
 import { api, applyBrandVariables, defaultBrandSettings, getSession, logoutSession, t, type BrandSettings } from "./lib";
-import { BarChart3, Bell, CheckCircle2, ClipboardList, FileCheck2, History, Inbox, Landmark, ListChecks, LogOut, Menu, Palette, PanelLeftClose, PanelLeftOpen, Settings, ShieldCheck, UploadCloud, Users } from "lucide-react";
+import { BarChart3, Bell, CheckCircle2, ChevronsLeft, ChevronsRight, ClipboardList, FileCheck2, History, Inbox, Landmark, ListChecks, LogOut, Palette, Settings, ShieldCheck, UploadCloud, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -33,9 +33,9 @@ export function AppNav() {
   const [headerTextAlign, setHeaderTextAlign] = useState<"left" | "center" | "right">("center");
   const [headerTextPosition, setHeaderTextPosition] = useState<"top" | "middle" | "bottom">("middle");
   const [menuMode, setMenuMode] = useState<"horizontal" | "vertical">("horizontal");
-  const [menuCollapsed, setMenuCollapsed] = useState(false);
   const [desktopMenuVisible, setDesktopMenuVisible] = useState(true);
   const [mobileMenuExpanded, setMobileMenuExpanded] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
   const [renderTick, setRenderTick] = useState(0);
 
@@ -57,6 +57,10 @@ export function AppNav() {
     const saved = window.localStorage.getItem("ui-language") ?? "es";
     setLanguage(saved);
     document.documentElement.lang = saved;
+    const mobileQuery = window.matchMedia("(max-width: 980px)");
+    const updateMobile = () => setIsMobile(mobileQuery.matches);
+    updateMobile();
+    mobileQuery.addEventListener("change", updateMobile);
     loadBrand();
     loadUnreadNotifications();
     const notificationTimer = window.setInterval(() => loadUnreadNotifications().catch(() => undefined), 15000);
@@ -69,6 +73,7 @@ export function AppNav() {
     return () => {
       window.removeEventListener("ui-language-changed", onSettings);
       window.removeEventListener("brand-settings-changed", onSettings);
+      mobileQuery.removeEventListener("change", updateMobile);
       window.clearInterval(notificationTimer);
     };
   }, [pathname, router]);
@@ -83,8 +88,9 @@ export function AppNav() {
     setHeaderTextPosition(currentBrand.headerTextPosition ?? "middle");
     const session = getSession();
     const preferredMenuMode = session?.user.menuMode ?? currentBrand.menuMode;
+    const preferredMenuCollapsed = Boolean(session?.user.menuCollapsed ?? currentBrand.menuCollapsed);
     setMenuMode(preferredMenuMode === "vertical" ? "vertical" : "horizontal");
-    setMenuCollapsed(preferredMenuMode === "vertical" ? Boolean(session?.user.menuCollapsed ?? currentBrand.menuCollapsed) : false);
+    setDesktopMenuVisible(preferredMenuMode === "vertical" ? !preferredMenuCollapsed : true);
     setMobileMenuExpanded(!currentBrand.mobileMenuCollapsed);
   }
 
@@ -107,26 +113,6 @@ export function AppNav() {
           <span className="brand-text">{brandTitle}</span>
         </div>
         <div className="session-box">
-          <button
-            className="icon-button desktop-menu-toggle"
-            type="button"
-            title={desktopMenuVisible ? "Ocultar menú" : "Mostrar menú en línea"}
-            aria-label={desktopMenuVisible ? "Ocultar menú" : "Mostrar menú en línea"}
-            aria-expanded={desktopMenuVisible}
-            onClick={() => setDesktopMenuVisible((visible) => !visible)}
-          >
-            {desktopMenuVisible ? <PanelLeftClose size={16} /> : <PanelLeftOpen size={16} />}
-          </button>
-          <button
-            className="icon-button mobile-menu-toggle"
-            type="button"
-            title={mobileMenuExpanded ? "Plegar menú" : "Abrir menú"}
-            aria-label={mobileMenuExpanded ? "Plegar menú" : "Abrir menú"}
-            aria-expanded={mobileMenuExpanded}
-            onClick={() => setMobileMenuExpanded((expanded) => !expanded)}
-          >
-            <Menu size={17} />
-          </button>
           <ShieldCheck size={16} />
           <span>{name}</span>
           <Link className="notification-bubble" href="/my-notifications" title="Ver mis notificaciones">
@@ -159,7 +145,17 @@ export function AppNav() {
           </button>
         </div>
       </header>
-      <nav className={`navlinks ${menuMode === "vertical" ? "navlinks-vertical" : "navlinks-horizontal"} ${menuMode === "vertical" && menuCollapsed ? "collapsed" : ""} ${desktopMenuVisible ? "" : "nav-hidden-desktop"} ${mobileMenuExpanded ? "mobile-expanded" : "mobile-collapsed"}`}>
+      <nav className={`navlinks ${menuMode === "vertical" ? "navlinks-vertical" : "navlinks-horizontal"} ${desktopMenuVisible ? "" : "desktop-collapsed"} ${mobileMenuExpanded ? "mobile-expanded" : "mobile-collapsed"}`}>
+          <button
+            className="icon-button menu-collapse-toggle"
+            type="button"
+            title={(isMobile ? mobileMenuExpanded : desktopMenuVisible) ? "Plegar menú" : "Abrir menú"}
+            aria-label={(isMobile ? mobileMenuExpanded : desktopMenuVisible) ? "Plegar menú" : "Abrir menú"}
+            aria-expanded={isMobile ? mobileMenuExpanded : desktopMenuVisible}
+            onClick={() => isMobile ? setMobileMenuExpanded((expanded) => !expanded) : setDesktopMenuVisible((visible) => !visible)}
+          >
+            {(isMobile ? mobileMenuExpanded : desktopMenuVisible) ? <ChevronsLeft size={18} /> : <ChevronsRight size={18} />}
+          </button>
           {items.map((item) => {
             const Icon = item.icon;
             const session = getSession();

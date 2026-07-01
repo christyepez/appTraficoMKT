@@ -393,7 +393,7 @@ La aplicación detecta el ancho disponible y adapta únicamente la presentación
 
 - La cabecera permanece visible al inicio y reduce el tamaño de logo, título y controles de sesión.
 - El menú se ubica a la izquierda como una barra de iconos plegada.
-- El botón de menú de la cabecera abre el drawer lateral con iconos y etiquetas.
+- El botón único de doble flecha, ubicado sobre las opciones, abre o pliega el menú lateral.
 - El contenido reserva el ancho de la barra plegada y no presenta desplazamiento horizontal.
 - En pantallas muy estrechas, las categorías y formularios cambian a una columna.
 

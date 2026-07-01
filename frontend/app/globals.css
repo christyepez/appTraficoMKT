@@ -200,18 +200,42 @@ button:disabled {
   display: none;
 }
 
-.mobile-menu-toggle {
+.menu-collapse-toggle {
+  flex: 0 0 36px;
+  align-self: flex-start;
+}
+
+.navlinks-horizontal.desktop-collapsed {
+  inset: 86px auto auto 0;
+  padding: 10px 12px;
+}
+
+.navlinks-horizontal.desktop-collapsed a {
   display: none;
 }
 
-.navlinks.nav-hidden-desktop {
-  display: none;
-}
-
-.navlinks.nav-hidden-desktop ~ .main-grid,
-.navlinks.nav-hidden-desktop ~ .content-shell {
+.navlinks-horizontal.desktop-collapsed ~ .main-grid,
+.navlinks-horizontal.desktop-collapsed ~ .content-shell {
   margin-left: 0;
   padding-top: 0;
+}
+
+.navlinks-vertical.desktop-collapsed {
+  width: 58px;
+  padding: 10px;
+}
+
+.navlinks-vertical.desktop-collapsed a {
+  justify-content: center;
+}
+
+.navlinks-vertical.desktop-collapsed a span {
+  display: none;
+}
+
+.navlinks-vertical.desktop-collapsed ~ .main-grid,
+.navlinks-vertical.desktop-collapsed ~ .content-shell {
+  margin-left: 58px;
 }
 
 .navlinks-horizontal ~ .main-grid,
@@ -1333,14 +1357,6 @@ mark {
     flex-wrap: wrap;
   }
 
-  .desktop-menu-toggle {
-    display: none;
-  }
-
-  .mobile-menu-toggle {
-    display: inline-flex;
-  }
-
   .navlinks,
   .navlinks-horizontal,
   .navlinks-vertical,
@@ -1361,10 +1377,6 @@ mark {
     transition: width 180ms ease;
   }
 
-  .navlinks.nav-hidden-desktop {
-    display: flex;
-  }
-
   .navlinks.mobile-expanded {
     width: min(280px, calc(100vw - 28px));
   }
@@ -1376,6 +1388,10 @@ mark {
     min-width: 0;
     justify-content: center;
     flex: 0 0 auto;
+  }
+
+  .navlinks.desktop-collapsed a {
+    display: flex;
   }
 
   .navlinks a span,
@@ -1392,12 +1408,6 @@ mark {
   .navlinks-vertical.mobile-expanded a span,
   .navlinks-vertical.collapsed.mobile-expanded a span {
     display: inline;
-  }
-
-  .navlinks.nav-hidden-desktop ~ .main-grid,
-  .navlinks.nav-hidden-desktop ~ .content-shell {
-    margin-left: 58px;
-    padding-top: 12px;
   }
 
   .modal-backdrop {
