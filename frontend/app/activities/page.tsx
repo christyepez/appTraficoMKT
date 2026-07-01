@@ -1,7 +1,7 @@
 "use client";
 
 import { AppNav } from "../nav";
-import { Activity, Requirement, api, getSession, showToast } from "../lib";
+import { Activity, Requirement, api, defaultBrandSettings, getSession, showToast, type BrandSettings } from "../lib";
 import { PaginationControls, paginate, type PaginationState } from "../pagination";
 import { Highlight } from "../search";
 import { Edit3, Eye, FileText, Paperclip, Play, Plus, RefreshCw, Save, Send, Trash2, Upload, X } from "lucide-react";
@@ -73,6 +73,7 @@ export default function ActivitiesPage() {
   const [attachmentUrl, setAttachmentUrl] = useState("");
   const [dragging, setDragging] = useState(false);
   const [suggestedProductId, setSuggestedProductId] = useState("PROD-0001");
+  const [showProductIdField, setShowProductIdField] = useState(defaultBrandSettings.showProductIdField);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [message, setMessage] = useState("");
@@ -82,13 +83,14 @@ export default function ActivitiesPage() {
 
   async function load() {
     const session = getSession();
-    const [reqs, acts, evs, aps, users, nextProduct, tipoRequerimiento, publicoObjetivo, tipoProducto, canalDifusion, kpiPrincipal] = await Promise.all([
+    const [reqs, acts, evs, aps, users, nextProduct, brand, tipoRequerimiento, publicoObjetivo, tipoProducto, canalDifusion, kpiPrincipal] = await Promise.all([
       api<Requirement[]>("/api/requirements"),
       api<Activity[]>("/api/activities"),
       api<EvidenceItem[]>("/api/evidence"),
       api<Approval[]>("/api/approvals").catch(() => []),
       api<User[]>("/api/identity/users/technicians").catch(() => []),
       api<{ productId: string }>("/api/activities/next-product-id").catch(() => null),
+      api<BrandSettings>("/api/identity/brand-settings").catch(() => defaultBrandSettings),
       api<CatalogItem[]>("/api/admin/catalogs/by-type/TipoRequerimiento"),
       api<CatalogItem[]>("/api/admin/catalogs/by-type/PublicoObjetivo"),
       api<CatalogItem[]>("/api/admin/catalogs/by-type/TipoProducto"),
@@ -114,6 +116,7 @@ export default function ActivitiesPage() {
       kpiPrincipal: kpiPrincipal.filter((item) => item.isActive)
     });
     setSuggestedProductId(nextProduct?.productId ?? nextProductId(acts));
+    setShowProductIdField(Boolean(brand.showProductIdField));
     setRequirementId((current) => current && visibleRequirements.some((item) => item.id === current) ? current : "");
   }
 
@@ -307,7 +310,7 @@ export default function ActivitiesPage() {
                 {requirements.map((item) => <option key={item.id} value={item.id}>{item.code} - {item.activityOrEvent}</option>)}
               </select>
             </label>
-            <label className="field"><span>Id producto</span><input name="productId" required readOnly value={editing?.productId ?? suggestedProductId} title="Código secuencial generado automáticamente" /></label>
+            {showProductIdField && <label className="field"><span>Id producto</span><input name="productId" required readOnly value={editing?.productId ?? suggestedProductId} title="Código secuencial generado automáticamente" /></label>}
             <SelectField label="Tipo requerimiento" name="requirementTypeId" items={catalogs.tipoRequerimiento} defaultValue={editing?.requirementTypeId} />
             <label className="field field-wide"><span>Objetivo estratégico</span><textarea name="strategicObjective" defaultValue={editing?.strategicObjective ?? ""} /></label>
             <SelectField label="Público objetivo" name="targetAudienceId" items={catalogs.publicoObjetivo} defaultValue={editing?.targetAudienceId} />

@@ -1,7 +1,7 @@
 "use client";
 
 import { api, applyBrandVariables, defaultBrandSettings, getSession, logoutSession, t, type BrandSettings } from "./lib";
-import { BarChart3, Bell, CheckCircle2, ChevronsLeft, ChevronsRight, ClipboardList, FileCheck2, History, Inbox, Landmark, ListChecks, LogOut, Palette, Settings, ShieldCheck, UploadCloud, Users } from "lucide-react";
+import { BarChart3, Bell, CheckCircle2, ChevronsDown, ChevronsLeft, ChevronsRight, ChevronsUp, ClipboardList, FileCheck2, History, Inbox, Landmark, ListChecks, LogOut, Palette, Settings, ShieldCheck, UploadCloud, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -38,6 +38,8 @@ export function AppNav() {
   const [isMobile, setIsMobile] = useState(false);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
   const [renderTick, setRenderTick] = useState(0);
+  const menuExpanded = isMobile ? mobileMenuExpanded : desktopMenuVisible;
+  const horizontalDesktopMenu = !isMobile && menuMode === "horizontal";
 
   useEffect(() => {
     const session = getSession();
@@ -149,12 +151,14 @@ export function AppNav() {
           <button
             className="icon-button menu-collapse-toggle"
             type="button"
-            title={(isMobile ? mobileMenuExpanded : desktopMenuVisible) ? "Plegar menú" : "Abrir menú"}
-            aria-label={(isMobile ? mobileMenuExpanded : desktopMenuVisible) ? "Plegar menú" : "Abrir menú"}
-            aria-expanded={isMobile ? mobileMenuExpanded : desktopMenuVisible}
+            title={menuExpanded ? (horizontalDesktopMenu ? "Plegar menú hacia arriba" : "Plegar menú hacia la izquierda") : (horizontalDesktopMenu ? "Desplegar menú hacia abajo" : "Desplegar menú hacia la derecha")}
+            aria-label={menuExpanded ? "Plegar menú" : "Abrir menú"}
+            aria-expanded={menuExpanded}
             onClick={() => isMobile ? setMobileMenuExpanded((expanded) => !expanded) : setDesktopMenuVisible((visible) => !visible)}
           >
-            {(isMobile ? mobileMenuExpanded : desktopMenuVisible) ? <ChevronsLeft size={18} /> : <ChevronsRight size={18} />}
+            {horizontalDesktopMenu
+              ? menuExpanded ? <ChevronsUp size={18} /> : <ChevronsDown size={18} />
+              : menuExpanded ? <ChevronsLeft size={18} /> : <ChevronsRight size={18} />}
           </button>
           {items.map((item) => {
             const Icon = item.icon;

@@ -2,10 +2,10 @@
 
 import { AppNav } from "../nav";
 import { api, applyBrandVariables, defaultBrandSettings, showToast, t, type BrandSettings } from "../lib";
-import { Image as ImageIcon, ImageUp, LogIn, Menu, MousePointer2, Palette, RotateCcw, Save, Type, X } from "lucide-react";
+import { ClipboardList, Image as ImageIcon, ImageUp, LogIn, Menu, MousePointer2, Palette, RotateCcw, Save, Type, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
-type BrandCategory = "textos" | "colores" | "botones" | "tipografia" | "cabecera" | "logo" | "login";
+type BrandCategory = "textos" | "colores" | "botones" | "tipografia" | "cabecera" | "formularios" | "logo" | "login";
 
 const categoryMeta: Array<{ id: BrandCategory; title: string; description: string; icon: typeof Type }> = [
   { id: "textos", title: "Textos", description: "Título y subtítulo institucional.", icon: Type },
@@ -13,6 +13,7 @@ const categoryMeta: Array<{ id: BrandCategory; title: string; description: strin
   { id: "botones", title: "Botones", description: "Colores de acciones y estados.", icon: MousePointer2 },
   { id: "tipografia", title: "Tipografía", description: "Fuente principal del sistema.", icon: Type },
   { id: "cabecera", title: "Cabecera y menú", description: "Alineación, menú y plegado.", icon: Menu },
+  { id: "formularios", title: "Formularios", description: "Visibilidad de campos administrados por el sistema.", icon: ClipboardList },
   { id: "logo", title: "Logo e imágenes", description: "Logo principal e icono del robot.", icon: ImageIcon },
   { id: "login", title: "Login público", description: "Formulario externo y robot Puma.", icon: LogIn }
 ];
@@ -186,6 +187,9 @@ export default function BrandingPage() {
                     <label className="check-field"><input type="checkbox" checked={settings.mobileMenuCollapsed} onChange={(event) => setSettings({ ...settings, mobileMenuCollapsed: event.target.checked })} /> Menú móvil lateral plegado por defecto</label>
                   </>
                 )}
+                {activeCategory === "formularios" && (
+                  <label className="check-field"><input type="checkbox" checked={settings.showProductIdField} onChange={(event) => setSettings({ ...settings, showProductIdField: event.target.checked })} /> Mostrar Id producto al crear o editar productos</label>
+                )}
                 {activeCategory === "logo" && (
                   <>
                     <label className="field"><span>URL del logo</span><input value={settings.logo.startsWith("data:") ? "Logo cargado desde archivo" : settings.logo} onChange={(event) => setSettings({ ...settings, logo: event.target.value })} /></label>
@@ -231,6 +235,7 @@ function categorySummary(category: BrandCategory, settings: BrandSettings) {
     botones: `Principal ${settings.primary} | Éxito ${settings.success}`,
     tipografia: settings.fontFamily.split(",")[0],
     cabecera: `${settings.menuMode} | ${settings.headerTextAlign} | móvil ${settings.mobileMenuCollapsed ? "plegado" : "abierto"}`,
+    formularios: settings.showProductIdField ? "Id producto visible" : "Id producto oculto",
     logo: settings.logo.startsWith("data:") ? "Logo cargado" : "URL configurada",
     login: [
       settings.showPublicRequirementForm ? "Popup" : "",

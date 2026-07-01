@@ -170,8 +170,12 @@ button:disabled {
 
 .navlinks-horizontal {
   inset: 86px 0 auto 0;
-  padding: 10px 28px;
+  min-height: 44px;
+  max-height: 240px;
+  padding: 10px 76px 10px 28px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+  overflow: hidden;
+  transition: max-height 180ms ease, padding 180ms ease, box-shadow 180ms ease;
 }
 
 .navlinks-vertical {
@@ -182,6 +186,7 @@ button:disabled {
   flex-wrap: nowrap;
   padding: 12px;
   overflow-y: auto;
+  transition: width 180ms ease;
 }
 
 .navlinks-vertical.collapsed {
@@ -205,19 +210,31 @@ button:disabled {
   align-self: flex-start;
 }
 
+.navlinks-horizontal .menu-collapse-toggle {
+  position: absolute;
+  top: 8px;
+  right: 24px;
+}
+
 .navlinks-horizontal.desktop-collapsed {
-  inset: 86px auto auto 0;
-  padding: 10px 12px;
+  inset: 86px 0 auto 0;
+  max-height: 44px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  box-shadow: none;
 }
 
 .navlinks-horizontal.desktop-collapsed a {
-  display: none;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(-24px);
+  pointer-events: none;
 }
 
 .navlinks-horizontal.desktop-collapsed ~ .main-grid,
 .navlinks-horizontal.desktop-collapsed ~ .content-shell {
   margin-left: 0;
-  padding-top: 0;
+  padding-top: 44px;
 }
 
 .navlinks-vertical.desktop-collapsed {
@@ -1375,6 +1392,15 @@ mark {
     border-right: 1px solid rgba(255, 255, 255, 0.18);
     box-shadow: 5px 0 16px rgba(16, 27, 45, 0.12);
     transition: width 180ms ease;
+  }
+
+  .navlinks-horizontal {
+    min-height: 0;
+    max-height: none;
+  }
+
+  .navlinks-horizontal .menu-collapse-toggle {
+    position: static;
   }
 
   .navlinks.mobile-expanded {

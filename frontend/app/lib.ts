@@ -45,6 +45,7 @@ export type BrandSettings = {
   showLoginChatbot: boolean;
   showDemoCredentials: boolean;
   showOffice365Login: boolean;
+  showProductIdField: boolean;
   title: string;
   subtitle: string;
 };
@@ -79,6 +80,7 @@ export const defaultBrandSettings: BrandSettings = {
   showLoginChatbot: true,
   showDemoCredentials: true,
   showOffice365Login: true,
+  showProductIdField: false,
   title: "Creamos conexiones que dejan huella",
   subtitle: "Universidad Indoamérica"
 };
