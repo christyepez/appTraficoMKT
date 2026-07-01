@@ -1,5 +1,6 @@
 using BuildingBlocks;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -18,6 +19,10 @@ builder.Services.AddHttpClient("evidence", client =>
 builder.Services.AddHttpClient("requirements", client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["Services:Requirements"] ?? "http://requirements-api:8080");
+});
+builder.Services.AddHttpClient("identity", client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["Services:Identity"] ?? "http://identity-api:8080");
 });
 builder.Services.AddHttpClient("notifications");
 builder.Services.AddDbContext<ActivitiesDbContext>(options =>
@@ -231,7 +236,7 @@ app.MapPatch("/activities/{id:guid}/submit-approval", async (Guid id, Activities
     return Results.Ok(activity);
 });
 
-app.MapPost("/activities/{id:guid}/approvals", async (Guid id, ApproveActivityRequest request, ActivitiesDbContext db, IHttpClientFactory httpClientFactory, IConfiguration configuration) =>
+app.MapPost("/activities/{id:guid}/approvals", async (Guid id, ApproveActivityRequest request, ActivitiesDbContext db, IHttpClientFactory httpClientFactory, IConfiguration configuration, HttpContext httpContext) =>
 {
     var activity = await db.Activities.FindAsync(id);
     if (activity is null || activity.IsDeleted) return Results.NotFound();
@@ -245,23 +250,31 @@ app.MapPost("/activities/{id:guid}/approvals", async (Guid id, ApproveActivityRe
     var client = httpClientFactory.CreateClient("evidence");
     await client.PostAsJsonAsync("/approvals", new CreateApprovalRequest(id, request.Decision, request.ApprovedBy, request.Comments));
 
-    if (request.Decision == ApprovalDecision.Approved)
+    var notificationSettings = await db.NotificationSettings.Where(x => x.IsActive).OrderByDescending(x => x.UpdatedAt ?? x.CreatedAt).FirstOrDefaultAsync();
+    var recipientEmail = await NotificationRecipientResolver.ResolveAsync(activity.ProductResponsible, httpContext, httpClientFactory);
+    var approved = request.Decision == ApprovalDecision.Approved;
+    if (approved)
     {
-        var notificationSettings = await db.NotificationSettings.Where(x => x.IsActive).OrderByDescending(x => x.UpdatedAt ?? x.CreatedAt).FirstOrDefaultAsync();
         await ProductNotification.SendApprovedAsync(activity, request, httpClientFactory, configuration, notificationSettings);
-        var record = NotificationRecord.Create(
-            "ProductApproved",
-            "Producto aprobado",
-            $"El producto {activity.ProductId} fue aprobado.",
-            activity.ProductResponsible,
-            request.ApprovedBy,
-            activity.RequirementId,
-            activity.Id,
-            AuditJson.Build("Notificaciones", "Producto aprobado", request.ApprovedBy, new { activity.Id, activity.ProductId, request.Comments }));
-        db.NotificationRecords.Add(record);
-        await db.SaveChangesAsync();
-        await RequirementWorkflowSync.CompleteIfReadyAsync(activity.RequirementId, httpClientFactory);
     }
+
+    var notificationAction = approved ? "Producto aprobado" : "Producto rechazado";
+    var record = NotificationRecord.Create(
+        approved ? "ProductApproved" : "ProductRejected",
+        notificationAction,
+        $"El producto {activity.ProductId} fue {(approved ? "aprobado" : "rechazado y devuelto a proceso")}. {request.Comments}".Trim(),
+        recipientEmail,
+        request.ApprovedBy,
+        activity.RequirementId,
+        activity.Id,
+        AuditJson.Build("Notificaciones", notificationAction, request.ApprovedBy, new { activity.Id, activity.ProductId, activity.ProductResponsible, recipientEmail, request.Comments }));
+    db.NotificationRecords.Add(record);
+    await db.SaveChangesAsync();
+
+    if (approved)
+        await RequirementWorkflowSync.CompleteIfReadyAsync(activity.RequirementId, httpClientFactory);
+    else
+        await NotificationDelivery.SendAsync(record, notificationSettings, httpClientFactory, configuration);
 
     return Results.Ok(activity);
 });
@@ -302,19 +315,21 @@ app.MapDelete("/notification-settings/{id:guid}", async (Guid id, ActivitiesDbCo
 app.MapGet("/notification-records", async (ActivitiesDbContext db) =>
     await db.NotificationRecords.OrderByDescending(x => x.CreatedAt).ToListAsync());
 
-app.MapGet("/notification-records/by-user", async (string email, ActivitiesDbContext db) =>
+app.MapGet("/notification-records/by-user", async (string email, string? name, ActivitiesDbContext db) =>
 {
     var normalized = email.Trim().ToLowerInvariant();
+    var normalizedName = name?.Trim().ToLowerInvariant() ?? string.Empty;
     return await db.NotificationRecords
-        .Where(x => x.RecipientEmail == normalized || x.RecipientEmail == "todos")
+        .Where(x => x.RecipientEmail == normalized || (normalizedName != "" && x.RecipientEmail == normalizedName) || x.RecipientEmail == "todos")
         .OrderByDescending(x => x.CreatedAt)
         .ToListAsync();
 });
 
-app.MapGet("/notification-records/unread-count", async (string email, ActivitiesDbContext db) =>
+app.MapGet("/notification-records/unread-count", async (string email, string? name, ActivitiesDbContext db) =>
 {
     var normalized = email.Trim().ToLowerInvariant();
-    var total = await db.NotificationRecords.CountAsync(x => !x.IsAcknowledged && (x.RecipientEmail == normalized || x.RecipientEmail == "todos"));
+    var normalizedName = name?.Trim().ToLowerInvariant() ?? string.Empty;
+    var total = await db.NotificationRecords.CountAsync(x => !x.IsAcknowledged && (x.RecipientEmail == normalized || (normalizedName != "" && x.RecipientEmail == normalizedName) || x.RecipientEmail == "todos"));
     return Results.Ok(new NotificationCountResponse(total));
 });
 
@@ -389,6 +404,34 @@ public sealed record SystemNotificationRequest(string EventType, string Title, s
 public sealed record NotificationCountResponse(int Count);
 public sealed record AcknowledgeNotificationRequest(string AcknowledgedBy);
 public sealed record EvidenceItemDto(Guid Id, Guid ActivityId, string FileName, string StorageUrl, string UploadedBy);
+public sealed record NotificationUserDto(string Name, string Email, bool IsActive);
+
+public static class NotificationRecipientResolver
+{
+    public static async Task<string> ResolveAsync(string responsible, HttpContext httpContext, IHttpClientFactory httpClientFactory)
+    {
+        var normalized = responsible.Trim();
+        if (normalized.Contains('@')) return normalized.ToLowerInvariant();
+
+        try
+        {
+            var client = httpClientFactory.CreateClient("identity");
+            var authorization = httpContext.Request.Headers.Authorization.ToString();
+            if (!string.IsNullOrWhiteSpace(authorization))
+                client.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse(authorization);
+
+            var users = await client.GetFromJsonAsync<List<NotificationUserDto>>("/users/technicians") ?? [];
+            var user = users.FirstOrDefault(x => x.IsActive && x.Name.Equals(normalized, StringComparison.OrdinalIgnoreCase));
+            if (!string.IsNullOrWhiteSpace(user?.Email)) return user.Email.Trim().ToLowerInvariant();
+        }
+        catch
+        {
+            // La decisión no debe fallar si Identity está temporalmente indisponible.
+        }
+
+        return normalized.ToLowerInvariant();
+    }
+}
 
 public static class ProductNotification
 {

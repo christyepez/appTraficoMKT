@@ -97,7 +97,7 @@ export function AppNav() {
   async function loadUnreadNotifications() {
     const session = getSession();
     if (!session?.user.email) return;
-    const data = await api<{ count: number }>(`/api/notification-records/unread-count?email=${encodeURIComponent(session.user.email)}`).catch(() => ({ count: 0 }));
+    const data = await api<{ count: number }>(`/api/notification-records/unread-count?email=${encodeURIComponent(session.user.email)}&name=${encodeURIComponent(session.user.name ?? "")}`).catch(() => ({ count: 0 }));
     setUnreadNotifications(data.count);
   }
 

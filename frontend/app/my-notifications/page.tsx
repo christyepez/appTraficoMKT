@@ -27,7 +27,7 @@ export default function MyNotificationsPage() {
 
   async function load() {
     if (!session?.user.email) return;
-    setItems(await api<NotificationRecord[]>(`/api/notification-records/by-user?email=${encodeURIComponent(session.user.email)}`));
+    setItems(await api<NotificationRecord[]>(`/api/notification-records/by-user?email=${encodeURIComponent(session.user.email)}&name=${encodeURIComponent(session.user.name ?? "")}`));
   }
 
   useEffect(() => {
