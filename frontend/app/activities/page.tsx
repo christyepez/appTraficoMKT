@@ -88,7 +88,7 @@ export default function ActivitiesPage() {
       api<EvidenceItem[]>("/api/evidence"),
       api<Approval[]>("/api/approvals").catch(() => []),
       api<User[]>("/api/identity/users/technicians").catch(() => []),
-      api<{ productId: string }>("/api/activities/next-product-id").catch(() => ({ productId: nextProductId([]) })),
+      api<{ productId: string }>("/api/activities/next-product-id").catch(() => null),
       api<CatalogItem[]>("/api/admin/catalogs/by-type/TipoRequerimiento"),
       api<CatalogItem[]>("/api/admin/catalogs/by-type/PublicoObjetivo"),
       api<CatalogItem[]>("/api/admin/catalogs/by-type/TipoProducto"),
@@ -113,7 +113,7 @@ export default function ActivitiesPage() {
       canalDifusion: canalDifusion.filter((item) => item.isActive),
       kpiPrincipal: kpiPrincipal.filter((item) => item.isActive)
     });
-    setSuggestedProductId(nextProduct.productId);
+    setSuggestedProductId(nextProduct?.productId ?? nextProductId(acts));
     setRequirementId((current) => current && visibleRequirements.some((item) => item.id === current) ? current : "");
   }
 
@@ -307,7 +307,7 @@ export default function ActivitiesPage() {
                 {requirements.map((item) => <option key={item.id} value={item.id}>{item.code} - {item.activityOrEvent}</option>)}
               </select>
             </label>
-            <label className="field"><span>Id producto</span><input name="productId" required pattern="PROD-[0-9]{4,}" title="Use el formato sugerido. Ejemplo: PROD-0001" defaultValue={editing?.productId ?? suggestedProductId} /></label>
+            <label className="field"><span>Id producto</span><input name="productId" required readOnly value={editing?.productId ?? suggestedProductId} title="Código secuencial generado automáticamente" /></label>
             <SelectField label="Tipo requerimiento" name="requirementTypeId" items={catalogs.tipoRequerimiento} defaultValue={editing?.requirementTypeId} />
             <label className="field field-wide"><span>Objetivo estratégico</span><textarea name="strategicObjective" defaultValue={editing?.strategicObjective ?? ""} /></label>
             <SelectField label="Público objetivo" name="targetAudienceId" items={catalogs.publicoObjetivo} defaultValue={editing?.targetAudienceId} />

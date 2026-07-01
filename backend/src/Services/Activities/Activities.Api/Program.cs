@@ -109,13 +109,15 @@ app.MapGet("/activities/summary/{requirementId:guid}", async (Guid requirementId
 
 app.MapPost("/activities", async (CreateActivityRequest request, ActivitiesDbContext db, IHttpClientFactory httpClientFactory) =>
 {
-    if (await db.Activities.AnyAsync(x => !x.IsDeleted && x.ProductId == request.ProductId))
-        return Results.Conflict($"Ya existe un producto con el código {request.ProductId}.");
+    await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
+    await db.Database.ExecuteSqlRawAsync("EXEC sp_getapplock @Resource = 'Activities.ProductIdSequence', @LockMode = 'Exclusive', @LockOwner = 'Transaction', @LockTimeout = 10000");
+    var productIds = await db.Activities.Select(x => x.ProductId).ToListAsync();
+    var generatedProductId = ProductIdSequence.Next(productIds);
 
     CatalogReferenceWriter.UpsertReferences(db, request);
     var activity = new TechnicalActivity(
         request.RequirementId,
-        request.ProductId,
+        generatedProductId,
         request.RequirementTypeId,
         request.RequirementType,
         request.StrategicObjective,
@@ -132,8 +134,9 @@ app.MapPost("/activities", async (CreateActivityRequest request, ActivitiesDbCon
         request.Observations);
     activity.SetStatusReference(request.StatusId ?? WorkflowCatalogIds.ForActivity(activity.Status));
     db.Activities.Add(activity);
-    db.AuditEvents.Add(ActivityAuditEvent.Created(activity.Id, activity.RequirementId, null, activity.Status.ToString(), "Creación del producto", request.ProductResponsible, AuditJson.Build("Productos", "Crear", request.ProductResponsible, request)));
+    db.AuditEvents.Add(ActivityAuditEvent.Created(activity.Id, activity.RequirementId, null, activity.Status.ToString(), "Creación del producto", request.ProductResponsible, AuditJson.Build("Productos", "Crear", request.ProductResponsible, new { ProductId = generatedProductId, Request = request })));
     await db.SaveChangesAsync();
+    await transaction.CommitAsync();
     await RequirementWorkflowSync.StartAnalysisAsync(activity.RequirementId, httpClientFactory);
     return Results.Created($"/activities/{activity.Id}", activity);
 });
@@ -142,14 +145,11 @@ app.MapPut("/activities/{id:guid}", async (Guid id, CreateActivityRequest reques
 {
     var activity = await db.Activities.FindAsync(id);
     if (activity is null) return Results.NotFound();
-    if (await db.Activities.AnyAsync(x => x.Id != id && !x.IsDeleted && x.ProductId == request.ProductId))
-        return Results.Conflict($"Ya existe un producto con el código {request.ProductId}.");
-
     CatalogReferenceWriter.UpsertReferences(db, request);
     var previousStatus = activity.Status.ToString();
     activity.Update(
         request.RequirementId,
-        request.ProductId,
+        activity.ProductId,
         request.RequirementTypeId,
         request.RequirementType,
         request.StrategicObjective,
@@ -994,8 +994,28 @@ public static class ActivitiesSchema
                 ALTER TABLE [Activities] ADD CONSTRAINT [FK_Activities_CatalogReferences_StatusId] FOREIGN KEY ([StatusId]) REFERENCES [CatalogReferences] ([Id]);
             IF EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Activities_ProductId' AND object_id = OBJECT_ID('Activities') AND filter_definition IS NULL)
                 DROP INDEX [IX_Activities_ProductId] ON [Activities];
+
+            DECLARE @MaxProductNumber int = COALESCE((
+                SELECT MAX(TRY_CONVERT(int, SUBSTRING([ProductId], 6, 30)))
+                FROM [Activities]
+                WHERE [ProductId] LIKE 'PROD-%'
+            ), 0);
+
+            ;WITH RankedProducts AS (
+                SELECT [Id], [CreatedAt], ROW_NUMBER() OVER (PARTITION BY UPPER(LTRIM(RTRIM([ProductId]))) ORDER BY [CreatedAt], [Id]) AS DuplicateRank
+                FROM [Activities]
+                WHERE [IsDeleted] = 0
+            ), Duplicates AS (
+                SELECT [Id], ROW_NUMBER() OVER (ORDER BY [CreatedAt], [Id]) AS SequenceOffset
+                FROM RankedProducts
+                WHERE DuplicateRank > 1
+            )
+            UPDATE activity
+            SET [ProductId] = CONCAT('PROD-', FORMAT(@MaxProductNumber + duplicate.SequenceOffset, '0000'))
+            FROM [Activities] activity
+            INNER JOIN Duplicates duplicate ON duplicate.[Id] = activity.[Id];
+
             IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Activities_ProductId' AND object_id = OBJECT_ID('Activities'))
-               AND NOT EXISTS (SELECT [ProductId] FROM [Activities] WHERE [IsDeleted] = 0 GROUP BY [ProductId] HAVING COUNT(*) > 1)
                 CREATE UNIQUE INDEX [IX_Activities_ProductId] ON [Activities] ([ProductId]) WHERE [IsDeleted] = 0;
             """);
 

@@ -71,7 +71,7 @@ export default function LoginPage() {
         window.sessionStorage.removeItem("msal-state");
         window.sessionStorage.removeItem("msal-code-verifier");
         saveSession(session);
-        router.push(session.user.mustChangePassword ? `/change-password?email=${encodeURIComponent(session.user.email)}` : "/dashboard");
+        window.location.replace(session.user.mustChangePassword ? `/change-password?email=${encodeURIComponent(session.user.email)}` : "/dashboard");
       })
       .catch((err: Error) => setMessage(safeLoginMessage(err.message)));
   }, [router]);
@@ -89,7 +89,7 @@ export default function LoginPage() {
       });
       saveSession(session);
       showToast("Inicio de sesión correcto.");
-      router.push(session.user.mustChangePassword ? `/change-password?email=${encodeURIComponent(session.user.email)}` : "/dashboard");
+      window.location.replace(session.user.mustChangePassword ? `/change-password?email=${encodeURIComponent(session.user.email)}` : "/dashboard");
     } catch (error) {
       setMessage(safeLoginMessage(error instanceof Error ? error.message : "No se pudo iniciar sesion."));
     }

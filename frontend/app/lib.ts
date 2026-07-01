@@ -143,11 +143,18 @@ export function getSession(): AuthSession | null {
 
 export function saveSession(session: AuthSession) {
   window.sessionStorage.removeItem("requirements-explicit-logout");
+  window.localStorage.removeItem("requirements-session");
+  window.localStorage.removeItem("requirements-last-toast");
   window.localStorage.setItem("requirements-session", JSON.stringify(session));
+  window.dispatchEvent(new Event("requirements-session-changed"));
 }
 
 export function clearSession() {
   window.localStorage.removeItem("requirements-session");
+  window.localStorage.removeItem("requirements-last-toast");
+  window.sessionStorage.removeItem("msal-state");
+  window.sessionStorage.removeItem("msal-code-verifier");
+  window.dispatchEvent(new Event("requirements-session-changed"));
 }
 
 export function logoutSession() {
@@ -239,7 +246,7 @@ export async function api<T>(url: string, init: RequestInit = {}): Promise<T> {
   if (!headers.has("Content-Type") && init.body && !(init.body instanceof FormData)) headers.set("Content-Type", "application/json");
   if (session?.accessToken) headers.set("Authorization", `Bearer ${session.accessToken}`);
 
-  const response = await fetch(url, { ...init, headers });
+  const response = await fetch(url, { cache: "no-store", ...init, headers });
   if (!response.ok) {
     const text = await response.text();
     const message = friendlyHttpMessage(response.status, text);

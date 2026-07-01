@@ -138,7 +138,7 @@ export function AppNav() {
             title="Cerrar sesión y volver al login"
             onClick={() => {
               logoutSession();
-              router.push("/login");
+              window.location.replace("/login");
             }}
           >
             <LogOut size={16} />
