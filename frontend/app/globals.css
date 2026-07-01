@@ -218,23 +218,32 @@ button:disabled {
 
 .navlinks-horizontal.desktop-collapsed {
   inset: 86px 0 auto 0;
-  max-height: 44px;
+  max-height: 56px;
   padding-top: 10px;
   padding-bottom: 10px;
   box-shadow: none;
 }
 
 .navlinks-horizontal.desktop-collapsed a {
-  visibility: hidden;
-  opacity: 0;
-  transform: translateY(-24px);
-  pointer-events: none;
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  padding: 0;
+  visibility: visible;
+  justify-content: center;
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.navlinks-horizontal.desktop-collapsed a span {
+  display: none;
 }
 
 .navlinks-horizontal.desktop-collapsed ~ .main-grid,
 .navlinks-horizontal.desktop-collapsed ~ .content-shell {
   margin-left: 0;
-  padding-top: 44px;
+  padding-top: 56px;
 }
 
 .navlinks-vertical.desktop-collapsed {
