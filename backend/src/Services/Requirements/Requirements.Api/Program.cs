@@ -123,6 +123,8 @@ app.MapPut("/requirements/{id:guid}", async (Guid id, CreateRequirementRequest r
 {
     var requirement = await db.Requirements.FindAsync(id);
     if (requirement is null || requirement.IsDeleted) return Results.NotFound();
+    if (requirement.Status is RequirementStatus.Completed or RequirementStatus.Rejected)
+        return Results.Conflict(new { message = "No se puede editar un requerimiento finalizado." });
 
     CatalogReferenceWriter.UpsertReferences(db, request);
     var previousStatus = requirement.Status.ToString();

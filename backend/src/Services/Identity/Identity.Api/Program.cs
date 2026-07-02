@@ -380,10 +380,14 @@ public sealed record UpsertBrandSettingsRequest(
     string Warning,
     string Danger,
     string TopbarText,
+    bool UseGradient,
+    string GradientColor,
+    string GradientDirection,
     string FontFamily,
     string MenuMode,
     bool MenuCollapsed,
     bool MobileMenuCollapsed,
+    string MenuOrder,
     string HeaderTextAlign,
     string HeaderTextPosition,
     int BrandVersion,
@@ -507,8 +511,11 @@ public sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> option
             entity.Property(x => x.Warning).HasMaxLength(20);
             entity.Property(x => x.Danger).HasMaxLength(20);
             entity.Property(x => x.TopbarText).HasMaxLength(20);
+            entity.Property(x => x.GradientColor).HasMaxLength(20);
+            entity.Property(x => x.GradientDirection).HasMaxLength(20);
             entity.Property(x => x.FontFamily).HasMaxLength(180);
             entity.Property(x => x.MenuMode).HasMaxLength(20);
+            entity.Property(x => x.MenuOrder).HasMaxLength(1000);
             entity.Property(x => x.MobileMenuCollapsed).HasDefaultValue(true);
             entity.Property(x => x.HeaderTextAlign).HasMaxLength(20);
             entity.Property(x => x.HeaderTextPosition).HasMaxLength(20);
@@ -544,13 +551,17 @@ public sealed class BrandSettings
     public string Warning { get; set; } = "#f6b700";
     public string Danger { get; set; } = "#b42318";
     public string TopbarText { get; set; } = "#ffffff";
+    public bool UseGradient { get; set; }
+    public string GradientColor { get; set; } = "#6d4a8d";
+    public string GradientDirection { get; set; } = "135deg";
     public string FontFamily { get; set; } = "Segoe UI, Arial, Helvetica, sans-serif";
     public string MenuMode { get; set; } = "horizontal";
     public bool MenuCollapsed { get; set; }
     public bool MobileMenuCollapsed { get; set; } = true;
+    public string MenuOrder { get; set; } = string.Join(',', ScreenAccess.All);
     public string HeaderTextAlign { get; set; } = "center";
     public string HeaderTextPosition { get; set; } = "middle";
-    public int BrandVersion { get; set; } = 3;
+    public int BrandVersion { get; set; } = 4;
     public string Logo { get; set; } = "https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/logo-gen-cuad.jpg";
     public string ChatbotIcon { get; set; } = "https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/logo-gen-cuad.jpg";
     public bool ShowPublicRequirementForm { get; set; } = true;
@@ -583,10 +594,14 @@ public sealed class BrandSettings
         Warning = request.Warning.Trim();
         Danger = request.Danger.Trim();
         TopbarText = request.TopbarText.Trim();
+        UseGradient = request.UseGradient;
+        GradientColor = request.GradientColor.Trim();
+        GradientDirection = request.GradientDirection is "to right" or "to bottom" ? request.GradientDirection : "135deg";
         FontFamily = request.FontFamily.Trim();
         MenuMode = request.MenuMode.Equals("vertical", StringComparison.OrdinalIgnoreCase) ? "vertical" : "horizontal";
         MenuCollapsed = request.MenuCollapsed;
         MobileMenuCollapsed = request.MobileMenuCollapsed;
+        MenuOrder = MenuOrdering.Normalize(request.MenuOrder);
         HeaderTextAlign = request.HeaderTextAlign.ToLowerInvariant() switch
         {
             "left" => "left",
@@ -599,7 +614,7 @@ public sealed class BrandSettings
             "bottom" => "bottom",
             _ => "middle"
         };
-        BrandVersion = Math.Max(3, request.BrandVersion);
+        BrandVersion = Math.Max(4, request.BrandVersion);
         Logo = request.Logo.Trim();
         ChatbotIcon = request.ChatbotIcon.Trim();
         ShowPublicRequirementForm = request.ShowPublicRequirementForm;
@@ -628,6 +643,20 @@ public static class ScreenAccess
         if (roleSet.Contains("Coordinador")) screens.UnionWith(["activities", "evidence", "approvals", "metrics", "audit", "my-notifications"]);
         if (roleSet.Contains("Auditor")) screens.UnionWith(["dashboard", "activities", "evidence", "approvals", "metrics", "audit"]);
         return screens.ToArray();
+    }
+}
+
+public static class MenuOrdering
+{
+    public static string Normalize(string? value)
+    {
+        var requested = (value ?? string.Empty)
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(ScreenAccess.All.Contains)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        requested.AddRange(ScreenAccess.All.Where(item => !requested.Contains(item, StringComparer.OrdinalIgnoreCase)));
+        return string.Join(',', requested);
     }
 }
 
@@ -805,10 +834,14 @@ public static class IdentitySchema
                     [Warning] nvarchar(20) NOT NULL,
                     [Danger] nvarchar(20) NOT NULL,
                     [TopbarText] nvarchar(20) NOT NULL,
+                    [UseGradient] bit NOT NULL DEFAULT(0),
+                    [GradientColor] nvarchar(20) NOT NULL DEFAULT('#6d4a8d'),
+                    [GradientDirection] nvarchar(20) NOT NULL DEFAULT('135deg'),
                     [FontFamily] nvarchar(180) NOT NULL,
                     [MenuMode] nvarchar(20) NOT NULL,
                     [MenuCollapsed] bit NOT NULL,
                     [MobileMenuCollapsed] bit NOT NULL DEFAULT(1),
+                    [MenuOrder] nvarchar(1000) NOT NULL DEFAULT('dashboard,activities,evidence,approvals,metrics,audit,admin,users,storage,initial-import,branding,notifications,my-notifications,notification-log'),
                     [HeaderTextAlign] nvarchar(20) NOT NULL DEFAULT('center'),
                     [HeaderTextPosition] nvarchar(20) NOT NULL DEFAULT('middle'),
                     [BrandVersion] int NOT NULL,
@@ -866,6 +899,22 @@ public static class IdentitySchema
             IF COL_LENGTH('BrandSettings', 'ShowProductIdField') IS NULL
             BEGIN
                 ALTER TABLE [BrandSettings] ADD [ShowProductIdField] bit NOT NULL DEFAULT(0)
+            END
+            IF COL_LENGTH('BrandSettings', 'UseGradient') IS NULL
+            BEGIN
+                ALTER TABLE [BrandSettings] ADD [UseGradient] bit NOT NULL DEFAULT(0)
+            END
+            IF COL_LENGTH('BrandSettings', 'GradientColor') IS NULL
+            BEGIN
+                ALTER TABLE [BrandSettings] ADD [GradientColor] nvarchar(20) NOT NULL DEFAULT('#6d4a8d')
+            END
+            IF COL_LENGTH('BrandSettings', 'GradientDirection') IS NULL
+            BEGIN
+                ALTER TABLE [BrandSettings] ADD [GradientDirection] nvarchar(20) NOT NULL DEFAULT('135deg')
+            END
+            IF COL_LENGTH('BrandSettings', 'MenuOrder') IS NULL
+            BEGIN
+                ALTER TABLE [BrandSettings] ADD [MenuOrder] nvarchar(1000) NOT NULL DEFAULT('dashboard,activities,evidence,approvals,metrics,audit,admin,users,storage,initial-import,branding,notifications,my-notifications,notification-log')
             END
             IF NOT EXISTS (SELECT 1 FROM [BrandSettings])
             BEGIN

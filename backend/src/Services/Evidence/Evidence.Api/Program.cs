@@ -79,6 +79,11 @@ app.MapDelete("/evidence/{id:guid}", async (Guid id, EvidenceDbContext db) =>
 {
     var evidence = await db.EvidenceItems.FindAsync(id);
     if (evidence is null || evidence.IsDeleted) return Results.NotFound();
+    var hasDecision = await db.Approvals.AnyAsync(x =>
+        x.ActivityId == evidence.ActivityId &&
+        (x.Decision == ApprovalDecision.Approved || x.Decision == ApprovalDecision.Rejected));
+    if (hasDecision)
+        return Results.Conflict(new { message = "No se puede eliminar un adjunto que forma parte del historial de aprobación." });
 
     evidence.Delete("Sistema");
     await db.SaveChangesAsync();

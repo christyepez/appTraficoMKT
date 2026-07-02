@@ -31,10 +31,14 @@ export type BrandSettings = {
   warning: string;
   danger: string;
   topbarText: string;
+  useGradient: boolean;
+  gradientColor: string;
+  gradientDirection: "to right" | "to bottom" | "135deg";
   fontFamily: string;
   menuMode: "horizontal" | "vertical";
   menuCollapsed: boolean;
   mobileMenuCollapsed: boolean;
+  menuOrder: string;
   headerTextAlign: "left" | "center" | "right";
   headerTextPosition: "top" | "middle" | "bottom";
   brandVersion: number;
@@ -66,10 +70,14 @@ export const defaultBrandSettings: BrandSettings = {
   warning: "#f6b700",
   danger: "#b42318",
   topbarText: "#ffffff",
+  useGradient: false,
+  gradientColor: "#6d4a8d",
+  gradientDirection: "135deg",
   fontFamily: "Segoe UI, Arial, Helvetica, sans-serif",
   menuMode: "horizontal",
   menuCollapsed: false,
   mobileMenuCollapsed: true,
+  menuOrder: "dashboard,activities,evidence,approvals,metrics,audit,admin,users,storage,initial-import,branding,notifications,my-notifications,notification-log",
   headerTextAlign: "center",
   headerTextPosition: "middle",
   brandVersion: 3,
@@ -88,6 +96,9 @@ export const defaultBrandSettings: BrandSettings = {
 export function applyBrandVariables(settings: Partial<BrandSettings>) {
   if (typeof document === "undefined") return;
   const root = document.documentElement;
+  const primary = settings.primary ?? defaultBrandSettings.primary;
+  const gradientColor = settings.gradientColor ?? defaultBrandSettings.gradientColor;
+  const gradientDirection = settings.gradientDirection ?? defaultBrandSettings.gradientDirection;
   Object.entries({
     "--primary": settings.primary,
     "--primary-dark": settings.primaryDark,
@@ -104,7 +115,8 @@ export function applyBrandVariables(settings: Partial<BrandSettings>) {
     "--warning": settings.warning,
     "--danger": settings.danger,
     "--topbar-text": settings.topbarText,
-    "--font-family": settings.fontFamily
+    "--font-family": settings.fontFamily,
+    "--brand-gradient": settings.useGradient ? `linear-gradient(${gradientDirection}, ${primary}, ${gradientColor})` : primary
   }).forEach(([key, value]) => {
     if (value) root.style.setProperty(key, String(value));
   });

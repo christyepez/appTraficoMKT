@@ -155,7 +155,9 @@ app.MapPost("/activities", async (CreateActivityRequest request, ActivitiesDbCon
 app.MapPut("/activities/{id:guid}", async (Guid id, CreateActivityRequest request, ActivitiesDbContext db) =>
 {
     var activity = await db.Activities.FindAsync(id);
-    if (activity is null) return Results.NotFound();
+    if (activity is null || activity.IsDeleted) return Results.NotFound();
+    if (activity.Status == ActivityStatus.Approved)
+        return Results.Conflict(new { message = "No se puede editar un producto completado." });
     CatalogReferenceWriter.UpsertReferences(db, request);
     var previousStatus = activity.Status.ToString();
     activity.Update(
@@ -185,6 +187,8 @@ app.MapDelete("/activities/{id:guid}", async (Guid id, ActivitiesDbContext db) =
 {
     var activity = await db.Activities.FindAsync(id);
     if (activity is null || activity.IsDeleted) return Results.NotFound();
+    if (activity.Status == ActivityStatus.Approved)
+        return Results.Conflict(new { message = "No se puede eliminar un producto completado." });
 
     var previousStatus = activity.Status.ToString();
     activity.Delete("Sistema");
@@ -195,7 +199,11 @@ app.MapDelete("/activities/{id:guid}", async (Guid id, ActivitiesDbContext db) =
 
 app.MapDelete("/activities/by-requirement/{requirementId:guid}", async (Guid requirementId, ActivitiesDbContext db) =>
 {
-    var activities = await db.Activities.Where(x => x.RequirementId == requirementId && !x.IsDeleted).ToListAsync();
+    var activities = await db.Activities
+        .Where(x => x.RequirementId == requirementId && !x.IsDeleted && x.Status != ActivityStatus.Approved)
+        .ToListAsync();
+    var blocked = await db.Activities
+        .CountAsync(x => x.RequirementId == requirementId && !x.IsDeleted && x.Status == ActivityStatus.Approved);
     foreach (var activity in activities)
     {
         var previousStatus = activity.Status.ToString();
@@ -204,7 +212,7 @@ app.MapDelete("/activities/by-requirement/{requirementId:guid}", async (Guid req
     }
 
     await db.SaveChangesAsync();
-    return Results.Ok(new { deleted = activities.Count });
+    return Results.Ok(new { deleted = activities.Count, blocked });
 });
 
 app.MapPatch("/activities/{id:guid}/start", async (Guid id, ActivitiesDbContext db, IHttpClientFactory httpClientFactory) =>

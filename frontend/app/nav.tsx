@@ -33,6 +33,7 @@ export function AppNav() {
   const [headerTextAlign, setHeaderTextAlign] = useState<"left" | "center" | "right">("center");
   const [headerTextPosition, setHeaderTextPosition] = useState<"top" | "middle" | "bottom">("middle");
   const [menuMode, setMenuMode] = useState<"horizontal" | "vertical">("horizontal");
+  const [menuOrder, setMenuOrder] = useState(defaultBrandSettings.menuOrder);
   const [desktopMenuVisible, setDesktopMenuVisible] = useState(true);
   const [mobileMenuExpanded, setMobileMenuExpanded] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -88,6 +89,7 @@ export function AppNav() {
     setBrandTitle(currentBrand.title);
     setHeaderTextAlign(currentBrand.headerTextAlign ?? "center");
     setHeaderTextPosition(currentBrand.headerTextPosition ?? "middle");
+    setMenuOrder(currentBrand.menuOrder);
     const session = getSession();
     const preferredMenuMode = session?.user.menuMode ?? currentBrand.menuMode;
     const preferredMenuCollapsed = Boolean(session?.user.menuCollapsed ?? currentBrand.menuCollapsed);
@@ -160,7 +162,7 @@ export function AppNav() {
               ? menuExpanded ? <ChevronsUp size={18} /> : <ChevronsDown size={18} />
               : menuExpanded ? <ChevronsLeft size={18} /> : <ChevronsRight size={18} />}
           </button>
-          {items.map((item) => {
+          {orderedItems(menuOrder).map((item) => {
             const Icon = item.icon;
             const session = getSession();
             const key = item.href.replace("/", "");
@@ -174,6 +176,15 @@ export function AppNav() {
       </nav>
     </>
   );
+}
+
+function orderedItems(value: string) {
+  const order = value.split(",").filter(Boolean);
+  return [...items].sort((a, b) => {
+    const aIndex = order.indexOf(a.href.slice(1));
+    const bIndex = order.indexOf(b.href.slice(1));
+    return (aIndex < 0 ? Number.MAX_SAFE_INTEGER : aIndex) - (bIndex < 0 ? Number.MAX_SAFE_INTEGER : bIndex);
+  });
 }
 
 function firstAllowedPath(session: NonNullable<ReturnType<typeof getSession>>) {

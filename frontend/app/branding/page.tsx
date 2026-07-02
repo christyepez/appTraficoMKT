@@ -2,17 +2,18 @@
 
 import { AppNav } from "../nav";
 import { api, applyBrandVariables, defaultBrandSettings, showToast, t, type BrandSettings } from "../lib";
-import { ClipboardList, Image as ImageIcon, ImageUp, LogIn, Menu, MousePointer2, Palette, RotateCcw, Save, Type, X } from "lucide-react";
+import { ClipboardList, Image as ImageIcon, ImageUp, ListOrdered, LogIn, Menu, MousePointer2, Palette, RotateCcw, Save, Type, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
-type BrandCategory = "textos" | "colores" | "botones" | "tipografia" | "cabecera" | "formularios" | "logo" | "login";
+type BrandCategory = "textos" | "colores" | "botones" | "tipografia" | "cabecera" | "menu" | "formularios" | "logo" | "login";
 
 const categoryMeta: Array<{ id: BrandCategory; title: string; description: string; icon: typeof Type }> = [
   { id: "textos", title: "Textos", description: "Título y subtítulo institucional.", icon: Type },
   { id: "colores", title: "Colores", description: "Paleta visual de la aplicación.", icon: Palette },
   { id: "botones", title: "Botones", description: "Colores de acciones y estados.", icon: MousePointer2 },
   { id: "tipografia", title: "Tipografía", description: "Fuente principal del sistema.", icon: Type },
-  { id: "cabecera", title: "Cabecera y menú", description: "Alineación, menú y plegado.", icon: Menu },
+  { id: "cabecera", title: "Cabecera", description: "Alineación y ubicación del texto.", icon: Menu },
+  { id: "menu", title: "Administrar menú", description: "Presentación y orden de las opciones.", icon: ListOrdered },
   { id: "formularios", title: "Formularios", description: "Visibilidad de campos administrados por el sistema.", icon: ClipboardList },
   { id: "logo", title: "Logo e imágenes", description: "Logo principal e icono del robot.", icon: ImageIcon },
   { id: "login", title: "Login público", description: "Formulario externo y robot Puma.", icon: LogIn }
@@ -155,6 +156,12 @@ export default function BrandingPage() {
                     <ColorField label="Texto secundario" value={settings.muted} onChange={(muted) => setSettings({ ...settings, muted })} />
                     <ColorField label="Bordes" value={settings.line} onChange={(line) => setSettings({ ...settings, line })} />
                     <ColorField label="Texto barra superior" value={settings.topbarText} onChange={(topbarText) => setSettings({ ...settings, topbarText })} />
+                    <label className="check-field field-wide"><input type="checkbox" checked={settings.useGradient} onChange={(event) => setSettings({ ...settings, useGradient: event.target.checked })} /> Aplicar degradado basado en el color principal</label>
+                    {settings.useGradient && <>
+                      <ColorField label="Color final del degradado" value={settings.gradientColor} onChange={(gradientColor) => setSettings({ ...settings, gradientColor })} />
+                      <label className="field"><span>Dirección del degradado</span><select value={settings.gradientDirection} onChange={(event) => setSettings({ ...settings, gradientDirection: event.target.value as BrandSettings["gradientDirection"] })}><option value="135deg">Diagonal</option><option value="to right">Horizontal</option><option value="to bottom">Vertical</option></select></label>
+                      <div className="gradient-preview field-wide" style={{ background: `linear-gradient(${settings.gradientDirection}, ${settings.primary}, ${settings.gradientColor})` }}>Vista previa del degradado</div>
+                    </>}
                   </>
                 )}
                 {activeCategory === "botones" && (
@@ -180,11 +187,19 @@ export default function BrandingPage() {
                 )}
                 {activeCategory === "cabecera" && (
                   <>
-                    <label className="field"><span>Modo de menú</span><select value={settings.menuMode} onChange={(event) => setSettings({ ...settings, menuMode: event.target.value as BrandSettings["menuMode"] })}><option value="horizontal">Horizontal bajo cabecera</option><option value="vertical">Vertical lateral</option></select></label>
                     <label className="field"><span>Alineación texto cabecera</span><select value={settings.headerTextAlign} onChange={(event) => setSettings({ ...settings, headerTextAlign: event.target.value as BrandSettings["headerTextAlign"] })}><option value="center">Centrado</option><option value="left">Izquierda</option><option value="right">Derecha</option></select></label>
                     <label className="field"><span>Ubicación vertical texto</span><select value={settings.headerTextPosition} onChange={(event) => setSettings({ ...settings, headerTextPosition: event.target.value as BrandSettings["headerTextPosition"] })}><option value="middle">Centro</option><option value="top">Arriba</option><option value="bottom">Abajo</option></select></label>
+                  </>
+                )}
+                {activeCategory === "menu" && (
+                  <>
+                    <label className="field"><span>Modo de menú</span><select value={settings.menuMode} onChange={(event) => setSettings({ ...settings, menuMode: event.target.value as BrandSettings["menuMode"] })}><option value="horizontal">Horizontal bajo cabecera</option><option value="vertical">Vertical lateral</option></select></label>
                     {settings.menuMode === "vertical" && <label className="check-field"><input type="checkbox" checked={settings.menuCollapsed} onChange={(event) => setSettings({ ...settings, menuCollapsed: event.target.checked })} /> Menú vertical plegado</label>}
                     <label className="check-field"><input type="checkbox" checked={settings.mobileMenuCollapsed} onChange={(event) => setSettings({ ...settings, mobileMenuCollapsed: event.target.checked })} /> Menú móvil lateral plegado por defecto</label>
+                    <div className="menu-order-grid field-wide">
+                      <div className="menu-order-row menu-order-head"><strong>Opción</strong><strong>Ruta</strong><strong>Orden</strong></div>
+                      {orderedMenuOptions(settings.menuOrder).map((item, index) => <div className="menu-order-row" key={item.key}><span>{item.label}</span><code>/{item.key}</code><input aria-label={`Orden de ${item.label}`} type="number" min={1} max={menuOptions.length} value={index + 1} onChange={(event) => setSettings({ ...settings, menuOrder: moveMenuOption(settings.menuOrder, item.key, Number(event.target.value) - 1) })} /></div>)}
+                    </div>
                   </>
                 )}
                 {activeCategory === "formularios" && (
@@ -231,10 +246,11 @@ function categoryDescription(category: BrandCategory) {
 function categorySummary(category: BrandCategory, settings: BrandSettings) {
   const summaries: Record<BrandCategory, string> = {
     textos: settings.title,
-    colores: `${settings.primary} | ${settings.accent}`,
+    colores: `${settings.primary} | ${settings.accent}${settings.useGradient ? " | degradado" : ""}`,
     botones: `Principal ${settings.primary} | Éxito ${settings.success}`,
     tipografia: settings.fontFamily.split(",")[0],
-    cabecera: `${settings.menuMode} | ${settings.headerTextAlign} | móvil ${settings.mobileMenuCollapsed ? "plegado" : "abierto"}`,
+    cabecera: `${settings.headerTextAlign} | ${settings.headerTextPosition}`,
+    menu: `${settings.menuMode} | ${menuOptions.length} opciones ordenadas`,
     formularios: settings.showProductIdField ? "Id producto visible" : "Id producto oculto",
     logo: settings.logo.startsWith("data:") ? "Logo cargado" : "URL configurada",
     login: [
@@ -246,6 +262,24 @@ function categorySummary(category: BrandCategory, settings: BrandSettings) {
     ].filter(Boolean).join(" | ") || "Oculto"
   };
   return summaries[category];
+}
+
+const menuOptions = [
+  ["dashboard", "Requerimientos"], ["activities", "Productos"], ["evidence", "Adjuntos"], ["approvals", "Aprobaciones"],
+  ["metrics", "Métricas"], ["audit", "Auditorías"], ["admin", "Administración"], ["users", "Usuarios"],
+  ["storage", "Archivos"], ["initial-import", "Carga inicial"], ["branding", "Manejo Marca"], ["notifications", "Notificaciones"],
+  ["my-notifications", "Mis notificaciones"], ["notification-log", "Registro notificaciones"]
+].map(([key, label]) => ({ key, label }));
+
+function orderedMenuOptions(value: string) {
+  const order = value.split(",").filter(Boolean);
+  return [...menuOptions].sort((a, b) => order.indexOf(a.key) - order.indexOf(b.key));
+}
+
+function moveMenuOption(value: string, key: string, target: number) {
+  const keys = orderedMenuOptions(value).map((item) => item.key).filter((item) => item !== key);
+  keys.splice(Math.max(0, Math.min(target, keys.length)), 0, key);
+  return keys.join(",");
 }
 
 function ColorField({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {

@@ -227,7 +227,7 @@ export default function EvidencePage() {
                               </div>
                               <div className="actions">
                                 <a className="icon-button" href={item.storageUrl} target="_blank" rel="noreferrer" title="Abrir adjunto"><Eye size={16} /></a>
-                                <button className="icon-button danger" title="Eliminar lógicamente la evidencia" onClick={() => removeEvidence(item.id)}><Trash2 size={16} /></button>
+                                <button className="icon-button danger" disabled={hasApprovalDecision(activityApprovals)} title={hasApprovalDecision(activityApprovals) ? "El adjunto pertenece al tracking de una aprobación y no puede eliminarse" : "Eliminar lógicamente la evidencia"} onClick={() => removeEvidence(item.id)}><Trash2 size={16} /></button>
                               </div>
                             </div>
                             <EvidencePreview item={item} />
@@ -283,6 +283,10 @@ function toggleExpanded(id: string, setExpandedProducts: (value: string[] | ((cu
 
 function isFinalActivity(status: string) {
   return ["Approved", "Completed"].includes(status);
+}
+
+function hasApprovalDecision(approvals: Approval[]) {
+  return approvals.some((item) => ["Approved", "Rejected"].includes(item.decision));
 }
 
 function filterRequirementsForSession(requirements: Requirement[], session: ReturnType<typeof getSession>) {
