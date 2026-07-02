@@ -52,13 +52,24 @@ export default function EvidencePage() {
     setActivities(visibleActivities);
     setEvidence(evs.filter((item) => visibleActivityIds.has(item.activityId)));
     setApprovals(aps.filter((item) => visibleActivityIds.has(item.activityId)));
-    setActivityId((current) => current || visibleActivities[0]?.id || "");
+    const attachableActivities = visibleActivities.filter((item) => !isFinalActivity(item.status));
+    setActivityId((current) => attachableActivities.some((item) => item.id === current) ? current : attachableActivities[0]?.id || "");
   }
 
   useEffect(() => {
     const timer = window.setInterval(() => load().catch(() => undefined), 10000);
+    const refresh = () => load().catch(() => undefined);
+    const refreshWhenVisible = () => { if (document.visibilityState === "visible") refresh(); };
+    window.addEventListener("focus", refresh);
+    window.addEventListener("pageshow", refresh);
+    document.addEventListener("visibilitychange", refreshWhenVisible);
     load().catch(() => location.assign("/login"));
-    return () => window.clearInterval(timer);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener("focus", refresh);
+      window.removeEventListener("pageshow", refresh);
+      document.removeEventListener("visibilitychange", refreshWhenVisible);
+    };
   }, []);
 
   function pickFile(nextFile?: File | null) {
@@ -74,6 +85,11 @@ export default function EvidencePage() {
   async function create(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (isUploading) return;
+    const selectedActivity = activities.find((item) => item.id === activityId);
+    if (!selectedActivity || isFinalActivity(selectedActivity.status)) {
+      showToast("El producto está finalizado y no admite nuevos adjuntos.", "error");
+      return;
+    }
     if ((attachmentMode === "file" && !file) || (attachmentMode === "url" && !externalUrl.trim())) {
       showToast("Complete el origen del adjunto.", "error");
       return;
@@ -125,7 +141,7 @@ export default function EvidencePage() {
             <label className="field">
               <span>Actividad</span>
               <select value={activityId} onChange={(event) => setActivityId(event.target.value)} required>
-                {activities.map((item) => <option key={item.id} value={item.id}>{item.productId} - {item.productType}</option>)}
+                {activities.filter((item) => !isFinalActivity(item.status)).map((item) => <option key={item.id} value={item.id}>{item.productId} - {item.productType}</option>)}
               </select>
             </label>
             <label className="field"><span>Origen del adjunto</span><select value={attachmentMode} onChange={(event) => { setAttachmentMode(event.target.value as "file" | "url"); setFile(null); setPreviewUrl(""); setExternalUrl(""); }}><option value="file">Subir archivo</option><option value="url">Ingresar URL</option></select></label>
@@ -168,7 +184,7 @@ export default function EvidencePage() {
               <p>{evidence.length} adjuntos registrados sobre {activities.length} productos visibles.</p>
             </div>
             <div className="actions">
-              <button className="icon-button" title="Adjuntar nueva evidencia" onClick={() => setIsUploadOpen(true)}><Plus size={16} /></button>
+              <button className="icon-button" title="Adjuntar nueva evidencia" disabled={!activities.some((item) => !isFinalActivity(item.status))} onClick={() => setIsUploadOpen(true)}><Plus size={16} /></button>
               <button className="button secondary" title="Actualizar evidencias y aprobaciones" onClick={load}><RefreshCw size={16} /> Actualizar</button>
             </div>
           </div>
@@ -192,7 +208,7 @@ export default function EvidencePage() {
                       <div className="card-meta">
                         <span className="badge">{files.length} adjunto(s)</span>
                         <span className="badge">{activityApprovals.length} aprobación(es)</span>
-                        <button className="icon-button" title="Adjuntar evidencia a este producto" onClick={() => { setActivityId(activity.id); setIsUploadOpen(true); }}><Plus size={16} /></button>
+                        <button className={isFinalActivity(activity.status) ? "icon-button success" : "icon-button"} disabled={isFinalActivity(activity.status)} title={isFinalActivity(activity.status) ? "Producto finalizado: no admite nuevos adjuntos" : "Adjuntar evidencia a este producto"} onClick={() => { setActivityId(activity.id); setIsUploadOpen(true); }}><Plus size={16} /></button>
                       </div>
                     </div>
                     <div className="detail-grid compact-detail-grid">
@@ -263,6 +279,10 @@ function activityLabel(activities: Activity[], activityId: string) {
 
 function toggleExpanded(id: string, setExpandedProducts: (value: string[] | ((current: string[]) => string[])) => void) {
   setExpandedProducts((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
+}
+
+function isFinalActivity(status: string) {
+  return ["Approved", "Completed"].includes(status);
 }
 
 function filterRequirementsForSession(requirements: Requirement[], session: ReturnType<typeof getSession>) {

@@ -4,11 +4,13 @@ import { AppNav } from "../nav";
 import { Activity, NamedCatalog, Requirement, api, getSession, showToast } from "../lib";
 import { PaginationControls, paginate, type PaginationState } from "../pagination";
 import { Highlight } from "../search";
-import { Edit3, FileCheck2, Play, Plus, RefreshCw, Save, Search, Trash2, X } from "lucide-react";
+import { Edit3, Eye, FileCheck2, Play, Plus, RefreshCw, Save, Search, Trash2, X } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
 
 export default function DashboardPage() {
   const [requirements, setRequirements] = useState<Requirement[]>([]);
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [selectedRequirement, setSelectedRequirement] = useState<Requirement | null>(null);
   const [message, setMessage] = useState("");
   const [editing, setEditing] = useState<Requirement | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
@@ -32,7 +34,10 @@ export default function DashboardPage() {
       api<NamedCatalog[]>("/api/admin/campuses").catch(() => []),
       api<NamedCatalog[]>("/api/admin/catalogs/by-type/FormatoEvento").catch(() => [])
     ]);
-    setRequirements(filterRequirementsForSession(reqs, acts, session));
+    const visibleRequirements = filterRequirementsForSession(reqs, acts, session);
+    const visibleRequirementIds = new Set(visibleRequirements.map((item) => item.id));
+    setRequirements(visibleRequirements);
+    setActivities(acts.filter((item) => visibleRequirementIds.has(item.requirementId)));
     setFaculties(facultyData.filter((item) => item.isActive));
     setCareers(careerData.filter((item) => item.isActive));
     setCampuses(campusData.filter((item) => item.isActive));
@@ -41,8 +46,18 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const timer = window.setInterval(() => load().catch(() => undefined), 15000);
+    const refresh = () => load().catch(() => undefined);
+    const refreshWhenVisible = () => { if (document.visibilityState === "visible") refresh(); };
+    window.addEventListener("focus", refresh);
+    window.addEventListener("pageshow", refresh);
+    document.addEventListener("visibilitychange", refreshWhenVisible);
     load().catch(() => location.assign("/login"));
-    return () => window.clearInterval(timer);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener("focus", refresh);
+      window.removeEventListener("pageshow", refresh);
+      document.removeEventListener("visibilitychange", refreshWhenVisible);
+    };
   }, []);
 
   async function save(event: FormEvent<HTMLFormElement>) {
@@ -157,6 +172,35 @@ export default function DashboardPage() {
             </section>
           </div>
         )}
+        {selectedRequirement && (
+          <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="related-products-title">
+            <section className="modal-panel modal-panel-wide">
+              <div className="card-head">
+                <div className="compact-title">
+                  <h2 id="related-products-title">Productos relacionados</h2>
+                  <p>{selectedRequirement.code} - {selectedRequirement.activityOrEvent}</p>
+                </div>
+                <button className="icon-button" type="button" title="Cerrar productos relacionados" onClick={() => setSelectedRequirement(null)}><X size={16} /></button>
+              </div>
+              <div className="table-scroll top-space">
+                <table className="data-table related-products-table">
+                  <thead><tr><th>Producto</th><th>Responsable</th><th>Entrega</th><th>Estado</th></tr></thead>
+                  <tbody>
+                    {activities.filter((item) => item.requirementId === selectedRequirement.id).map((item) => (
+                      <tr key={item.id}>
+                        <td><strong>{item.productId}</strong><span>{item.productType}</span></td>
+                        <td>{item.productResponsible}</td>
+                        <td>{item.productDeliveryDate}</td>
+                        <td><span className="badge">{activityStatusLabel(item.status)}</span></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {activities.every((item) => item.requirementId !== selectedRequirement.id) && <div className="empty top-space">Este requerimiento todavía no tiene productos relacionados.</div>}
+            </section>
+          </div>
+        )}
         <section className="panel">
           <div className="card-head">
             <h2>Seguimiento de requerimientos</h2>
@@ -182,6 +226,7 @@ export default function DashboardPage() {
                   <div className="card-meta">
                     <span className="badge">{requirementStatusLabel(item.status)}</span>
                     <div className="actions">
+                      <button className="icon-button" title="Ver productos relacionados" onClick={() => setSelectedRequirement(item)}><Eye size={16} /></button>
                       <button className={workflowButtonClass(requirementStepState(item, "analysis"))} disabled={requirementStepState(item, "analysis") !== "ready"} title="Cambiar requerimiento a análisis" onClick={() => patch(`/api/requirements/${item.id}/analysis`)}><Search size={16} /></button>
                       <button className={workflowButtonClass(requirementStepState(item, "execution"))} disabled={requirementStepState(item, "execution") !== "ready"} title="Cambiar requerimiento a ejecución" onClick={() => patch(`/api/requirements/${item.id}/execution`)}><Play size={16} /></button>
                       <button className={workflowButtonClass(requirementStepState(item, "complete"))} disabled={requirementStepState(item, "complete") !== "ready"} title="Completar requerimiento si todos los productos están aprobados" onClick={() => patch(`/api/requirements/${item.id}/complete`)}><FileCheck2 size={16} /></button>
@@ -242,6 +287,18 @@ function requirementStatusLabel(status: string) {
     PendingApproval: "Pendiente de aprobación",
     Completed: "Finalizado",
     Rejected: "Finalizado rechazado"
+  };
+  return labels[status] ?? status;
+}
+
+function activityStatusLabel(status: string) {
+  const labels: Record<string, string> = {
+    Todo: "Por hacer",
+    InProgress: "En progreso",
+    EvidenceAttached: "Evidencia adjunta",
+    PendingApproval: "Pendiente de aprobación",
+    Approved: "Aprobado",
+    Rejected: "Rechazado"
   };
   return labels[status] ?? status;
 }
