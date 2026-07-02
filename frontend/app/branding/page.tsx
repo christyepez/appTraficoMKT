@@ -119,7 +119,7 @@ export default function BrandingPage() {
             <h2>{t("Vista previa")}</h2>
             <span className="badge"><ImageUp size={14} /> Logo, colores, textos y botones</span>
           </div>
-          <article className="brand-preview top-space" style={{ borderColor: settings.accent, background: settings.primary }}>
+          <article className="brand-preview top-space" style={{ borderColor: settings.accent, background: settings.headerUseGradient ? `linear-gradient(${settings.headerGradientDirection}, ${settings.headerColor}, ${settings.headerGradientColor})` : settings.headerColor }}>
             <img src={settings.logo} alt="Logo institucional" />
             <div>
               {settings.showHeaderTitle && <h3 style={{ fontSize: settings.headerTitleSize, fontWeight: settings.headerTitleWeight }}>{settings.title}</h3>}
@@ -169,8 +169,6 @@ export default function BrandingPage() {
                 )}
                 {activeCategory === "colores" && (
                   <>
-                    <ColorField label="Color principal" value={settings.primary} onChange={(primary) => setSettings({ ...settings, primary })} />
-                    <ColorField label="Color principal oscuro" value={settings.primaryDark} onChange={(primaryDark) => setSettings({ ...settings, primaryDark })} />
                     <ColorField label="Amarillo acento" value={settings.accent} onChange={(accent) => setSettings({ ...settings, accent })} />
                     <ColorField label="Fondo aplicación" value={settings.background} onChange={(background) => setSettings({ ...settings, background })} />
                     <ColorField label="Paneles y tarjetas" value={settings.surface} onChange={(surface) => setSettings({ ...settings, surface })} />
@@ -198,7 +196,15 @@ export default function BrandingPage() {
                 )}
                 {activeCategory === "botones" && (
                   <>
+                    <ColorField label="Botón principal" value={settings.primary} onChange={(primary) => setSettings({ ...settings, primary })} />
+                    <ColorField label="Botón principal al pasar el cursor" value={settings.primaryDark} onChange={(primaryDark) => setSettings({ ...settings, primaryDark })} />
                     <ColorField label="Texto botones" value={settings.buttonText} onChange={(buttonText) => setSettings({ ...settings, buttonText })} />
+                    <label className="check-field"><input type="checkbox" checked={settings.useGradient} onChange={(event) => setSettings({ ...settings, useGradient: event.target.checked })} /> Usar degradado en botón principal</label>
+                    {settings.useGradient && <>
+                      <ColorField label="Color final botón principal" value={settings.gradientColor} onChange={(gradientColor) => setSettings({ ...settings, gradientColor })} />
+                      <GradientDirectionField label="Dirección botón principal" value={settings.gradientDirection} onChange={(gradientDirection) => setSettings({ ...settings, gradientDirection })} />
+                      <div className="gradient-preview field-wide" style={{ background: `linear-gradient(${settings.gradientDirection}, ${settings.primary}, ${settings.gradientColor})` }}>Vista previa del botón principal</div>
+                    </>}
                     <ColorField label="Botón secundario" value={settings.secondary} onChange={(secondary) => setSettings({ ...settings, secondary })} />
                     <ColorField label="Texto botón secundario" value={settings.secondaryText} onChange={(secondaryText) => setSettings({ ...settings, secondaryText })} />
                     <ColorField label="Éxito" value={settings.success} onChange={(success) => setSettings({ ...settings, success })} />
@@ -279,7 +285,7 @@ function categorySummary(category: BrandCategory, settings: BrandSettings) {
   const summaries: Record<BrandCategory, string> = {
     textos: `${settings.showHeaderTitle ? settings.title : "Título oculto"} | ${settings.showHeaderSubtitle ? settings.subtitle : "Subtítulo oculto"}`,
     colores: `Cabecera ${settings.headerUseGradient ? "degradado" : settings.headerColor} | Menú ${settings.menuUseGradient ? "degradado" : settings.menuColor}`,
-    botones: `Principal ${settings.primary} | Éxito ${settings.success}`,
+    botones: `Principal ${settings.useGradient ? "degradado" : settings.primary} | Éxito ${settings.success}`,
     tipografia: settings.fontFamily.split(",")[0],
     cabecera: `${settings.headerTextAlign} | ${settings.headerTextPosition}`,
     menu: `${settings.menuMode} | ${menuOptions.length} opciones ordenadas`,

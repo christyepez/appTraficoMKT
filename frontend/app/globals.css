@@ -546,7 +546,7 @@ mark {
   padding: 0 14px;
   border-radius: 6px;
   color: var(--button-text);
-  background: var(--brand-gradient, var(--primary));
+  background: var(--button-primary-background, var(--primary));
 }
 
 .button:hover {

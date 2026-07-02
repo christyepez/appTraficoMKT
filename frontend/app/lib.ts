@@ -146,7 +146,7 @@ export function applyBrandVariables(settings: Partial<BrandSettings>) {
     "--danger": settings.danger,
     "--topbar-text": settings.topbarText,
     "--font-family": settings.fontFamily,
-    "--brand-gradient": settings.useGradient ? `linear-gradient(${gradientDirection}, ${primary}, ${gradientColor})` : primary,
+    "--button-primary-background": settings.useGradient ? `linear-gradient(${gradientDirection}, ${primary}, ${gradientColor})` : primary,
     "--header-background": settings.headerUseGradient ? `linear-gradient(${settings.headerGradientDirection ?? "135deg"}, ${headerColor}, ${settings.headerGradientColor ?? headerColor})` : headerColor,
     "--menu-background": settings.menuUseGradient ? `linear-gradient(${settings.menuGradientDirection ?? "135deg"}, ${menuColor}, ${settings.menuGradientColor ?? menuColor})` : menuColor,
     "--header-title-size": `${settings.headerTitleSize ?? defaultBrandSettings.headerTitleSize}px`,
