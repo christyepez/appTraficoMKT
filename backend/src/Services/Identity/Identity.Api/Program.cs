@@ -398,6 +398,12 @@ public sealed record UpsertBrandSettingsRequest(
     string MenuOrder,
     string HeaderTextAlign,
     string HeaderTextPosition,
+    bool ShowHeaderTitle,
+    bool ShowHeaderSubtitle,
+    int HeaderTitleSize,
+    int HeaderSubtitleSize,
+    string HeaderTitleWeight,
+    string HeaderSubtitleWeight,
     int BrandVersion,
     string Logo,
     string ChatbotIcon,
@@ -533,6 +539,8 @@ public sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> option
             entity.Property(x => x.MobileMenuCollapsed).HasDefaultValue(true);
             entity.Property(x => x.HeaderTextAlign).HasMaxLength(20);
             entity.Property(x => x.HeaderTextPosition).HasMaxLength(20);
+            entity.Property(x => x.HeaderTitleWeight).HasMaxLength(10);
+            entity.Property(x => x.HeaderSubtitleWeight).HasMaxLength(10);
             entity.Property(x => x.Logo).HasMaxLength(1200);
             entity.Property(x => x.ChatbotIcon).HasMaxLength(1200);
             entity.Property(x => x.ShowPublicRequirementForm).HasDefaultValue(true);
@@ -583,6 +591,12 @@ public sealed class BrandSettings
     public string MenuOrder { get; set; } = string.Join(',', ScreenAccess.All);
     public string HeaderTextAlign { get; set; } = "center";
     public string HeaderTextPosition { get; set; } = "middle";
+    public bool ShowHeaderTitle { get; set; } = true;
+    public bool ShowHeaderSubtitle { get; set; } = true;
+    public int HeaderTitleSize { get; set; } = 18;
+    public int HeaderSubtitleSize { get; set; } = 12;
+    public string HeaderTitleWeight { get; set; } = "700";
+    public string HeaderSubtitleWeight { get; set; } = "400";
     public int BrandVersion { get; set; } = 4;
     public string Logo { get; set; } = "https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/logo-gen-cuad.jpg";
     public string ChatbotIcon { get; set; } = "https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/logo-gen-cuad.jpg";
@@ -644,6 +658,12 @@ public sealed class BrandSettings
             "bottom" => "bottom",
             _ => "middle"
         };
+        ShowHeaderTitle = request.ShowHeaderTitle;
+        ShowHeaderSubtitle = request.ShowHeaderSubtitle;
+        HeaderTitleSize = Math.Clamp(request.HeaderTitleSize, 14, 32);
+        HeaderSubtitleSize = Math.Clamp(request.HeaderSubtitleSize, 10, 24);
+        HeaderTitleWeight = NormalizeFontWeight(request.HeaderTitleWeight, "700");
+        HeaderSubtitleWeight = NormalizeFontWeight(request.HeaderSubtitleWeight, "400");
         BrandVersion = Math.Max(4, request.BrandVersion);
         Logo = request.Logo.Trim();
         ChatbotIcon = request.ChatbotIcon.Trim();
@@ -659,6 +679,7 @@ public sealed class BrandSettings
     }
 
     private static string NormalizeGradientDirection(string value) => value is "to right" or "to bottom" ? value : "135deg";
+    private static string NormalizeFontWeight(string value, string fallback) => value is "400" or "600" or "700" ? value : fallback;
 }
 
 public static class ScreenAccess
@@ -884,6 +905,12 @@ public static class IdentitySchema
                     [MenuOrder] nvarchar(1000) NOT NULL DEFAULT('dashboard,activities,evidence,approvals,metrics,audit,admin,users,storage,initial-import,branding,notifications,my-notifications,notification-log'),
                     [HeaderTextAlign] nvarchar(20) NOT NULL DEFAULT('center'),
                     [HeaderTextPosition] nvarchar(20) NOT NULL DEFAULT('middle'),
+                    [ShowHeaderTitle] bit NOT NULL DEFAULT(1),
+                    [ShowHeaderSubtitle] bit NOT NULL DEFAULT(1),
+                    [HeaderTitleSize] int NOT NULL DEFAULT(18),
+                    [HeaderSubtitleSize] int NOT NULL DEFAULT(12),
+                    [HeaderTitleWeight] nvarchar(10) NOT NULL DEFAULT('700'),
+                    [HeaderSubtitleWeight] nvarchar(10) NOT NULL DEFAULT('400'),
                     [BrandVersion] int NOT NULL,
                     [Logo] nvarchar(1200) NOT NULL,
                     [ChatbotIcon] nvarchar(1200) NOT NULL DEFAULT('https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/logo-gen-cuad.jpg'),
@@ -907,6 +934,30 @@ public static class IdentitySchema
             IF COL_LENGTH('BrandSettings', 'HeaderTextPosition') IS NULL
             BEGIN
                 ALTER TABLE [BrandSettings] ADD [HeaderTextPosition] nvarchar(20) NOT NULL DEFAULT('middle')
+            END
+            IF COL_LENGTH('BrandSettings', 'ShowHeaderTitle') IS NULL
+            BEGIN
+                ALTER TABLE [BrandSettings] ADD [ShowHeaderTitle] bit NOT NULL DEFAULT(1)
+            END
+            IF COL_LENGTH('BrandSettings', 'ShowHeaderSubtitle') IS NULL
+            BEGIN
+                ALTER TABLE [BrandSettings] ADD [ShowHeaderSubtitle] bit NOT NULL DEFAULT(1)
+            END
+            IF COL_LENGTH('BrandSettings', 'HeaderTitleSize') IS NULL
+            BEGIN
+                ALTER TABLE [BrandSettings] ADD [HeaderTitleSize] int NOT NULL DEFAULT(18)
+            END
+            IF COL_LENGTH('BrandSettings', 'HeaderSubtitleSize') IS NULL
+            BEGIN
+                ALTER TABLE [BrandSettings] ADD [HeaderSubtitleSize] int NOT NULL DEFAULT(12)
+            END
+            IF COL_LENGTH('BrandSettings', 'HeaderTitleWeight') IS NULL
+            BEGIN
+                ALTER TABLE [BrandSettings] ADD [HeaderTitleWeight] nvarchar(10) NOT NULL DEFAULT('700')
+            END
+            IF COL_LENGTH('BrandSettings', 'HeaderSubtitleWeight') IS NULL
+            BEGIN
+                ALTER TABLE [BrandSettings] ADD [HeaderSubtitleWeight] nvarchar(10) NOT NULL DEFAULT('400')
             END
             IF COL_LENGTH('BrandSettings', 'ChatbotIcon') IS NULL
             BEGIN

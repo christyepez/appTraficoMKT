@@ -49,6 +49,12 @@ export type BrandSettings = {
   menuOrder: string;
   headerTextAlign: "left" | "center" | "right";
   headerTextPosition: "top" | "middle" | "bottom";
+  showHeaderTitle: boolean;
+  showHeaderSubtitle: boolean;
+  headerTitleSize: number;
+  headerSubtitleSize: number;
+  headerTitleWeight: "400" | "600" | "700";
+  headerSubtitleWeight: "400" | "600" | "700";
   brandVersion: number;
   logo: string;
   chatbotIcon: string;
@@ -96,6 +102,12 @@ export const defaultBrandSettings: BrandSettings = {
   menuOrder: "dashboard,activities,evidence,approvals,metrics,audit,admin,users,storage,initial-import,branding,notifications,my-notifications,notification-log",
   headerTextAlign: "center",
   headerTextPosition: "middle",
+  showHeaderTitle: true,
+  showHeaderSubtitle: true,
+  headerTitleSize: 18,
+  headerSubtitleSize: 12,
+  headerTitleWeight: "700",
+  headerSubtitleWeight: "400",
   brandVersion: 3,
   logo: "https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/logo-gen-cuad.jpg",
   chatbotIcon: "https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/logo-gen-cuad.jpg",
@@ -136,7 +148,11 @@ export function applyBrandVariables(settings: Partial<BrandSettings>) {
     "--font-family": settings.fontFamily,
     "--brand-gradient": settings.useGradient ? `linear-gradient(${gradientDirection}, ${primary}, ${gradientColor})` : primary,
     "--header-background": settings.headerUseGradient ? `linear-gradient(${settings.headerGradientDirection ?? "135deg"}, ${headerColor}, ${settings.headerGradientColor ?? headerColor})` : headerColor,
-    "--menu-background": settings.menuUseGradient ? `linear-gradient(${settings.menuGradientDirection ?? "135deg"}, ${menuColor}, ${settings.menuGradientColor ?? menuColor})` : menuColor
+    "--menu-background": settings.menuUseGradient ? `linear-gradient(${settings.menuGradientDirection ?? "135deg"}, ${menuColor}, ${settings.menuGradientColor ?? menuColor})` : menuColor,
+    "--header-title-size": `${settings.headerTitleSize ?? defaultBrandSettings.headerTitleSize}px`,
+    "--header-subtitle-size": `${settings.headerSubtitleSize ?? defaultBrandSettings.headerSubtitleSize}px`,
+    "--header-title-weight": settings.headerTitleWeight ?? defaultBrandSettings.headerTitleWeight,
+    "--header-subtitle-weight": settings.headerSubtitleWeight ?? defaultBrandSettings.headerSubtitleWeight
   }).forEach(([key, value]) => {
     if (value) root.style.setProperty(key, String(value));
   });

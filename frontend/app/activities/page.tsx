@@ -413,7 +413,7 @@ export default function ActivitiesPage() {
                       </summary>
                       <div className="actions top-space">
                         <a className="icon-button" href={file.storageUrl} target="_blank" rel="noreferrer" title="Abrir adjunto"><Eye size={16} /></a>
-                        <button className="icon-button danger" type="button" disabled={approvals.some((approval) => approval.activityId === file.activityId && ["Approved", "Rejected"].includes(approval.decision))} title={approvals.some((approval) => approval.activityId === file.activityId && ["Approved", "Rejected"].includes(approval.decision)) ? "El adjunto pertenece al tracking de una aprobación y no puede eliminarse" : "Eliminar adjunto"} onClick={() => removeEvidence(file.id)}><Trash2 size={16} /></button>
+                        {!approvals.some((approval) => approval.activityId === file.activityId && ["Approved", "Rejected"].includes(approval.decision)) && <button className="icon-button danger" type="button" title="Eliminar adjunto" onClick={() => removeEvidence(file.id)}><Trash2 size={16} /></button>}
                       </div>
                       <EvidencePreview item={file} />
                     </details>
@@ -470,13 +470,17 @@ export default function ActivitiesPage() {
                   <div className="card-meta">
                     <span className="badge">{activityStatusLabel(item.status)}</span>
                     <div className="actions">
-                      <button className={workflowButtonClass(activityStepState(item, "start"))} disabled={activityStepState(item, "start") !== "ready"} title="Cambiar producto a en progreso" onClick={() => patch(`/api/activities/${item.id}/start`)}><Play size={16} /></button>
-                      <button className={workflowButtonClass(activityStepState(item, "evidence"))} disabled={activityStepState(item, "evidence") !== "ready"} title="Adjuntar evidencia o archivo a este producto" onClick={() => setAttachmentActivityId(item.id)}><Paperclip size={16} /></button>
-                      <button className={workflowButtonClass(activityStepState(item, "approval"))} disabled={activityStepState(item, "approval") !== "ready"} title="Enviar producto a aprobación" onClick={() => patch(`/api/activities/${item.id}/submit-approval`)}><Send size={16} /></button>
+                      {normalizedActivityStatus(item.status) !== "Approved" && <>
+                        <button className={workflowButtonClass(activityStepState(item, "start"))} disabled={activityStepState(item, "start") !== "ready"} title="Cambiar producto a en progreso" onClick={() => patch(`/api/activities/${item.id}/start`)}><Play size={16} /></button>
+                        <button className={workflowButtonClass(activityStepState(item, "evidence"))} disabled={activityStepState(item, "evidence") !== "ready"} title="Adjuntar evidencia o archivo a este producto" onClick={() => setAttachmentActivityId(item.id)}><Paperclip size={16} /></button>
+                        <button className={workflowButtonClass(activityStepState(item, "approval"))} disabled={activityStepState(item, "approval") !== "ready"} title="Enviar producto a aprobación" onClick={() => patch(`/api/activities/${item.id}/submit-approval`)}><Send size={16} /></button>
+                      </>}
                       <button className="icon-button" title="Ver detalle y adjuntos del producto" onClick={() => setAttachmentDetailActivityId(item.id)}><Eye size={16} /></button>
                       <button className="icon-button" title="Ver versiones enviadas a aprobación" onClick={() => setApprovalVersionsActivityId(item.id)}><FileText size={16} /></button>
-                      <button className="icon-button" disabled={normalizedActivityStatus(item.status) === "Approved"} title={normalizedActivityStatus(item.status) === "Approved" ? "El producto está completado y no puede editarse" : "Editar datos del producto"} onClick={() => openEditor(item)}><Edit3 size={16} /></button>
-                      <button className="icon-button danger" disabled={item.status === "Approved"} title={item.status === "Approved" ? "El producto está completado y no puede eliminarse" : "Eliminar lógicamente el producto"} onClick={() => removeActivity(item.id)}><Trash2 size={16} /></button>
+                      {normalizedActivityStatus(item.status) !== "Approved" && <>
+                        <button className="icon-button" title="Editar datos del producto" onClick={() => openEditor(item)}><Edit3 size={16} /></button>
+                        <button className="icon-button danger" title="Eliminar lógicamente el producto" onClick={() => removeActivity(item.id)}><Trash2 size={16} /></button>
+                      </>}
                     </div>
                   </div>
                 </div>

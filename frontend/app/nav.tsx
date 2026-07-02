@@ -30,6 +30,9 @@ export function AppNav() {
   const [language, setLanguage] = useState("es");
   const [logo, setLogo] = useState(defaultBrandSettings.logo);
   const [brandTitle, setBrandTitle] = useState("Creamos conexiones que dejan huella");
+  const [brandSubtitle, setBrandSubtitle] = useState(defaultBrandSettings.subtitle);
+  const [showHeaderTitle, setShowHeaderTitle] = useState(true);
+  const [showHeaderSubtitle, setShowHeaderSubtitle] = useState(true);
   const [headerTextAlign, setHeaderTextAlign] = useState<"left" | "center" | "right">("center");
   const [headerTextPosition, setHeaderTextPosition] = useState<"top" | "middle" | "bottom">("middle");
   const [menuMode, setMenuMode] = useState<"horizontal" | "vertical">("horizontal");
@@ -87,6 +90,9 @@ export function AppNav() {
     applyBrandVariables(currentBrand);
     setLogo(currentBrand.logo);
     setBrandTitle(currentBrand.title);
+    setBrandSubtitle(currentBrand.subtitle);
+    setShowHeaderTitle(currentBrand.showHeaderTitle);
+    setShowHeaderSubtitle(currentBrand.showHeaderSubtitle);
     setHeaderTextAlign(currentBrand.headerTextAlign ?? "center");
     setHeaderTextPosition(currentBrand.headerTextPosition ?? "middle");
     setMenuOrder(currentBrand.menuOrder);
@@ -114,7 +120,10 @@ export function AppNav() {
           </span>
         </Link>
         <div className={`brand-title-slot align-${headerTextAlign} position-${headerTextPosition}`}>
-          <span className="brand-text">{brandTitle}</span>
+          <span className="brand-copy">
+            {showHeaderTitle && <strong className="brand-text">{brandTitle}</strong>}
+            {showHeaderSubtitle && <small className="brand-subtitle">{brandSubtitle}</small>}
+          </span>
         </div>
         <div className="session-box">
           <ShieldCheck size={16} />

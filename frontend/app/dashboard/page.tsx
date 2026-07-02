@@ -227,11 +227,13 @@ export default function DashboardPage() {
                     <span className="badge">{requirementStatusLabel(item.status)}</span>
                     <div className="actions">
                       <button className="icon-button" title="Ver productos relacionados" onClick={() => setSelectedRequirement(item)}><Eye size={16} /></button>
-                      <button className={workflowButtonClass(requirementStepState(item, "analysis"))} disabled={requirementStepState(item, "analysis") !== "ready"} title="Cambiar requerimiento a análisis" onClick={() => patch(`/api/requirements/${item.id}/analysis`)}><Search size={16} /></button>
-                      <button className={workflowButtonClass(requirementStepState(item, "execution"))} disabled={requirementStepState(item, "execution") !== "ready"} title="Cambiar requerimiento a ejecución" onClick={() => patch(`/api/requirements/${item.id}/execution`)}><Play size={16} /></button>
-                      <button className={workflowButtonClass(requirementStepState(item, "complete"))} disabled={requirementStepState(item, "complete") !== "ready"} title="Completar requerimiento si todos los productos están aprobados" onClick={() => patch(`/api/requirements/${item.id}/complete`)}><FileCheck2 size={16} /></button>
-                      <button className="icon-button" disabled={isFinalRequirement(item.status)} title={isFinalRequirement(item.status) ? "El requerimiento está finalizado y no puede editarse" : "Editar datos del requerimiento"} onClick={() => { setEditing(item); setSelectedFacultyId(item.facultyId); setIsEditorOpen(true); }}><Edit3 size={16} /></button>
-                      <button className="icon-button danger" disabled={item.status === "Completed"} title={item.status === "Completed" ? "El requerimiento está completado y no puede eliminarse" : "Eliminar lógicamente el requerimiento y sus productos"} onClick={() => removeRequirement(item.id)}><Trash2 size={16} /></button>
+                      {!isFinalRequirement(item.status) && <>
+                        <button className={workflowButtonClass(requirementStepState(item, "analysis"))} disabled={requirementStepState(item, "analysis") !== "ready"} title="Cambiar requerimiento a análisis" onClick={() => patch(`/api/requirements/${item.id}/analysis`)}><Search size={16} /></button>
+                        <button className={workflowButtonClass(requirementStepState(item, "execution"))} disabled={requirementStepState(item, "execution") !== "ready"} title="Cambiar requerimiento a ejecución" onClick={() => patch(`/api/requirements/${item.id}/execution`)}><Play size={16} /></button>
+                        <button className={workflowButtonClass(requirementStepState(item, "complete"))} disabled={requirementStepState(item, "complete") !== "ready"} title="Completar requerimiento si todos los productos están aprobados" onClick={() => patch(`/api/requirements/${item.id}/complete`)}><FileCheck2 size={16} /></button>
+                        <button className="icon-button" title="Editar datos del requerimiento" onClick={() => { setEditing(item); setSelectedFacultyId(item.facultyId); setIsEditorOpen(true); }}><Edit3 size={16} /></button>
+                        <button className="icon-button danger" title="Eliminar lógicamente el requerimiento y sus productos" onClick={() => removeRequirement(item.id)}><Trash2 size={16} /></button>
+                      </>}
                     </div>
                   </div>
                 </div>

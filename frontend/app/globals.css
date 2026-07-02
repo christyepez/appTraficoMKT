@@ -153,7 +153,24 @@ button:disabled {
   display: block;
   max-width: 620px;
   color: var(--topbar-text);
-  font-size: 1.08rem;
+  font-size: var(--header-title-size, 18px);
+  font-weight: var(--header-title-weight, 700);
+  line-height: 1.2;
+}
+
+.brand-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.brand-subtitle {
+  display: block;
+  max-width: 620px;
+  color: var(--topbar-text);
+  font-size: var(--header-subtitle-size, 12px);
+  font-weight: var(--header-subtitle-weight, 400);
   line-height: 1.2;
 }
 
@@ -1420,7 +1437,11 @@ mark {
   }
 
   .brand-text {
-    font-size: 0.95rem;
+    font-size: min(var(--header-title-size, 18px), 15px);
+  }
+
+  .brand-subtitle {
+    font-size: min(var(--header-subtitle-size, 12px), 11px);
   }
 
   .session-box {
@@ -1642,7 +1663,11 @@ mark {
   }
 
   .brand-text {
-    font-size: 0.88rem;
+    font-size: min(var(--header-title-size, 18px), 14px);
+  }
+
+  .brand-subtitle {
+    font-size: min(var(--header-subtitle-size, 12px), 10px);
   }
 
   .session-box {

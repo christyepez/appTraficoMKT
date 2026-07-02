@@ -106,8 +106,8 @@ export default function BrandingPage() {
           <article className="brand-preview top-space" style={{ borderColor: settings.accent, background: settings.primary }}>
             <img src={settings.logo} alt="Logo institucional" />
             <div>
-              <h3>{settings.title}</h3>
-              <p>{settings.subtitle}</p>
+              {settings.showHeaderTitle && <h3 style={{ fontSize: settings.headerTitleSize, fontWeight: settings.headerTitleWeight }}>{settings.title}</h3>}
+              {settings.showHeaderSubtitle && <p style={{ fontSize: settings.headerSubtitleSize, fontWeight: settings.headerSubtitleWeight }}>{settings.subtitle}</p>}
             </div>
           </article>
           <article className="card top-space">
@@ -143,6 +143,12 @@ export default function BrandingPage() {
                   <>
                     <label className="field"><span>{t("Título")}</span><input required maxLength={120} value={settings.title} onChange={(event) => setSettings({ ...settings, title: event.target.value })} /></label>
                     <label className="field"><span>{t("Subtítulo")}</span><input required maxLength={180} value={settings.subtitle} onChange={(event) => setSettings({ ...settings, subtitle: event.target.value })} /></label>
+                    <label className="check-field"><input type="checkbox" checked={settings.showHeaderTitle} onChange={(event) => setSettings({ ...settings, showHeaderTitle: event.target.checked })} /> Mostrar título en cabecera</label>
+                    <label className="check-field"><input type="checkbox" checked={settings.showHeaderSubtitle} onChange={(event) => setSettings({ ...settings, showHeaderSubtitle: event.target.checked })} /> Mostrar subtítulo en cabecera</label>
+                    <label className="field"><span>Tamaño del título</span><input type="number" min={14} max={32} value={settings.headerTitleSize} onChange={(event) => setSettings({ ...settings, headerTitleSize: Number(event.target.value) })} /></label>
+                    <label className="field"><span>Peso del título</span><select value={settings.headerTitleWeight} onChange={(event) => setSettings({ ...settings, headerTitleWeight: event.target.value as BrandSettings["headerTitleWeight"] })}><option value="400">Normal</option><option value="600">Seminegrita</option><option value="700">Negrita</option></select></label>
+                    <label className="field"><span>Tamaño del subtítulo</span><input type="number" min={10} max={24} value={settings.headerSubtitleSize} onChange={(event) => setSettings({ ...settings, headerSubtitleSize: Number(event.target.value) })} /></label>
+                    <label className="field"><span>Peso del subtítulo</span><select value={settings.headerSubtitleWeight} onChange={(event) => setSettings({ ...settings, headerSubtitleWeight: event.target.value as BrandSettings["headerSubtitleWeight"] })}><option value="400">Normal</option><option value="600">Seminegrita</option><option value="700">Negrita</option></select></label>
                   </>
                 )}
                 {activeCategory === "colores" && (
@@ -255,7 +261,7 @@ function categoryDescription(category: BrandCategory) {
 
 function categorySummary(category: BrandCategory, settings: BrandSettings) {
   const summaries: Record<BrandCategory, string> = {
-    textos: settings.title,
+    textos: `${settings.showHeaderTitle ? settings.title : "Título oculto"} | ${settings.showHeaderSubtitle ? settings.subtitle : "Subtítulo oculto"}`,
     colores: `Cabecera ${settings.headerUseGradient ? "degradado" : settings.headerColor} | Menú ${settings.menuUseGradient ? "degradado" : settings.menuColor}`,
     botones: `Principal ${settings.primary} | Éxito ${settings.success}`,
     tipografia: settings.fontFamily.split(",")[0],
