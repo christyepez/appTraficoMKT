@@ -42,8 +42,11 @@ using (var scope = app.Services.CreateScope())
 
 app.MapGet("/health", () => Results.Ok(new { service = "requirements", status = "healthy" }));
 
-app.MapGet("/requirements", async (RequirementsDbContext db) =>
-    await db.Requirements.Where(x => !x.IsDeleted).OrderByDescending(x => x.CreatedAt).ToListAsync());
+app.MapGet("/requirements", async (RequirementsDbContext db, IHttpClientFactory httpClientFactory) =>
+{
+    await RequirementWorkflowReconciliation.CompleteReadyAsync(db, httpClientFactory);
+    return await db.Requirements.Where(x => !x.IsDeleted).OrderByDescending(x => x.CreatedAt).ToListAsync();
+});
 
 app.MapGet("/requirements/assignments/by-user", async (string email, string? name, RequirementsDbContext db) =>
 {
@@ -148,6 +151,8 @@ app.MapDelete("/requirements/{id:guid}", async (Guid id, RequirementsDbContext d
 {
     var requirement = await db.Requirements.FindAsync(id);
     if (requirement is null || requirement.IsDeleted) return Results.NotFound();
+    if (requirement.Status == RequirementStatus.Completed)
+        return Results.Conflict(new { message = "No se puede eliminar un requerimiento completado." });
 
     var previousStatus = requirement.Status.ToString();
     requirement.Reject();
@@ -354,6 +359,47 @@ public static class RequirementNotifications
         }
     }
 }
+
+public static class RequirementWorkflowReconciliation
+{
+    public static async Task CompleteReadyAsync(RequirementsDbContext db, IHttpClientFactory httpClientFactory)
+    {
+        try
+        {
+            var client = httpClientFactory.CreateClient("activities");
+            var summaries = await client.GetFromJsonAsync<List<CompletedRequirementSummary>>("/activities/completed-requirements") ?? [];
+            if (summaries.Count == 0) return;
+            var completedRequirementIds = summaries.Select(x => x.RequirementId).ToList();
+
+            var requirements = await db.Requirements
+                .Where(x => completedRequirementIds.Contains(x.Id) && !x.IsDeleted && x.Status != RequirementStatus.Completed)
+                .ToListAsync();
+
+            foreach (var requirement in requirements)
+            {
+                var summary = summaries.Single(x => x.RequirementId == requirement.Id);
+                var previousStatus = requirement.Status.ToString();
+                requirement.Complete(summary.Total, summary.Approved);
+                CatalogReferenceWriter.UpsertStatusReference(db, requirement.Status);
+                db.AuditEvents.Add(RequirementAuditEvent.Changed(
+                    requirement.Id,
+                    previousStatus,
+                    requirement.Status.ToString(),
+                    "Requerimiento completado automáticamente: todos sus productos están aprobados",
+                    "Sistema",
+                    AuditJson.Build("Requerimientos", "Completar automáticamente", "Sistema", new { requirement.Id, summary.Total, summary.Approved })));
+            }
+
+            if (requirements.Count > 0) await db.SaveChangesAsync();
+        }
+        catch
+        {
+            // La lectura de requerimientos continúa si el servicio de productos está temporalmente no disponible.
+        }
+    }
+}
+
+public sealed record CompletedRequirementSummary(Guid RequirementId, int Total, int Approved);
 
 public static class AssignmentKeys
 {

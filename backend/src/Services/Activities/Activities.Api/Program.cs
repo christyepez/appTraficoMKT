@@ -107,6 +107,17 @@ app.MapGet("/activities/summary/{requirementId:guid}", async (Guid requirementId
         activities.Count(x => x.Status != ActivityStatus.Approved));
 });
 
+app.MapGet("/activities/completed-requirements", async (ActivitiesDbContext db) =>
+    await db.Activities
+        .Where(x => !x.IsDeleted)
+        .GroupBy(x => x.RequirementId)
+        .Where(group => group.Any() && group.All(x => x.Status == ActivityStatus.Approved))
+        .Select(group => new CompletedRequirementSummary(
+            group.Key,
+            group.Count(),
+            group.Count(x => x.Status == ActivityStatus.Approved)))
+        .ToListAsync());
+
 app.MapPost("/activities", async (CreateActivityRequest request, ActivitiesDbContext db, IHttpClientFactory httpClientFactory) =>
 {
     await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
@@ -376,6 +387,7 @@ public sealed record NextProductIdResponse(string ProductId);
 public sealed record ApproveActivityRequest(ApprovalDecision Decision, string ApprovedBy, string Comments);
 public sealed record CreateApprovalRequest(Guid ActivityId, ApprovalDecision Decision, string ApprovedBy, string Comments);
 public sealed record ActivitySummary(int Total, int Approved, int Pending);
+public sealed record CompletedRequirementSummary(Guid RequirementId, int Total, int Approved);
 public sealed record AssignmentCountResponse(int Count);
 public sealed record MetricSlice(string Name, int Count, decimal Percentage);
 public sealed record StageMetric(string Stage, decimal AverageHours, int Events);
