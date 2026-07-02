@@ -36,16 +36,20 @@ export default function BrandingPage() {
   }
 
   async function saveSettings() {
-    const saved = await api<BrandSettings>("/api/identity/brand-settings", {
-      method: "PUT",
-      body: JSON.stringify(settings)
-    });
-    setSettings({ ...defaultBrandSettings, ...saved });
-    applyBrandVariables(saved);
-    window.dispatchEvent(new Event("brand-settings-changed"));
-    setMessage(`${categoryTitle(activeCategory)} guardado correctamente.`);
-    showToast("Marca global guardada correctamente.");
-    setActiveCategory("");
+    try {
+      const saved = await api<BrandSettings>("/api/identity/brand-settings", {
+        method: "PUT",
+        body: JSON.stringify(settings)
+      });
+      setSettings({ ...defaultBrandSettings, ...saved });
+      applyBrandVariables(saved);
+      window.dispatchEvent(new Event("brand-settings-changed"));
+      setMessage(`${categoryTitle(activeCategory)} guardado correctamente.`);
+      showToast("Marca global guardada correctamente.");
+      setActiveCategory("");
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : "No se pudo guardar la configuración de marca.", "error");
+    }
   }
 
   async function restore() {
@@ -62,8 +66,20 @@ export default function BrandingPage() {
 
   function loadImage(field: "logo" | "chatbotIcon", file?: File) {
     if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      showToast("Seleccione un archivo de imagen válido.", "error");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      showToast("La imagen no puede superar 2 MB.", "error");
+      return;
+    }
     const reader = new FileReader();
-    reader.onload = () => setSettings((current) => ({ ...current, [field]: String(reader.result) }));
+    reader.onload = () => {
+      setSettings((current) => ({ ...current, [field]: String(reader.result) }));
+      showToast(field === "logo" ? "Logo listo para guardar." : "Icono listo para guardar.");
+    };
+    reader.onerror = () => showToast("No se pudo leer la imagen seleccionada.", "error");
     reader.readAsDataURL(file);
   }
 
@@ -225,8 +241,8 @@ export default function BrandingPage() {
                   <>
                     <label className="field"><span>URL del logo</span><input value={settings.logo.startsWith("data:") ? "Logo cargado desde archivo" : settings.logo} onChange={(event) => setSettings({ ...settings, logo: event.target.value })} /></label>
                     <label className="field"><span>Icono Puma chatbot</span><input value={settings.chatbotIcon?.startsWith("data:") ? "Icono cargado desde archivo" : settings.chatbotIcon} onChange={(event) => setSettings({ ...settings, chatbotIcon: event.target.value })} /></label>
-                    <label className="field"><span>Cargar logo</span><input type="file" accept="image/*" onChange={(event) => loadImage("logo", event.target.files?.[0])} /></label>
-                    <label className="field"><span>Cargar icono robot</span><input type="file" accept="image/*" onChange={(event) => loadImage("chatbotIcon", event.target.files?.[0])} /></label>
+                    <label className="field"><span>Cargar logo (máximo 2 MB)</span><input type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={(event) => loadImage("logo", event.target.files?.[0])} /></label>
+                    <label className="field"><span>Cargar icono robot (máximo 2 MB)</span><input type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={(event) => loadImage("chatbotIcon", event.target.files?.[0])} /></label>
                   </>
                 )}
                 {activeCategory === "login" && (

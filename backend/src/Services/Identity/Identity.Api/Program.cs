@@ -541,8 +541,8 @@ public sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> option
             entity.Property(x => x.HeaderTextPosition).HasMaxLength(20);
             entity.Property(x => x.HeaderTitleWeight).HasMaxLength(10);
             entity.Property(x => x.HeaderSubtitleWeight).HasMaxLength(10);
-            entity.Property(x => x.Logo).HasMaxLength(1200);
-            entity.Property(x => x.ChatbotIcon).HasMaxLength(1200);
+            entity.Property(x => x.Logo).HasColumnType("nvarchar(max)");
+            entity.Property(x => x.ChatbotIcon).HasColumnType("nvarchar(max)");
             entity.Property(x => x.ShowPublicRequirementForm).HasDefaultValue(true);
             entity.Property(x => x.ShowPublicRequirementFullPage).HasDefaultValue(true);
             entity.Property(x => x.ShowLoginChatbot).HasDefaultValue(true);
@@ -912,8 +912,8 @@ public static class IdentitySchema
                     [HeaderTitleWeight] nvarchar(10) NOT NULL DEFAULT('700'),
                     [HeaderSubtitleWeight] nvarchar(10) NOT NULL DEFAULT('400'),
                     [BrandVersion] int NOT NULL,
-                    [Logo] nvarchar(1200) NOT NULL,
-                    [ChatbotIcon] nvarchar(1200) NOT NULL DEFAULT('https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/logo-gen-cuad.jpg'),
+                    [Logo] nvarchar(max) NOT NULL,
+                    [ChatbotIcon] nvarchar(max) NOT NULL DEFAULT('https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/logo-gen-cuad.jpg'),
                     [ShowPublicRequirementForm] bit NOT NULL DEFAULT(1),
                     [ShowPublicRequirementFullPage] bit NOT NULL DEFAULT(1),
                     [ShowLoginChatbot] bit NOT NULL DEFAULT(1),
@@ -961,7 +961,23 @@ public static class IdentitySchema
             END
             IF COL_LENGTH('BrandSettings', 'ChatbotIcon') IS NULL
             BEGIN
-                ALTER TABLE [BrandSettings] ADD [ChatbotIcon] nvarchar(1200) NOT NULL DEFAULT('https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/logo-gen-cuad.jpg')
+                ALTER TABLE [BrandSettings] ADD [ChatbotIcon] nvarchar(max) NOT NULL DEFAULT('https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/logo-gen-cuad.jpg')
+            END
+            IF EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('BrandSettings') AND name = 'Logo' AND max_length <> -1)
+            BEGIN
+                ALTER TABLE [BrandSettings] ALTER COLUMN [Logo] nvarchar(max) NOT NULL
+            END
+            IF EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('BrandSettings') AND name = 'ChatbotIcon' AND max_length <> -1)
+            BEGIN
+                DECLARE @chatbotDefault sysname
+                SELECT @chatbotDefault = dc.name
+                FROM sys.default_constraints dc
+                INNER JOIN sys.columns c ON c.default_object_id = dc.object_id
+                WHERE dc.parent_object_id = OBJECT_ID('BrandSettings') AND c.name = 'ChatbotIcon'
+                IF @chatbotDefault IS NOT NULL
+                    EXEC('ALTER TABLE [BrandSettings] DROP CONSTRAINT [' + @chatbotDefault + ']')
+                ALTER TABLE [BrandSettings] ALTER COLUMN [ChatbotIcon] nvarchar(max) NOT NULL
+                ALTER TABLE [BrandSettings] ADD CONSTRAINT [DF_BrandSettings_ChatbotIcon] DEFAULT('https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/logo-gen-cuad.jpg') FOR [ChatbotIcon]
             END
             IF COL_LENGTH('BrandSettings', 'ShowPublicRequirementForm') IS NULL
             BEGIN
