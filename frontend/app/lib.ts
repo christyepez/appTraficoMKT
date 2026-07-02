@@ -34,6 +34,14 @@ export type BrandSettings = {
   useGradient: boolean;
   gradientColor: string;
   gradientDirection: "to right" | "to bottom" | "135deg";
+  headerColor: string;
+  headerUseGradient: boolean;
+  headerGradientColor: string;
+  headerGradientDirection: "to right" | "to bottom" | "135deg";
+  menuColor: string;
+  menuUseGradient: boolean;
+  menuGradientColor: string;
+  menuGradientDirection: "to right" | "to bottom" | "135deg";
   fontFamily: string;
   menuMode: "horizontal" | "vertical";
   menuCollapsed: boolean;
@@ -73,6 +81,14 @@ export const defaultBrandSettings: BrandSettings = {
   useGradient: false,
   gradientColor: "#6d4a8d",
   gradientDirection: "135deg",
+  headerColor: "#3c235f",
+  headerUseGradient: false,
+  headerGradientColor: "#6d4a8d",
+  headerGradientDirection: "135deg",
+  menuColor: "#3c235f",
+  menuUseGradient: false,
+  menuGradientColor: "#6d4a8d",
+  menuGradientDirection: "135deg",
   fontFamily: "Segoe UI, Arial, Helvetica, sans-serif",
   menuMode: "horizontal",
   menuCollapsed: false,
@@ -99,6 +115,8 @@ export function applyBrandVariables(settings: Partial<BrandSettings>) {
   const primary = settings.primary ?? defaultBrandSettings.primary;
   const gradientColor = settings.gradientColor ?? defaultBrandSettings.gradientColor;
   const gradientDirection = settings.gradientDirection ?? defaultBrandSettings.gradientDirection;
+  const headerColor = settings.headerColor ?? primary;
+  const menuColor = settings.menuColor ?? primary;
   Object.entries({
     "--primary": settings.primary,
     "--primary-dark": settings.primaryDark,
@@ -116,7 +134,9 @@ export function applyBrandVariables(settings: Partial<BrandSettings>) {
     "--danger": settings.danger,
     "--topbar-text": settings.topbarText,
     "--font-family": settings.fontFamily,
-    "--brand-gradient": settings.useGradient ? `linear-gradient(${gradientDirection}, ${primary}, ${gradientColor})` : primary
+    "--brand-gradient": settings.useGradient ? `linear-gradient(${gradientDirection}, ${primary}, ${gradientColor})` : primary,
+    "--header-background": settings.headerUseGradient ? `linear-gradient(${settings.headerGradientDirection ?? "135deg"}, ${headerColor}, ${settings.headerGradientColor ?? headerColor})` : headerColor,
+    "--menu-background": settings.menuUseGradient ? `linear-gradient(${settings.menuGradientDirection ?? "135deg"}, ${menuColor}, ${settings.menuGradientColor ?? menuColor})` : menuColor
   }).forEach(([key, value]) => {
     if (value) root.style.setProperty(key, String(value));
   });

@@ -60,7 +60,7 @@ button:disabled {
   gap: 16px;
   min-height: 86px;
   padding: 12px 28px;
-  background: var(--brand-gradient, var(--primary));
+  background: var(--header-background, var(--primary));
   border-bottom: 4px solid var(--accent);
   color: var(--topbar-text);
 }
@@ -164,7 +164,7 @@ button:disabled {
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
-  background: var(--brand-gradient, var(--primary));
+  background: var(--menu-background, var(--primary));
   color: var(--topbar-text);
 }
 
@@ -1577,6 +1577,13 @@ mark {
   border-radius: 6px;
   color: #fff;
   font-weight: 700;
+}
+
+.settings-group-title {
+  margin: 8px 0 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+  font-size: 1rem;
 }
 
 .menu-order-grid {

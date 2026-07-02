@@ -383,6 +383,14 @@ public sealed record UpsertBrandSettingsRequest(
     bool UseGradient,
     string GradientColor,
     string GradientDirection,
+    string HeaderColor,
+    bool HeaderUseGradient,
+    string HeaderGradientColor,
+    string HeaderGradientDirection,
+    string MenuColor,
+    bool MenuUseGradient,
+    string MenuGradientColor,
+    string MenuGradientDirection,
     string FontFamily,
     string MenuMode,
     bool MenuCollapsed,
@@ -513,6 +521,12 @@ public sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> option
             entity.Property(x => x.TopbarText).HasMaxLength(20);
             entity.Property(x => x.GradientColor).HasMaxLength(20);
             entity.Property(x => x.GradientDirection).HasMaxLength(20);
+            entity.Property(x => x.HeaderColor).HasMaxLength(20);
+            entity.Property(x => x.HeaderGradientColor).HasMaxLength(20);
+            entity.Property(x => x.HeaderGradientDirection).HasMaxLength(20);
+            entity.Property(x => x.MenuColor).HasMaxLength(20);
+            entity.Property(x => x.MenuGradientColor).HasMaxLength(20);
+            entity.Property(x => x.MenuGradientDirection).HasMaxLength(20);
             entity.Property(x => x.FontFamily).HasMaxLength(180);
             entity.Property(x => x.MenuMode).HasMaxLength(20);
             entity.Property(x => x.MenuOrder).HasMaxLength(1000);
@@ -554,6 +568,14 @@ public sealed class BrandSettings
     public bool UseGradient { get; set; }
     public string GradientColor { get; set; } = "#6d4a8d";
     public string GradientDirection { get; set; } = "135deg";
+    public string HeaderColor { get; set; } = "#3c235f";
+    public bool HeaderUseGradient { get; set; }
+    public string HeaderGradientColor { get; set; } = "#6d4a8d";
+    public string HeaderGradientDirection { get; set; } = "135deg";
+    public string MenuColor { get; set; } = "#3c235f";
+    public bool MenuUseGradient { get; set; }
+    public string MenuGradientColor { get; set; } = "#6d4a8d";
+    public string MenuGradientDirection { get; set; } = "135deg";
     public string FontFamily { get; set; } = "Segoe UI, Arial, Helvetica, sans-serif";
     public string MenuMode { get; set; } = "horizontal";
     public bool MenuCollapsed { get; set; }
@@ -597,6 +619,14 @@ public sealed class BrandSettings
         UseGradient = request.UseGradient;
         GradientColor = request.GradientColor.Trim();
         GradientDirection = request.GradientDirection is "to right" or "to bottom" ? request.GradientDirection : "135deg";
+        HeaderColor = request.HeaderColor.Trim();
+        HeaderUseGradient = request.HeaderUseGradient;
+        HeaderGradientColor = request.HeaderGradientColor.Trim();
+        HeaderGradientDirection = NormalizeGradientDirection(request.HeaderGradientDirection);
+        MenuColor = request.MenuColor.Trim();
+        MenuUseGradient = request.MenuUseGradient;
+        MenuGradientColor = request.MenuGradientColor.Trim();
+        MenuGradientDirection = NormalizeGradientDirection(request.MenuGradientDirection);
         FontFamily = request.FontFamily.Trim();
         MenuMode = request.MenuMode.Equals("vertical", StringComparison.OrdinalIgnoreCase) ? "vertical" : "horizontal";
         MenuCollapsed = request.MenuCollapsed;
@@ -627,6 +657,8 @@ public sealed class BrandSettings
         Subtitle = request.Subtitle.Trim();
         UpdatedAt = DateTimeOffset.UtcNow;
     }
+
+    private static string NormalizeGradientDirection(string value) => value is "to right" or "to bottom" ? value : "135deg";
 }
 
 public static class ScreenAccess
@@ -837,6 +869,14 @@ public static class IdentitySchema
                     [UseGradient] bit NOT NULL DEFAULT(0),
                     [GradientColor] nvarchar(20) NOT NULL DEFAULT('#6d4a8d'),
                     [GradientDirection] nvarchar(20) NOT NULL DEFAULT('135deg'),
+                    [HeaderColor] nvarchar(20) NOT NULL DEFAULT('#3c235f'),
+                    [HeaderUseGradient] bit NOT NULL DEFAULT(0),
+                    [HeaderGradientColor] nvarchar(20) NOT NULL DEFAULT('#6d4a8d'),
+                    [HeaderGradientDirection] nvarchar(20) NOT NULL DEFAULT('135deg'),
+                    [MenuColor] nvarchar(20) NOT NULL DEFAULT('#3c235f'),
+                    [MenuUseGradient] bit NOT NULL DEFAULT(0),
+                    [MenuGradientColor] nvarchar(20) NOT NULL DEFAULT('#6d4a8d'),
+                    [MenuGradientDirection] nvarchar(20) NOT NULL DEFAULT('135deg'),
                     [FontFamily] nvarchar(180) NOT NULL,
                     [MenuMode] nvarchar(20) NOT NULL,
                     [MenuCollapsed] bit NOT NULL,
@@ -915,6 +955,38 @@ public static class IdentitySchema
             IF COL_LENGTH('BrandSettings', 'MenuOrder') IS NULL
             BEGIN
                 ALTER TABLE [BrandSettings] ADD [MenuOrder] nvarchar(1000) NOT NULL DEFAULT('dashboard,activities,evidence,approvals,metrics,audit,admin,users,storage,initial-import,branding,notifications,my-notifications,notification-log')
+            END
+            IF COL_LENGTH('BrandSettings', 'HeaderColor') IS NULL
+            BEGIN
+                ALTER TABLE [BrandSettings] ADD [HeaderColor] nvarchar(20) NOT NULL DEFAULT('#3c235f')
+            END
+            IF COL_LENGTH('BrandSettings', 'HeaderUseGradient') IS NULL
+            BEGIN
+                ALTER TABLE [BrandSettings] ADD [HeaderUseGradient] bit NOT NULL DEFAULT(0)
+            END
+            IF COL_LENGTH('BrandSettings', 'HeaderGradientColor') IS NULL
+            BEGIN
+                ALTER TABLE [BrandSettings] ADD [HeaderGradientColor] nvarchar(20) NOT NULL DEFAULT('#6d4a8d')
+            END
+            IF COL_LENGTH('BrandSettings', 'HeaderGradientDirection') IS NULL
+            BEGIN
+                ALTER TABLE [BrandSettings] ADD [HeaderGradientDirection] nvarchar(20) NOT NULL DEFAULT('135deg')
+            END
+            IF COL_LENGTH('BrandSettings', 'MenuColor') IS NULL
+            BEGIN
+                ALTER TABLE [BrandSettings] ADD [MenuColor] nvarchar(20) NOT NULL DEFAULT('#3c235f')
+            END
+            IF COL_LENGTH('BrandSettings', 'MenuUseGradient') IS NULL
+            BEGIN
+                ALTER TABLE [BrandSettings] ADD [MenuUseGradient] bit NOT NULL DEFAULT(0)
+            END
+            IF COL_LENGTH('BrandSettings', 'MenuGradientColor') IS NULL
+            BEGIN
+                ALTER TABLE [BrandSettings] ADD [MenuGradientColor] nvarchar(20) NOT NULL DEFAULT('#6d4a8d')
+            END
+            IF COL_LENGTH('BrandSettings', 'MenuGradientDirection') IS NULL
+            BEGIN
+                ALTER TABLE [BrandSettings] ADD [MenuGradientDirection] nvarchar(20) NOT NULL DEFAULT('135deg')
             END
             IF NOT EXISTS (SELECT 1 FROM [BrandSettings])
             BEGIN

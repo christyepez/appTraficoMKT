@@ -156,11 +156,21 @@ export default function BrandingPage() {
                     <ColorField label="Texto secundario" value={settings.muted} onChange={(muted) => setSettings({ ...settings, muted })} />
                     <ColorField label="Bordes" value={settings.line} onChange={(line) => setSettings({ ...settings, line })} />
                     <ColorField label="Texto barra superior" value={settings.topbarText} onChange={(topbarText) => setSettings({ ...settings, topbarText })} />
-                    <label className="check-field field-wide"><input type="checkbox" checked={settings.useGradient} onChange={(event) => setSettings({ ...settings, useGradient: event.target.checked })} /> Aplicar degradado basado en el color principal</label>
-                    {settings.useGradient && <>
-                      <ColorField label="Color final del degradado" value={settings.gradientColor} onChange={(gradientColor) => setSettings({ ...settings, gradientColor })} />
-                      <label className="field"><span>Dirección del degradado</span><select value={settings.gradientDirection} onChange={(event) => setSettings({ ...settings, gradientDirection: event.target.value as BrandSettings["gradientDirection"] })}><option value="135deg">Diagonal</option><option value="to right">Horizontal</option><option value="to bottom">Vertical</option></select></label>
-                      <div className="gradient-preview field-wide" style={{ background: `linear-gradient(${settings.gradientDirection}, ${settings.primary}, ${settings.gradientColor})` }}>Vista previa del degradado</div>
+                    <h3 className="field-wide settings-group-title">Cabecera</h3>
+                    <ColorField label="Color de cabecera" value={settings.headerColor} onChange={(headerColor) => setSettings({ ...settings, headerColor })} />
+                    <label className="check-field"><input type="checkbox" checked={settings.headerUseGradient} onChange={(event) => setSettings({ ...settings, headerUseGradient: event.target.checked })} /> Usar degradado en cabecera</label>
+                    {settings.headerUseGradient && <>
+                      <ColorField label="Color final cabecera" value={settings.headerGradientColor} onChange={(headerGradientColor) => setSettings({ ...settings, headerGradientColor })} />
+                      <GradientDirectionField label="Dirección cabecera" value={settings.headerGradientDirection} onChange={(headerGradientDirection) => setSettings({ ...settings, headerGradientDirection })} />
+                      <div className="gradient-preview field-wide" style={{ background: `linear-gradient(${settings.headerGradientDirection}, ${settings.headerColor}, ${settings.headerGradientColor})` }}>Vista previa de cabecera</div>
+                    </>}
+                    <h3 className="field-wide settings-group-title">Menú</h3>
+                    <ColorField label="Color del menú" value={settings.menuColor} onChange={(menuColor) => setSettings({ ...settings, menuColor })} />
+                    <label className="check-field"><input type="checkbox" checked={settings.menuUseGradient} onChange={(event) => setSettings({ ...settings, menuUseGradient: event.target.checked })} /> Usar degradado en menú</label>
+                    {settings.menuUseGradient && <>
+                      <ColorField label="Color final menú" value={settings.menuGradientColor} onChange={(menuGradientColor) => setSettings({ ...settings, menuGradientColor })} />
+                      <GradientDirectionField label="Dirección menú" value={settings.menuGradientDirection} onChange={(menuGradientDirection) => setSettings({ ...settings, menuGradientDirection })} />
+                      <div className="gradient-preview field-wide" style={{ background: `linear-gradient(${settings.menuGradientDirection}, ${settings.menuColor}, ${settings.menuGradientColor})` }}>Vista previa del menú</div>
                     </>}
                   </>
                 )}
@@ -246,7 +256,7 @@ function categoryDescription(category: BrandCategory) {
 function categorySummary(category: BrandCategory, settings: BrandSettings) {
   const summaries: Record<BrandCategory, string> = {
     textos: settings.title,
-    colores: `${settings.primary} | ${settings.accent}${settings.useGradient ? " | degradado" : ""}`,
+    colores: `Cabecera ${settings.headerUseGradient ? "degradado" : settings.headerColor} | Menú ${settings.menuUseGradient ? "degradado" : settings.menuColor}`,
     botones: `Principal ${settings.primary} | Éxito ${settings.success}`,
     tipografia: settings.fontFamily.split(",")[0],
     cabecera: `${settings.headerTextAlign} | ${settings.headerTextPosition}`,
@@ -289,4 +299,8 @@ function ColorField({ label, value, onChange }: { label: string; value: string; 
       <input type="color" value={value} onChange={(event) => onChange(event.target.value)} />
     </label>
   );
+}
+
+function GradientDirectionField({ label, value, onChange }: { label: string; value: BrandSettings["headerGradientDirection"]; onChange: (value: BrandSettings["headerGradientDirection"]) => void }) {
+  return <label className="field"><span>{label}</span><select value={value} onChange={(event) => onChange(event.target.value as BrandSettings["headerGradientDirection"])}><option value="135deg">Diagonal</option><option value="to right">Horizontal</option><option value="to bottom">Vertical</option></select></label>;
 }
