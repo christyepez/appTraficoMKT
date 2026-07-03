@@ -136,17 +136,18 @@ button:disabled {
   align-items: center;
   justify-content: center;
   flex: 0 0 auto;
-  width: 150px;
-  height: 58px;
-  border-radius: 6px;
-  background: #fff;
-  padding: 6px 10px;
+  width: 170px;
+  height: 62px;
+  background: transparent;
 }
 
 .brand-logo {
-  width: 130px;
-  height: 46px;
+  display: block;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
+  object-position: left center;
+  background: transparent;
 }
 
 .brand-text {
@@ -957,8 +958,7 @@ mark {
   width: min(260px, 48%);
   max-height: 86px;
   object-fit: contain;
-  border-radius: 6px;
-  background: #fff;
+  background: transparent;
 }
 
 .brand-preview h3 {
@@ -1427,13 +1427,13 @@ mark {
   }
 
   .brand-mark {
-    width: 120px;
+    width: 92px;
     height: 48px;
   }
 
   .brand-logo {
-    width: 104px;
-    height: 38px;
+    width: 100%;
+    height: 100%;
   }
 
   .brand-text {
@@ -1654,12 +1654,11 @@ mark {
   .brand-mark {
     width: 72px;
     height: 44px;
-    padding: 4px 6px;
   }
 
   .brand-logo {
-    width: 62px;
-    height: 34px;
+    width: 100%;
+    height: 100%;
   }
 
   .brand-text {
