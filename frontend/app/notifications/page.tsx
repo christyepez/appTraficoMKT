@@ -63,7 +63,13 @@ export default function NotificationsPage() {
     if (templateMode === "visual" && visualEditorRef.current && visualEditorRef.current.innerHTML !== editing.htmlTemplate) {
       visualEditorRef.current.innerHTML = editing.htmlTemplate;
     }
-  }, [templateMode, editing.id, isEditorOpen]);
+  }, [templateMode, editorSection, editing.id, isEditorOpen]);
+
+  function syncVisualEditor() {
+    window.requestAnimationFrame(() => {
+      if (visualEditorRef.current) visualEditorRef.current.innerHTML = editing.htmlTemplate || empty.htmlTemplate;
+    });
+  }
 
   function openEditor(item: NotificationSettings | null = null, section: "config" | "template" = "config") {
     setEditing(item ? { ...empty, ...item, htmlTemplate: item.htmlTemplate || empty.htmlTemplate } : empty);
@@ -124,7 +130,7 @@ export default function NotificationsPage() {
               <form className="form top-space" onSubmit={save}>
                 <div className="editor-section-tabs field-wide" role="tablist" aria-label="Sección de notificación">
                   <button className={editorSection === "config" ? "active" : ""} type="button" role="tab" aria-selected={editorSection === "config"} onClick={() => setEditorSection("config")}>Configuración</button>
-                  <button className={editorSection === "template" ? "active" : ""} type="button" role="tab" aria-selected={editorSection === "template"} onClick={() => setEditorSection("template")}><FileCode2 size={16} /> Plantilla HTML</button>
+                  <button className={editorSection === "template" ? "active" : ""} type="button" role="tab" aria-selected={editorSection === "template"} onClick={() => { setEditorSection("template"); syncVisualEditor(); }}><FileCode2 size={16} /> Plantilla HTML</button>
                 </div>
                 {editorSection === "config" && <>
                   <label className="field"><span>{t("Nombre")}</span><input required maxLength={120} value={editing.name} onChange={(event) => setEditing({ ...editing, name: event.target.value })} /></label>
@@ -137,7 +143,7 @@ export default function NotificationsPage() {
                 {editorSection === "template" && <div className="field field-wide">
                   <span>Plantilla HTML</span>
                   <div className="template-mode-switch" role="group" aria-label="Modo de edición de plantilla">
-                    <button className={templateMode === "visual" ? "active" : ""} type="button" aria-pressed={templateMode === "visual"} onClick={() => setTemplateMode("visual")}><Type size={16} /> Visual</button>
+                    <button className={templateMode === "visual" ? "active" : ""} type="button" aria-pressed={templateMode === "visual"} onClick={() => { setTemplateMode("visual"); syncVisualEditor(); }}><Type size={16} /> Visual</button>
                     <button className={templateMode === "html" ? "active" : ""} type="button" aria-pressed={templateMode === "html"} onClick={() => setTemplateMode("html")}><Code2 size={16} /> HTML</button>
                     <button className={templateMode === "preview" ? "active" : ""} type="button" aria-pressed={templateMode === "preview"} onClick={() => setTemplateMode("preview")}><Eye size={16} /> Vista previa</button>
                   </div>
