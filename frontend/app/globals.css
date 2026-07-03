@@ -332,6 +332,34 @@ button:disabled {
   width: min(1080px, 100%);
 }
 
+.notification-modal-backdrop {
+  place-items: center;
+  padding: 18px;
+}
+
+.notification-modal {
+  max-height: calc(100vh - 36px);
+  overscroll-behavior: contain;
+}
+
+.notification-modal > .card-head {
+  position: sticky;
+  top: -18px;
+  z-index: 4;
+  margin: -18px -18px 0;
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.notification-modal .editor-section-tabs {
+  position: sticky;
+  top: 67px;
+  z-index: 3;
+  padding: 10px 0;
+  background: var(--surface);
+}
+
 .table-scroll {
   width: 100%;
   overflow-x: auto;
@@ -1664,7 +1692,7 @@ mark {
 }
 
 .rich-html-editor {
-  min-height: 240px;
+  min-height: clamp(180px, 32vh, 280px);
   max-height: 420px;
   padding: 14px;
   overflow: auto;

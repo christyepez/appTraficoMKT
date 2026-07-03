@@ -48,6 +48,7 @@ export default function NotificationsPage() {
   const [templateMode, setTemplateMode] = useState<"visual" | "html" | "preview">("visual");
   const [editorSection, setEditorSection] = useState<"config" | "template">("config");
   const visualEditorRef = useRef<HTMLDivElement>(null);
+  const modalPanelRef = useRef<HTMLElement>(null);
 
   async function load() {
     setItems(await api<NotificationSettings[]>("/api/notification-settings"));
@@ -68,6 +69,14 @@ export default function NotificationsPage() {
   function syncVisualEditor() {
     window.requestAnimationFrame(() => {
       if (visualEditorRef.current) visualEditorRef.current.innerHTML = editing.htmlTemplate || empty.htmlTemplate;
+    });
+  }
+
+  function changeEditorSection(section: "config" | "template") {
+    setEditorSection(section);
+    window.requestAnimationFrame(() => {
+      if (modalPanelRef.current) modalPanelRef.current.scrollTop = 0;
+      if (section === "template") syncVisualEditor();
     });
   }
 
@@ -121,16 +130,16 @@ export default function NotificationsPage() {
       <AppNav />
       <section className="content-shell">
         {isEditorOpen && (
-          <div className="modal-backdrop" role="dialog" aria-modal="true">
-            <section className="modal-panel">
+          <div className="modal-backdrop notification-modal-backdrop" role="dialog" aria-modal="true">
+            <section className="modal-panel modal-panel-wide notification-modal" ref={modalPanelRef}>
               <div className="card-head">
-                <h2>{editing.id ? "Editar notificación" : "Crear notificación"}</h2>
+                <div><h2>{editing.id ? "Editar notificación" : "Crear notificación"}</h2><span className="badge">{editorSection === "config" ? "Configuración de canales" : `Plantilla HTML · ${templateMode === "visual" ? "Visual" : templateMode === "html" ? "Código" : "Vista previa"}`}</span></div>
                 <button className="icon-button" type="button" title="Cerrar formulario" disabled={isSaving} onClick={() => setIsEditorOpen(false)}><X size={16} /></button>
               </div>
               <form className="form top-space" onSubmit={save}>
                 <div className="editor-section-tabs field-wide" role="tablist" aria-label="Sección de notificación">
-                  <button className={editorSection === "config" ? "active" : ""} type="button" role="tab" aria-selected={editorSection === "config"} onClick={() => setEditorSection("config")}>Configuración</button>
-                  <button className={editorSection === "template" ? "active" : ""} type="button" role="tab" aria-selected={editorSection === "template"} onClick={() => { setEditorSection("template"); syncVisualEditor(); }}><FileCode2 size={16} /> Plantilla HTML</button>
+                  <button className={editorSection === "config" ? "active" : ""} type="button" role="tab" aria-selected={editorSection === "config"} onClick={() => changeEditorSection("config")}>Configuración</button>
+                  <button className={editorSection === "template" ? "active" : ""} type="button" role="tab" aria-selected={editorSection === "template"} onClick={() => changeEditorSection("template")}><FileCode2 size={16} /> Plantilla HTML</button>
                 </div>
                 {editorSection === "config" && <>
                   <label className="field"><span>{t("Nombre")}</span><input required maxLength={120} value={editing.name} onChange={(event) => setEditing({ ...editing, name: event.target.value })} /></label>
