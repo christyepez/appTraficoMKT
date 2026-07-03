@@ -4,8 +4,8 @@ import { AppNav } from "../nav";
 import { api, showToast, t } from "../lib";
 import { PaginationControls, paginate, type PaginationState } from "../pagination";
 import { Highlight, matchesSearch } from "../search";
-import { Edit3, Plus, RefreshCw, Save, Trash2, X } from "lucide-react";
-import { FormEvent, useEffect, useState } from "react";
+import { Bold, Code2, Edit3, Eye, Heading2, Italic, Link2, Pilcrow, Plus, RefreshCw, Save, Trash2, Type, Underline, X } from "lucide-react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 
 type NotificationSettings = {
   id: string;
@@ -45,6 +45,8 @@ export default function NotificationsPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [pagination, setPagination] = useState<PaginationState>({ page: 1, pageSize: 10 });
   const [search, setSearch] = useState("");
+  const [templateMode, setTemplateMode] = useState<"visual" | "html" | "preview">("visual");
+  const visualEditorRef = useRef<HTMLDivElement>(null);
 
   async function load() {
     setItems(await api<NotificationSettings[]>("/api/notification-settings"));
@@ -56,9 +58,27 @@ export default function NotificationsPage() {
     return () => window.clearInterval(timer);
   }, []);
 
+  useEffect(() => {
+    if (templateMode === "visual" && visualEditorRef.current && visualEditorRef.current.innerHTML !== editing.htmlTemplate) {
+      visualEditorRef.current.innerHTML = editing.htmlTemplate;
+    }
+  }, [templateMode, editing.id, isEditorOpen]);
+
   function openEditor(item: NotificationSettings | null = null) {
     setEditing(item ? { ...empty, ...item, htmlTemplate: item.htmlTemplate || empty.htmlTemplate } : empty);
+    setTemplateMode("visual");
     setIsEditorOpen(true);
+  }
+
+  function applyVisualFormat(command: string, value?: string) {
+    visualEditorRef.current?.focus();
+    document.execCommand(command, false, value);
+    if (visualEditorRef.current) setEditing((current) => ({ ...current, htmlTemplate: visualEditorRef.current?.innerHTML ?? current.htmlTemplate }));
+  }
+
+  function insertLink() {
+    const url = window.prompt("URL del enlace", "https://");
+    if (url) applyVisualFormat("createLink", url);
   }
 
   async function save(event: FormEvent<HTMLFormElement>) {
@@ -108,17 +128,26 @@ export default function NotificationsPage() {
                 {editing.teamsEnabled && <label className="field"><span>Canal Teams</span><input maxLength={300} value={editing.teamsChannel} onChange={(event) => setEditing({ ...editing, teamsChannel: event.target.value })} /></label>}
                 <div className="field field-wide">
                   <span>Plantilla HTML</span>
-                  <div className="toolbar">
-                    <button className="icon-button" type="button" title="Insertar título" onClick={() => setEditing({ ...editing, htmlTemplate: `${editing.htmlTemplate}\n<h2>{{productId}}</h2>` })}>H2</button>
-                    <button className="icon-button" type="button" title="Insertar párrafo" onClick={() => setEditing({ ...editing, htmlTemplate: `${editing.htmlTemplate}\n<p>{{comments}}</p>` })}>P</button>
-                    <button className="button secondary compact" type="button" title="Restaurar plantilla por defecto" onClick={() => setEditing({ ...editing, htmlTemplate: empty.htmlTemplate })}>Plantilla base</button>
+                  <div className="template-mode-switch" role="group" aria-label="Modo de edición de plantilla">
+                    <button className={templateMode === "visual" ? "active" : ""} type="button" aria-pressed={templateMode === "visual"} onClick={() => setTemplateMode("visual")}><Type size={16} /> Visual</button>
+                    <button className={templateMode === "html" ? "active" : ""} type="button" aria-pressed={templateMode === "html"} onClick={() => setTemplateMode("html")}><Code2 size={16} /> HTML</button>
+                    <button className={templateMode === "preview" ? "active" : ""} type="button" aria-pressed={templateMode === "preview"} onClick={() => setTemplateMode("preview")}><Eye size={16} /> Vista previa</button>
                   </div>
-                  <textarea rows={10} maxLength={8000} value={editing.htmlTemplate} onChange={(event) => setEditing({ ...editing, htmlTemplate: event.target.value })} />
+                  {templateMode === "visual" && <>
+                    <div className="toolbar rich-html-toolbar" role="toolbar" aria-label="Formato de plantilla">
+                      <button className="icon-button" type="button" title="Negrita" onClick={() => applyVisualFormat("bold")}><Bold size={16} /></button>
+                      <button className="icon-button" type="button" title="Cursiva" onClick={() => applyVisualFormat("italic")}><Italic size={16} /></button>
+                      <button className="icon-button" type="button" title="Subrayado" onClick={() => applyVisualFormat("underline")}><Underline size={16} /></button>
+                      <button className="icon-button" type="button" title="Convertir en título" onClick={() => applyVisualFormat("formatBlock", "h2")}><Heading2 size={16} /></button>
+                      <button className="icon-button" type="button" title="Convertir en párrafo" onClick={() => applyVisualFormat("formatBlock", "p")}><Pilcrow size={16} /></button>
+                      <button className="icon-button" type="button" title="Insertar enlace" onClick={insertLink}><Link2 size={16} /></button>
+                      <button className="button secondary compact" type="button" title="Restaurar plantilla por defecto" onClick={() => { setEditing({ ...editing, htmlTemplate: empty.htmlTemplate }); if (visualEditorRef.current) visualEditorRef.current.innerHTML = empty.htmlTemplate; }}>Plantilla base</button>
+                    </div>
+                    <div ref={visualEditorRef} className="rich-html-editor" contentEditable suppressContentEditableWarning role="textbox" aria-label="Editor visual de plantilla" onInput={(event) => setEditing({ ...editing, htmlTemplate: event.currentTarget.innerHTML })} />
+                  </>}
+                  {templateMode === "html" && <textarea aria-label="Código HTML de plantilla" rows={12} maxLength={8000} value={editing.htmlTemplate} onChange={(event) => setEditing({ ...editing, htmlTemplate: event.target.value })} />}
+                  {templateMode === "preview" && <div className="html-preview template-preview" dangerouslySetInnerHTML={{ __html: previewHtml(editing.htmlTemplate) }} />}
                 </div>
-                <article className="card field-wide">
-                  <h3>Preview de plantilla</h3>
-                  <div className="html-preview" dangerouslySetInnerHTML={{ __html: previewHtml(editing.htmlTemplate) }} />
-                </article>
                 <label className="check-field field-wide"><input type="checkbox" checked={editing.isActive} onChange={(event) => setEditing({ ...editing, isActive: event.target.checked })} /> Activo</label>
                 <div className="form-actions">
                   <button className="button" title="Guardar configuración de notificaciones" disabled={isSaving}>{editing.id ? <Save size={16} /> : <Plus size={16} />} {isSaving ? "Guardando" : editing.id ? "Guardar" : "Crear"}</button>
