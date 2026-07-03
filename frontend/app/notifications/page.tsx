@@ -4,7 +4,7 @@ import { AppNav } from "../nav";
 import { api, showToast, t } from "../lib";
 import { PaginationControls, paginate, type PaginationState } from "../pagination";
 import { Highlight, matchesSearch } from "../search";
-import { Bold, Code2, Edit3, Eye, Heading2, Italic, Link2, Pilcrow, Plus, RefreshCw, Save, Trash2, Type, Underline, X } from "lucide-react";
+import { Bold, Code2, Edit3, Eye, FileCode2, Heading2, Italic, Link2, Pilcrow, Plus, RefreshCw, Save, Trash2, Type, Underline, X } from "lucide-react";
 import { FormEvent, useEffect, useRef, useState } from "react";
 
 type NotificationSettings = {
@@ -46,6 +46,7 @@ export default function NotificationsPage() {
   const [pagination, setPagination] = useState<PaginationState>({ page: 1, pageSize: 10 });
   const [search, setSearch] = useState("");
   const [templateMode, setTemplateMode] = useState<"visual" | "html" | "preview">("visual");
+  const [editorSection, setEditorSection] = useState<"config" | "template">("config");
   const visualEditorRef = useRef<HTMLDivElement>(null);
 
   async function load() {
@@ -64,9 +65,10 @@ export default function NotificationsPage() {
     }
   }, [templateMode, editing.id, isEditorOpen]);
 
-  function openEditor(item: NotificationSettings | null = null) {
+  function openEditor(item: NotificationSettings | null = null, section: "config" | "template" = "config") {
     setEditing(item ? { ...empty, ...item, htmlTemplate: item.htmlTemplate || empty.htmlTemplate } : empty);
     setTemplateMode("visual");
+    setEditorSection(section);
     setIsEditorOpen(true);
   }
 
@@ -120,13 +122,19 @@ export default function NotificationsPage() {
                 <button className="icon-button" type="button" title="Cerrar formulario" disabled={isSaving} onClick={() => setIsEditorOpen(false)}><X size={16} /></button>
               </div>
               <form className="form top-space" onSubmit={save}>
-                <label className="field"><span>{t("Nombre")}</span><input required maxLength={120} value={editing.name} onChange={(event) => setEditing({ ...editing, name: event.target.value })} /></label>
-                <label className="field field-wide"><span>Webhook Power Automate</span><input type="url" placeholder="https://prod-..." value={editing.powerAutomateWebhookUrl} onChange={(event) => setEditing({ ...editing, powerAutomateWebhookUrl: event.target.value })} /></label>
-                <label className="check-field field-wide"><input type="checkbox" checked={editing.emailEnabled} onChange={(event) => setEditing({ ...editing, emailEnabled: event.target.checked })} /> Enviar correo</label>
-                {editing.emailEnabled && <label className="field field-wide"><span>Correos destino</span><input type="email" multiple placeholder="correo@dominio.com" value={editing.emailTo} onChange={(event) => setEditing({ ...editing, emailTo: event.target.value })} /></label>}
-                <label className="check-field field-wide"><input type="checkbox" checked={editing.teamsEnabled} onChange={(event) => setEditing({ ...editing, teamsEnabled: event.target.checked })} /> Enviar Teams</label>
-                {editing.teamsEnabled && <label className="field"><span>Canal Teams</span><input maxLength={300} value={editing.teamsChannel} onChange={(event) => setEditing({ ...editing, teamsChannel: event.target.value })} /></label>}
-                <div className="field field-wide">
+                <div className="editor-section-tabs field-wide" role="tablist" aria-label="Sección de notificación">
+                  <button className={editorSection === "config" ? "active" : ""} type="button" role="tab" aria-selected={editorSection === "config"} onClick={() => setEditorSection("config")}>Configuración</button>
+                  <button className={editorSection === "template" ? "active" : ""} type="button" role="tab" aria-selected={editorSection === "template"} onClick={() => setEditorSection("template")}><FileCode2 size={16} /> Plantilla HTML</button>
+                </div>
+                {editorSection === "config" && <>
+                  <label className="field"><span>{t("Nombre")}</span><input required maxLength={120} value={editing.name} onChange={(event) => setEditing({ ...editing, name: event.target.value })} /></label>
+                  <label className="field field-wide"><span>Webhook Power Automate</span><input type="url" placeholder="https://prod-..." value={editing.powerAutomateWebhookUrl} onChange={(event) => setEditing({ ...editing, powerAutomateWebhookUrl: event.target.value })} /></label>
+                  <label className="check-field field-wide"><input type="checkbox" checked={editing.emailEnabled} onChange={(event) => setEditing({ ...editing, emailEnabled: event.target.checked })} /> Enviar correo</label>
+                  {editing.emailEnabled && <label className="field field-wide"><span>Correos destino</span><input type="email" multiple placeholder="correo@dominio.com" value={editing.emailTo} onChange={(event) => setEditing({ ...editing, emailTo: event.target.value })} /></label>}
+                  <label className="check-field field-wide"><input type="checkbox" checked={editing.teamsEnabled} onChange={(event) => setEditing({ ...editing, teamsEnabled: event.target.checked })} /> Enviar Teams</label>
+                  {editing.teamsEnabled && <label className="field"><span>Canal Teams</span><input maxLength={300} value={editing.teamsChannel} onChange={(event) => setEditing({ ...editing, teamsChannel: event.target.value })} /></label>}
+                </>}
+                {editorSection === "template" && <div className="field field-wide">
                   <span>Plantilla HTML</span>
                   <div className="template-mode-switch" role="group" aria-label="Modo de edición de plantilla">
                     <button className={templateMode === "visual" ? "active" : ""} type="button" aria-pressed={templateMode === "visual"} onClick={() => setTemplateMode("visual")}><Type size={16} /> Visual</button>
@@ -147,7 +155,7 @@ export default function NotificationsPage() {
                   </>}
                   {templateMode === "html" && <textarea aria-label="Código HTML de plantilla" rows={12} maxLength={8000} value={editing.htmlTemplate} onChange={(event) => setEditing({ ...editing, htmlTemplate: event.target.value })} />}
                   {templateMode === "preview" && <div className="html-preview template-preview" dangerouslySetInnerHTML={{ __html: previewHtml(editing.htmlTemplate) }} />}
-                </div>
+                </div>}
                 <label className="check-field field-wide"><input type="checkbox" checked={editing.isActive} onChange={(event) => setEditing({ ...editing, isActive: event.target.checked })} /> Activo</label>
                 <div className="form-actions">
                   <button className="button" title="Guardar configuración de notificaciones" disabled={isSaving}>{editing.id ? <Save size={16} /> : <Plus size={16} />} {isSaving ? "Guardando" : editing.id ? "Guardar" : "Crear"}</button>
@@ -163,6 +171,7 @@ export default function NotificationsPage() {
             <h2>{t("Detalle de configuraciones")}</h2>
             <div className="actions">
               <button className="icon-button" title="Crear configuración de notificaciones" onClick={() => openEditor()}><Plus size={16} /></button>
+              <button className="button secondary" title="Crear o configurar una plantilla HTML" onClick={() => openEditor(null, "template")}><FileCode2 size={16} /> Plantilla HTML</button>
               <button className="button secondary" title="Actualizar detalle de configuraciones" onClick={load}><RefreshCw size={16} /> Actualizar</button>
             </div>
           </div>
@@ -179,6 +188,7 @@ export default function NotificationsPage() {
                     <span className="badge">{item.isActive ? "Activo" : "Inactivo"}</span>
                     <div className="actions">
                       <button className="icon-button" title="Editar configuración de notificaciones" onClick={() => openEditor(item)}><Edit3 size={16} /></button>
+                      <button className="icon-button" title="Editar plantilla HTML" onClick={() => openEditor(item, "template")}><FileCode2 size={16} /></button>
                       <button className="icon-button danger" title="Eliminar lógicamente la configuración de notificaciones" onClick={() => removeSettings(item.id)}><Trash2 size={16} /></button>
                     </div>
                   </div>

@@ -1605,6 +1605,32 @@ mark {
   overflow: hidden;
 }
 
+.editor-section-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(140px, 1fr));
+  gap: 6px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.editor-section-tabs button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--foreground);
+  background: var(--surface);
+}
+
+.editor-section-tabs button.active {
+  color: var(--button-text);
+  border-color: var(--primary);
+  background: var(--button-primary-background, var(--primary));
+}
+
 .template-mode-switch button {
   display: inline-flex;
   align-items: center;
