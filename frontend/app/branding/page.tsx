@@ -2,7 +2,7 @@
 
 import { AppNav } from "../nav";
 import { api, applyBrandVariables, defaultBrandSettings, showToast, t, type BrandSettings } from "../lib";
-import { ClipboardList, Image as ImageIcon, ImageUp, ListOrdered, LogIn, Menu, MousePointer2, Palette, RotateCcw, Save, Type, X } from "lucide-react";
+import { Bold, ClipboardList, Image as ImageIcon, ImageUp, Italic, ListOrdered, LogIn, Menu, MousePointer2, Palette, RotateCcw, Save, Type, Underline, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 type BrandCategory = "textos" | "colores" | "botones" | "tipografia" | "cabecera" | "menu" | "formularios" | "logo" | "login";
@@ -122,8 +122,8 @@ export default function BrandingPage() {
           <article className="brand-preview top-space" style={{ borderColor: settings.accent, background: settings.headerUseGradient ? `linear-gradient(${settings.headerGradientDirection}, ${settings.headerColor}, ${settings.headerGradientColor})` : settings.headerColor }}>
             <img src={settings.logo} alt="Logo institucional" />
             <div>
-              {settings.showHeaderTitle && <h3 style={{ fontSize: settings.headerTitleSize, fontWeight: settings.headerTitleWeight }}>{settings.title}</h3>}
-              {settings.showHeaderSubtitle && <p style={{ fontSize: settings.headerSubtitleSize, fontWeight: settings.headerSubtitleWeight }}>{settings.subtitle}</p>}
+              {settings.showHeaderTitle && <h3 style={{ color: settings.headerTitleColor, fontSize: settings.headerTitleSize, fontWeight: settings.headerTitleWeight, fontStyle: settings.headerTitleItalic ? "italic" : "normal", textDecoration: settings.headerTitleUnderline ? "underline" : "none" }}>{settings.title}</h3>}
+              {settings.showHeaderSubtitle && <p style={{ color: settings.headerSubtitleColor, fontSize: settings.headerSubtitleSize, fontWeight: settings.headerSubtitleWeight, fontStyle: settings.headerSubtitleItalic ? "italic" : "normal", textDecoration: settings.headerSubtitleUnderline ? "underline" : "none" }}>{settings.subtitle}</p>}
             </div>
           </article>
           <article className="card top-space">
@@ -157,14 +157,18 @@ export default function BrandingPage() {
               <div className="form top-space">
                 {activeCategory === "textos" && (
                   <>
-                    <label className="field"><span>{t("Título")}</span><input required maxLength={120} value={settings.title} onChange={(event) => setSettings({ ...settings, title: event.target.value })} /></label>
-                    <label className="field"><span>{t("Subtítulo")}</span><input required maxLength={180} value={settings.subtitle} onChange={(event) => setSettings({ ...settings, subtitle: event.target.value })} /></label>
+                    <h3 className="field-wide settings-group-title">{t("Título")}</h3>
+                    <label className="field field-wide"><span>Contenido del título</span><input required maxLength={120} value={settings.title} onChange={(event) => setSettings({ ...settings, title: event.target.value })} /></label>
                     <label className="check-field"><input type="checkbox" checked={settings.showHeaderTitle} onChange={(event) => setSettings({ ...settings, showHeaderTitle: event.target.checked })} /> Mostrar título en cabecera</label>
-                    <label className="check-field"><input type="checkbox" checked={settings.showHeaderSubtitle} onChange={(event) => setSettings({ ...settings, showHeaderSubtitle: event.target.checked })} /> Mostrar subtítulo en cabecera</label>
                     <label className="field"><span>Tamaño del título</span><input type="number" min={14} max={32} value={settings.headerTitleSize} onChange={(event) => setSettings({ ...settings, headerTitleSize: Number(event.target.value) })} /></label>
-                    <label className="field"><span>Peso del título</span><select value={settings.headerTitleWeight} onChange={(event) => setSettings({ ...settings, headerTitleWeight: event.target.value as BrandSettings["headerTitleWeight"] })}><option value="400">Normal</option><option value="600">Seminegrita</option><option value="700">Negrita</option></select></label>
+                    <ColorField label="Color del título" value={settings.headerTitleColor} onChange={(headerTitleColor) => setSettings({ ...settings, headerTitleColor })} />
+                    <RichTextToolbar bold={settings.headerTitleWeight === "700"} italic={settings.headerTitleItalic} underline={settings.headerTitleUnderline} onBold={() => setSettings({ ...settings, headerTitleWeight: settings.headerTitleWeight === "700" ? "400" : "700" })} onItalic={() => setSettings({ ...settings, headerTitleItalic: !settings.headerTitleItalic })} onUnderline={() => setSettings({ ...settings, headerTitleUnderline: !settings.headerTitleUnderline })} />
+                    <h3 className="field-wide settings-group-title">{t("Subtítulo")}</h3>
+                    <label className="field field-wide"><span>Contenido del subtítulo</span><input required maxLength={180} value={settings.subtitle} onChange={(event) => setSettings({ ...settings, subtitle: event.target.value })} /></label>
+                    <label className="check-field"><input type="checkbox" checked={settings.showHeaderSubtitle} onChange={(event) => setSettings({ ...settings, showHeaderSubtitle: event.target.checked })} /> Mostrar subtítulo en cabecera</label>
                     <label className="field"><span>Tamaño del subtítulo</span><input type="number" min={10} max={24} value={settings.headerSubtitleSize} onChange={(event) => setSettings({ ...settings, headerSubtitleSize: Number(event.target.value) })} /></label>
-                    <label className="field"><span>Peso del subtítulo</span><select value={settings.headerSubtitleWeight} onChange={(event) => setSettings({ ...settings, headerSubtitleWeight: event.target.value as BrandSettings["headerSubtitleWeight"] })}><option value="400">Normal</option><option value="600">Seminegrita</option><option value="700">Negrita</option></select></label>
+                    <ColorField label="Color del subtítulo" value={settings.headerSubtitleColor} onChange={(headerSubtitleColor) => setSettings({ ...settings, headerSubtitleColor })} />
+                    <RichTextToolbar bold={settings.headerSubtitleWeight === "700"} italic={settings.headerSubtitleItalic} underline={settings.headerSubtitleUnderline} onBold={() => setSettings({ ...settings, headerSubtitleWeight: settings.headerSubtitleWeight === "700" ? "400" : "700" })} onItalic={() => setSettings({ ...settings, headerSubtitleItalic: !settings.headerSubtitleItalic })} onUnderline={() => setSettings({ ...settings, headerSubtitleUnderline: !settings.headerSubtitleUnderline })} />
                   </>
                 )}
                 {activeCategory === "colores" && (
@@ -331,4 +335,8 @@ function ColorField({ label, value, onChange }: { label: string; value: string; 
 
 function GradientDirectionField({ label, value, onChange }: { label: string; value: BrandSettings["headerGradientDirection"]; onChange: (value: BrandSettings["headerGradientDirection"]) => void }) {
   return <label className="field"><span>{label}</span><select value={value} onChange={(event) => onChange(event.target.value as BrandSettings["headerGradientDirection"])}><option value="135deg">Diagonal</option><option value="to right">Horizontal</option><option value="to bottom">Vertical</option></select></label>;
+}
+
+function RichTextToolbar({ bold, italic, underline, onBold, onItalic, onUnderline }: { bold: boolean; italic: boolean; underline: boolean; onBold: () => void; onItalic: () => void; onUnderline: () => void }) {
+  return <div className="field rich-text-field"><span>Formato enriquecido</span><div className="rich-text-toolbar"><button className={bold ? "icon-button active" : "icon-button"} type="button" title="Aplicar o quitar negrita" aria-pressed={bold} onClick={onBold}><Bold size={16} /></button><button className={italic ? "icon-button active" : "icon-button"} type="button" title="Aplicar o quitar cursiva" aria-pressed={italic} onClick={onItalic}><Italic size={16} /></button><button className={underline ? "icon-button active" : "icon-button"} type="button" title="Aplicar o quitar subrayado" aria-pressed={underline} onClick={onUnderline}><Underline size={16} /></button></div></div>;
 }

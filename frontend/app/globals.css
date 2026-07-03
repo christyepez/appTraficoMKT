@@ -153,9 +153,11 @@ button:disabled {
 .brand-text {
   display: block;
   max-width: 620px;
-  color: var(--topbar-text);
+  color: var(--header-title-color, var(--topbar-text));
   font-size: var(--header-title-size, 18px);
   font-weight: var(--header-title-weight, 700);
+  font-style: var(--header-title-style, normal);
+  text-decoration: var(--header-title-decoration, none);
   line-height: 1.2;
 }
 
@@ -169,9 +171,11 @@ button:disabled {
 .brand-subtitle {
   display: block;
   max-width: 620px;
-  color: var(--topbar-text);
+  color: var(--header-subtitle-color, var(--topbar-text));
   font-size: var(--header-subtitle-size, 12px);
   font-weight: var(--header-subtitle-weight, 400);
+  font-style: var(--header-subtitle-style, normal);
+  text-decoration: var(--header-subtitle-decoration, none);
   line-height: 1.2;
 }
 
@@ -1605,6 +1609,23 @@ mark {
   padding-bottom: 8px;
   border-bottom: 1px solid var(--line);
   font-size: 1rem;
+}
+
+.rich-text-field {
+  align-self: end;
+}
+
+.rich-text-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 42px;
+}
+
+.rich-text-toolbar .icon-button.active {
+  border-color: var(--primary);
+  color: var(--button-text);
+  background: var(--button-primary-background, var(--primary));
 }
 
 .menu-order-grid {

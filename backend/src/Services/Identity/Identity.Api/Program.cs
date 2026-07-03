@@ -404,6 +404,12 @@ public sealed record UpsertBrandSettingsRequest(
     int HeaderSubtitleSize,
     string HeaderTitleWeight,
     string HeaderSubtitleWeight,
+    bool HeaderTitleItalic,
+    bool HeaderSubtitleItalic,
+    bool HeaderTitleUnderline,
+    bool HeaderSubtitleUnderline,
+    string HeaderTitleColor,
+    string HeaderSubtitleColor,
     int BrandVersion,
     string Logo,
     string ChatbotIcon,
@@ -541,6 +547,8 @@ public sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> option
             entity.Property(x => x.HeaderTextPosition).HasMaxLength(20);
             entity.Property(x => x.HeaderTitleWeight).HasMaxLength(10);
             entity.Property(x => x.HeaderSubtitleWeight).HasMaxLength(10);
+            entity.Property(x => x.HeaderTitleColor).HasMaxLength(20);
+            entity.Property(x => x.HeaderSubtitleColor).HasMaxLength(20);
             entity.Property(x => x.Logo).HasColumnType("nvarchar(max)");
             entity.Property(x => x.ChatbotIcon).HasColumnType("nvarchar(max)");
             entity.Property(x => x.ShowPublicRequirementForm).HasDefaultValue(true);
@@ -597,6 +605,12 @@ public sealed class BrandSettings
     public int HeaderSubtitleSize { get; set; } = 12;
     public string HeaderTitleWeight { get; set; } = "700";
     public string HeaderSubtitleWeight { get; set; } = "400";
+    public bool HeaderTitleItalic { get; set; }
+    public bool HeaderSubtitleItalic { get; set; }
+    public bool HeaderTitleUnderline { get; set; }
+    public bool HeaderSubtitleUnderline { get; set; }
+    public string HeaderTitleColor { get; set; } = "#ffffff";
+    public string HeaderSubtitleColor { get; set; } = "#ffffff";
     public int BrandVersion { get; set; } = 4;
     public string Logo { get; set; } = "https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/logo-gen-cuad.jpg";
     public string ChatbotIcon { get; set; } = "https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/logo-gen-cuad.jpg";
@@ -664,6 +678,12 @@ public sealed class BrandSettings
         HeaderSubtitleSize = Math.Clamp(request.HeaderSubtitleSize, 10, 24);
         HeaderTitleWeight = NormalizeFontWeight(request.HeaderTitleWeight, "700");
         HeaderSubtitleWeight = NormalizeFontWeight(request.HeaderSubtitleWeight, "400");
+        HeaderTitleItalic = request.HeaderTitleItalic;
+        HeaderSubtitleItalic = request.HeaderSubtitleItalic;
+        HeaderTitleUnderline = request.HeaderTitleUnderline;
+        HeaderSubtitleUnderline = request.HeaderSubtitleUnderline;
+        HeaderTitleColor = request.HeaderTitleColor.Trim();
+        HeaderSubtitleColor = request.HeaderSubtitleColor.Trim();
         BrandVersion = Math.Max(4, request.BrandVersion);
         Logo = request.Logo.Trim();
         ChatbotIcon = request.ChatbotIcon.Trim();
@@ -911,6 +931,12 @@ public static class IdentitySchema
                     [HeaderSubtitleSize] int NOT NULL DEFAULT(12),
                     [HeaderTitleWeight] nvarchar(10) NOT NULL DEFAULT('700'),
                     [HeaderSubtitleWeight] nvarchar(10) NOT NULL DEFAULT('400'),
+                    [HeaderTitleItalic] bit NOT NULL DEFAULT(0),
+                    [HeaderSubtitleItalic] bit NOT NULL DEFAULT(0),
+                    [HeaderTitleUnderline] bit NOT NULL DEFAULT(0),
+                    [HeaderSubtitleUnderline] bit NOT NULL DEFAULT(0),
+                    [HeaderTitleColor] nvarchar(20) NOT NULL DEFAULT('#ffffff'),
+                    [HeaderSubtitleColor] nvarchar(20) NOT NULL DEFAULT('#ffffff'),
                     [BrandVersion] int NOT NULL,
                     [Logo] nvarchar(max) NOT NULL,
                     [ChatbotIcon] nvarchar(max) NOT NULL DEFAULT('https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/logo-gen-cuad.jpg'),
@@ -958,6 +984,30 @@ public static class IdentitySchema
             IF COL_LENGTH('BrandSettings', 'HeaderSubtitleWeight') IS NULL
             BEGIN
                 ALTER TABLE [BrandSettings] ADD [HeaderSubtitleWeight] nvarchar(10) NOT NULL DEFAULT('400')
+            END
+            IF COL_LENGTH('BrandSettings', 'HeaderTitleItalic') IS NULL
+            BEGIN
+                ALTER TABLE [BrandSettings] ADD [HeaderTitleItalic] bit NOT NULL DEFAULT(0)
+            END
+            IF COL_LENGTH('BrandSettings', 'HeaderSubtitleItalic') IS NULL
+            BEGIN
+                ALTER TABLE [BrandSettings] ADD [HeaderSubtitleItalic] bit NOT NULL DEFAULT(0)
+            END
+            IF COL_LENGTH('BrandSettings', 'HeaderTitleUnderline') IS NULL
+            BEGIN
+                ALTER TABLE [BrandSettings] ADD [HeaderTitleUnderline] bit NOT NULL DEFAULT(0)
+            END
+            IF COL_LENGTH('BrandSettings', 'HeaderSubtitleUnderline') IS NULL
+            BEGIN
+                ALTER TABLE [BrandSettings] ADD [HeaderSubtitleUnderline] bit NOT NULL DEFAULT(0)
+            END
+            IF COL_LENGTH('BrandSettings', 'HeaderTitleColor') IS NULL
+            BEGIN
+                ALTER TABLE [BrandSettings] ADD [HeaderTitleColor] nvarchar(20) NOT NULL DEFAULT('#ffffff')
+            END
+            IF COL_LENGTH('BrandSettings', 'HeaderSubtitleColor') IS NULL
+            BEGIN
+                ALTER TABLE [BrandSettings] ADD [HeaderSubtitleColor] nvarchar(20) NOT NULL DEFAULT('#ffffff')
             END
             IF COL_LENGTH('BrandSettings', 'ChatbotIcon') IS NULL
             BEGIN

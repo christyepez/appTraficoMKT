@@ -55,6 +55,12 @@ export type BrandSettings = {
   headerSubtitleSize: number;
   headerTitleWeight: "400" | "600" | "700";
   headerSubtitleWeight: "400" | "600" | "700";
+  headerTitleItalic: boolean;
+  headerSubtitleItalic: boolean;
+  headerTitleUnderline: boolean;
+  headerSubtitleUnderline: boolean;
+  headerTitleColor: string;
+  headerSubtitleColor: string;
   brandVersion: number;
   logo: string;
   chatbotIcon: string;
@@ -108,6 +114,12 @@ export const defaultBrandSettings: BrandSettings = {
   headerSubtitleSize: 12,
   headerTitleWeight: "700",
   headerSubtitleWeight: "400",
+  headerTitleItalic: false,
+  headerSubtitleItalic: false,
+  headerTitleUnderline: false,
+  headerSubtitleUnderline: false,
+  headerTitleColor: "#ffffff",
+  headerSubtitleColor: "#ffffff",
   brandVersion: 3,
   logo: "https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/logo-gen-cuad.jpg",
   chatbotIcon: "https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/logo-gen-cuad.jpg",
@@ -152,7 +164,13 @@ export function applyBrandVariables(settings: Partial<BrandSettings>) {
     "--header-title-size": `${settings.headerTitleSize ?? defaultBrandSettings.headerTitleSize}px`,
     "--header-subtitle-size": `${settings.headerSubtitleSize ?? defaultBrandSettings.headerSubtitleSize}px`,
     "--header-title-weight": settings.headerTitleWeight ?? defaultBrandSettings.headerTitleWeight,
-    "--header-subtitle-weight": settings.headerSubtitleWeight ?? defaultBrandSettings.headerSubtitleWeight
+    "--header-subtitle-weight": settings.headerSubtitleWeight ?? defaultBrandSettings.headerSubtitleWeight,
+    "--header-title-style": settings.headerTitleItalic ? "italic" : "normal",
+    "--header-subtitle-style": settings.headerSubtitleItalic ? "italic" : "normal",
+    "--header-title-decoration": settings.headerTitleUnderline ? "underline" : "none",
+    "--header-subtitle-decoration": settings.headerSubtitleUnderline ? "underline" : "none",
+    "--header-title-color": settings.headerTitleColor ?? defaultBrandSettings.headerTitleColor,
+    "--header-subtitle-color": settings.headerSubtitleColor ?? defaultBrandSettings.headerSubtitleColor
   }).forEach(([key, value]) => {
     if (value) root.style.setProperty(key, String(value));
   });
