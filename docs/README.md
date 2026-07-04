@@ -3,6 +3,8 @@
 Esta carpeta contiene la documentacion funcional, tecnica y de arquitectura de la aplicacion.
 GitHub renderiza los diagramas Mermaid directamente en los archivos Markdown.
 
+Las capturas de escritorio y dispositivos moviles fueron regeneradas desde la aplicacion operativa el 4 de julio de 2026.
+
 ## Indice
 
 - [Arquitectura C4](architecture/c4.md)
