@@ -25,6 +25,8 @@ services:
       ASPNETCORE_URLS: http://+:8080
       ConnectionStrings__RequirementsDb: "Server=sqlserver;Database=RequirementsDb;User Id=sa;Password=Passw0rd!Local;TrustServerCertificate=True"
       Services__Activities: "http://activities-api:8080"
+      App__PublicBaseUrl: "${PUBLIC_APP_URL:-https://marketingtrafico.indoamerica.edu.ec}"
+      Satisfaction__SigningKey: "${SATISFACTION_SIGNING_KEY:-local-satisfaction-signing-key-change-in-production}"
     ports:
       - "5101:8080"
     depends_on:

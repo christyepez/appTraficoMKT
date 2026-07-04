@@ -1,6 +1,8 @@
 using BuildingBlocks;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -42,9 +44,9 @@ using (var scope = app.Services.CreateScope())
 
 app.MapGet("/health", () => Results.Ok(new { service = "requirements", status = "healthy" }));
 
-app.MapGet("/requirements", async (RequirementsDbContext db, IHttpClientFactory httpClientFactory) =>
+app.MapGet("/requirements", async (RequirementsDbContext db, IHttpClientFactory httpClientFactory, IConfiguration configuration) =>
 {
-    await RequirementWorkflowReconciliation.CompleteReadyAsync(db, httpClientFactory);
+    await RequirementWorkflowReconciliation.CompleteReadyAsync(db, httpClientFactory, configuration);
     return await db.Requirements.Where(x => !x.IsDeleted).OrderByDescending(x => x.CreatedAt).ToListAsync();
 });
 
@@ -84,6 +86,32 @@ app.MapGet("/requirements/{id:guid}/audit", async (Guid id, RequirementsDbContex
 
 app.MapGet("/requirements/{id:guid}", async (Guid id, RequirementsDbContext db) =>
     await db.Requirements.FindAsync(id) is { IsDeleted: false } requirement ? Results.Ok(requirement) : Results.NotFound());
+
+app.MapGet("/requirements/satisfaction/{token}", async (string token, RequirementsDbContext db, IConfiguration configuration) =>
+{
+    if (!SatisfactionLinks.TryReadToken(token, configuration, out var requirementId)) return Results.NotFound();
+    var requirement = await db.Requirements.FindAsync(requirementId);
+    if (requirement is null || requirement.IsDeleted || requirement.Status != RequirementStatus.Completed) return Results.NotFound();
+    var response = await db.SatisfactionResponses.SingleOrDefaultAsync(x => x.RequirementId == requirementId);
+    return Results.Ok(new SatisfactionFormResponse(requirement.Code, requirement.ActivityOrEvent, requirement.RequestedBy, response is not null, response?.SubmittedAt));
+});
+
+app.MapPost("/requirements/satisfaction/{token}", async (string token, SubmitSatisfactionRequest request, RequirementsDbContext db, IConfiguration configuration) =>
+{
+    if (!SatisfactionLinks.TryReadToken(token, configuration, out var requirementId)) return Results.NotFound();
+    var requirement = await db.Requirements.FindAsync(requirementId);
+    if (requirement is null || requirement.IsDeleted || requirement.Status != RequirementStatus.Completed) return Results.NotFound();
+    if (await db.SatisfactionResponses.AnyAsync(x => x.RequirementId == requirementId))
+        return Results.Conflict(new { message = "La encuesta de este requerimiento ya fue registrada." });
+    if (!SatisfactionResponse.IsValidRating(request.OverallRating) || !SatisfactionResponse.IsValidRating(request.TimelinessRating) || !SatisfactionResponse.IsValidRating(request.QualityRating))
+        return Results.BadRequest(new { message = "Las calificaciones deben estar entre 1 y 5." });
+
+    var response = SatisfactionResponse.Create(requirementId, request);
+    db.SatisfactionResponses.Add(response);
+    db.AuditEvents.Add(RequirementAuditEvent.Changed(requirementId, requirement.Status.ToString(), requirement.Status.ToString(), "Encuesta de satisfacción registrada", requirement.RequestedBy, AuditJson.Build("Satisfacción", "Registrar encuesta", requirement.RequestedBy, request)));
+    await db.SaveChangesAsync();
+    return Results.Created($"/requirements/satisfaction/{token}", new { message = "Gracias. Su respuesta fue registrada correctamente.", response.SubmittedAt });
+});
 
 app.MapPost("/requirements", async (CreateRequirementRequest request, RequirementsDbContext db, IHttpClientFactory httpClientFactory) =>
 {
@@ -199,7 +227,7 @@ app.MapPatch("/requirements/{id:guid}/execution", async (Guid id, RequirementsDb
     return Results.Ok(requirement);
 });
 
-app.MapPatch("/requirements/{id:guid}/complete", async (Guid id, RequirementsDbContext db, IHttpClientFactory httpClientFactory) =>
+app.MapPatch("/requirements/{id:guid}/complete", async (Guid id, RequirementsDbContext db, IHttpClientFactory httpClientFactory, IConfiguration configuration) =>
 {
     var requirement = await db.Requirements.FindAsync(id);
     if (requirement is null || requirement.IsDeleted) return Results.NotFound();
@@ -213,6 +241,7 @@ app.MapPatch("/requirements/{id:guid}/complete", async (Guid id, RequirementsDbC
     CatalogReferenceWriter.UpsertStatusReference(db, requirement.Status);
     db.AuditEvents.Add(RequirementAuditEvent.Changed(id, previousStatus, requirement.Status.ToString(), $"Requerimiento completado con {summary.Approved}/{summary.Total} productos aprobados", "Sistema", AuditJson.Build("Requerimientos", "Completar", "Sistema", new { id, summary.Total, summary.Approved })));
     await db.SaveChangesAsync();
+    await RequirementNotifications.NotifyCompletedAsync(httpClientFactory, configuration, requirement);
     return Results.Ok(requirement);
 });
 
@@ -234,9 +263,11 @@ public sealed record CreateRequirementRequest(
     string EventFormat,
     DateOnly RequestDate,
     Guid? StatusId = null);
+public sealed record SubmitSatisfactionRequest(int OverallRating, int TimelinessRating, int QualityRating, bool WouldRecommend, string? Comments);
+public sealed record SatisfactionFormResponse(string RequirementCode, string ActivityOrEvent, string RequestedBy, bool AlreadySubmitted, DateTimeOffset? SubmittedAt);
 public sealed record ActivitySummary(int Total, int Approved, int Pending);
 public sealed record AssignmentCountResponse(int Count);
-public sealed record SystemNotificationRequest(string EventType, string Title, string Message, string RecipientEmail, string CreatedBy, Guid? RequirementId, Guid? ActivityId, string PayloadJson);
+public sealed record SystemNotificationRequest(string EventType, string Title, string Message, string RecipientEmail, string CreatedBy, Guid? RequirementId, Guid? ActivityId, string PayloadJson, string? Html = null);
 public sealed record MetricSlice(string Name, int Count, decimal Percentage);
 public sealed record StageMetric(string Stage, decimal AverageHours, int Events);
 public sealed record RequirementMetricsResponse(
@@ -255,6 +286,7 @@ public sealed class RequirementsDbContext(DbContextOptions<RequirementsDbContext
     public DbSet<Requirement> Requirements => Set<Requirement>();
     public DbSet<CatalogReference> CatalogReferences => Set<CatalogReference>();
     public DbSet<RequirementAuditEvent> AuditEvents => Set<RequirementAuditEvent>();
+    public DbSet<SatisfactionResponse> SatisfactionResponses => Set<SatisfactionResponse>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -301,7 +333,38 @@ public sealed class RequirementsDbContext(DbContextOptions<RequirementsDbContext
             entity.HasIndex(x => x.RequirementId);
             entity.HasIndex(x => x.OccurredAt);
         });
+
+        modelBuilder.Entity<SatisfactionResponse>(entity =>
+        {
+            entity.ToTable("RequirementSatisfactionResponses");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Comments).HasMaxLength(2000);
+            entity.HasIndex(x => x.RequirementId).IsUnique();
+        });
     }
+}
+
+public sealed class SatisfactionResponse
+{
+    public Guid Id { get; private set; } = Guid.NewGuid();
+    public Guid RequirementId { get; private set; }
+    public int OverallRating { get; private set; }
+    public int TimelinessRating { get; private set; }
+    public int QualityRating { get; private set; }
+    public bool WouldRecommend { get; private set; }
+    public string Comments { get; private set; } = string.Empty;
+    public DateTimeOffset SubmittedAt { get; private set; } = DateTimeOffset.UtcNow;
+
+    public static bool IsValidRating(int value) => value is >= 1 and <= 5;
+    public static SatisfactionResponse Create(Guid requirementId, SubmitSatisfactionRequest request) => new()
+    {
+        RequirementId = requirementId,
+        OverallRating = request.OverallRating,
+        TimelinessRating = request.TimelinessRating,
+        QualityRating = request.QualityRating,
+        WouldRecommend = request.WouldRecommend,
+        Comments = (request.Comments ?? string.Empty).Trim()
+    };
 }
 
 public sealed class CatalogReference
@@ -360,11 +423,60 @@ public static class RequirementNotifications
             // La gestión del requerimiento no debe fallar si la notificación está temporalmente no disponible.
         }
     }
+
+    public static Task NotifyCompletedAsync(IHttpClientFactory httpClientFactory, IConfiguration configuration, Requirement requirement)
+    {
+        var satisfactionUrl = SatisfactionLinks.CreateUrl(requirement.Id, configuration);
+        var title = $"Requerimiento {requirement.Code} finalizado";
+        var message = $"El requerimiento {requirement.Code}: {requirement.ActivityOrEvent} fue completado. Por favor registre su satisfacción.";
+        var html = $"<h2>{System.Net.WebUtility.HtmlEncode(title)}</h2><p>{System.Net.WebUtility.HtmlEncode(message)}</p><p><a href=\"{System.Net.WebUtility.HtmlEncode(satisfactionUrl)}\" style=\"display:inline-block;padding:12px 18px;background:#3c235f;color:#fff;text-decoration:none;border-radius:4px\">Completar encuesta de satisfacción</a></p>";
+        return NotifyAsync(httpClientFactory, new SystemNotificationRequest(
+            "RequirementCompleted", title, message, requirement.RequestedBy, "Sistema", requirement.Id, null,
+            AuditJson.Build("Notificaciones", "Requerimiento finalizado", "Sistema", new { requirement.Id, requirement.Code, requirement.ActivityOrEvent, requirement.RequestedBy, satisfactionUrl }), html));
+    }
+}
+
+public static class SatisfactionLinks
+{
+    public static string CreateUrl(Guid requirementId, IConfiguration configuration)
+    {
+        var baseUrl = (configuration["App:PublicBaseUrl"] ?? "https://marketingtrafico.indoamerica.edu.ec").TrimEnd('/');
+        return $"{baseUrl}/satisfaction/{CreateToken(requirementId, configuration)}";
+    }
+
+    public static bool TryReadToken(string token, IConfiguration configuration, out Guid requirementId)
+    {
+        requirementId = Guid.Empty;
+        try
+        {
+            var bytes = Convert.FromBase64String(token.Replace('-', '+').Replace('_', '/') + new string('=', (4 - token.Length % 4) % 4));
+            if (bytes.Length != 32) return false;
+            var idBytes = bytes[..16];
+            var expected = Sign(idBytes, configuration);
+            if (!CryptographicOperations.FixedTimeEquals(bytes.AsSpan(16, 16), expected.AsSpan(0, 16))) return false;
+            requirementId = new Guid(idBytes);
+            return true;
+        }
+        catch { return false; }
+    }
+
+    private static string CreateToken(Guid requirementId, IConfiguration configuration)
+    {
+        var idBytes = requirementId.ToByteArray();
+        var bytes = idBytes.Concat(Sign(idBytes, configuration).Take(16)).ToArray();
+        return Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+    }
+
+    private static byte[] Sign(byte[] value, IConfiguration configuration)
+    {
+        var key = configuration["Satisfaction:SigningKey"] ?? "change-this-satisfaction-key-in-production";
+        return HMACSHA256.HashData(Encoding.UTF8.GetBytes(key), value);
+    }
 }
 
 public static class RequirementWorkflowReconciliation
 {
-    public static async Task CompleteReadyAsync(RequirementsDbContext db, IHttpClientFactory httpClientFactory)
+    public static async Task CompleteReadyAsync(RequirementsDbContext db, IHttpClientFactory httpClientFactory, IConfiguration configuration)
     {
         try
         {
@@ -393,6 +505,8 @@ public static class RequirementWorkflowReconciliation
             }
 
             if (requirements.Count > 0) await db.SaveChangesAsync();
+            foreach (var requirement in requirements)
+                await RequirementNotifications.NotifyCompletedAsync(httpClientFactory, configuration, requirement);
         }
         catch
         {
@@ -547,6 +661,25 @@ public static class RequirementsSchema
                     CONSTRAINT [PK_CatalogReferences] PRIMARY KEY ([Id])
                 )
                 CREATE UNIQUE INDEX [IX_CatalogReferences_Type_Code] ON [CatalogReferences] ([Type], [Code])
+            END
+            """);
+
+        await db.Database.ExecuteSqlRawAsync("""
+            IF OBJECT_ID('RequirementSatisfactionResponses', 'U') IS NULL
+            BEGIN
+                CREATE TABLE [RequirementSatisfactionResponses] (
+                    [Id] uniqueidentifier NOT NULL,
+                    [RequirementId] uniqueidentifier NOT NULL,
+                    [OverallRating] int NOT NULL,
+                    [TimelinessRating] int NOT NULL,
+                    [QualityRating] int NOT NULL,
+                    [WouldRecommend] bit NOT NULL,
+                    [Comments] nvarchar(2000) NOT NULL,
+                    [SubmittedAt] datetimeoffset NOT NULL,
+                    CONSTRAINT [PK_RequirementSatisfactionResponses] PRIMARY KEY ([Id]),
+                    CONSTRAINT [FK_RequirementSatisfactionResponses_Requirements_RequirementId] FOREIGN KEY ([RequirementId]) REFERENCES [Requirements] ([Id])
+                );
+                CREATE UNIQUE INDEX [IX_RequirementSatisfactionResponses_RequirementId] ON [RequirementSatisfactionResponses] ([RequirementId]);
             END
             """);
 

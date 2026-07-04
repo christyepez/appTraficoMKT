@@ -81,7 +81,7 @@ export default function PublicRequirementPage() {
         </div>
         <form className="form" onSubmit={save}>
           <label className="field"><span>Actividad o evento</span><input name="activityOrEvent" required /></label>
-          <label className="field"><span>Solicitante</span><input name="requestedBy" required placeholder="Nombre o correo institucional" /></label>
+          <label className="field"><span>Correo del solicitante</span><input name="requestedBy" type="email" required placeholder="correo@uti.edu.ec" /></label>
           <label className="field">
             <span>Facultad</span>
             <select required value={facultyId} onChange={(event) => setFacultyId(event.target.value)}>

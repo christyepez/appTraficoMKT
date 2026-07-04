@@ -367,7 +367,7 @@ app.MapPost("/notification-records/system", async (SystemNotificationRequest req
     var record = NotificationRecord.Create(request.EventType, request.Title, request.Message, request.RecipientEmail, request.CreatedBy, request.RequirementId, request.ActivityId, request.PayloadJson);
     db.NotificationRecords.Add(record);
     await db.SaveChangesAsync();
-    await NotificationDelivery.SendAsync(record, settings, httpClientFactory, configuration);
+    await NotificationDelivery.SendAsync(record, settings, httpClientFactory, configuration, request.Html);
     return Results.Created($"/notification-records/{record.Id}", record);
 });
 
@@ -420,7 +420,7 @@ public sealed record UpsertNotificationSettingsRequest(
     string PowerAutomateWebhookUrl,
     string HtmlTemplate,
     bool IsActive);
-public sealed record SystemNotificationRequest(string EventType, string Title, string Message, string RecipientEmail, string CreatedBy, Guid? RequirementId, Guid? ActivityId, string PayloadJson);
+public sealed record SystemNotificationRequest(string EventType, string Title, string Message, string RecipientEmail, string CreatedBy, Guid? RequirementId, Guid? ActivityId, string PayloadJson, string? Html = null);
 public sealed record NotificationCountResponse(int Count);
 public sealed record AcknowledgeNotificationRequest(string AcknowledgedBy);
 public sealed record EvidenceItemDto(Guid Id, Guid ActivityId, string FileName, string StorageUrl, string UploadedBy);
@@ -833,7 +833,7 @@ public sealed class NotificationRecord
 
 public static class NotificationDelivery
 {
-    public static async Task SendAsync(NotificationRecord record, NotificationSettings? settings, IHttpClientFactory httpClientFactory, IConfiguration configuration)
+    public static async Task SendAsync(NotificationRecord record, NotificationSettings? settings, IHttpClientFactory httpClientFactory, IConfiguration configuration, string? customHtml = null)
     {
         var webhookUrl = settings?.PowerAutomateWebhookUrl;
         if (string.IsNullOrWhiteSpace(webhookUrl)) webhookUrl = configuration["Notifications:PowerAutomateWebhookUrl"];
@@ -844,7 +844,7 @@ public static class NotificationDelivery
             eventType = record.EventType,
             subject = record.Title,
             teamsTitle = record.Title,
-            html = $"<h2>{System.Net.WebUtility.HtmlEncode(record.Title)}</h2><p>{System.Net.WebUtility.HtmlEncode(record.Message)}</p>",
+            html = string.IsNullOrWhiteSpace(customHtml) ? $"<h2>{System.Net.WebUtility.HtmlEncode(record.Title)}</h2><p>{System.Net.WebUtility.HtmlEncode(record.Message)}</p>" : customHtml,
             data = new
             {
                 record.Id,

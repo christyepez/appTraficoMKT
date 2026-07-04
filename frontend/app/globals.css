@@ -873,6 +873,26 @@ mark {
   width: min(920px, calc(100vw - 32px));
 }
 
+.satisfaction-panel {
+  width: min(620px, calc(100vw - 32px));
+}
+
+.satisfaction-summary,
+.satisfaction-success {
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #f7f8fa;
+}
+
+.satisfaction-success {
+  place-items: center;
+  color: var(--success);
+  text-align: center;
+}
+
 .chatbot-launcher {
   position: fixed;
   right: 22px;

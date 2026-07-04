@@ -274,7 +274,7 @@ export default function LoginPage() {
           </div>
           <form className="form top-space" onSubmit={createFromChat}>
             <label className="field"><span>Actividad o evento</span><input name="activityOrEvent" required /></label>
-            <label className="field"><span>Solicitante</span><input name="requestedBy" required /></label>
+            <label className="field"><span>Correo del solicitante</span><input name="requestedBy" type="email" required placeholder="correo@uti.edu.ec" /></label>
             <label className="field"><span>Lugar</span><input name="place" /></label>
             <label className="field"><span>Fecha inicio</span><input name="startDate" type="date" /></label>
             <label className="field"><span>Fecha fin</span><input name="endDate" type="date" /></label>

@@ -130,7 +130,7 @@ export default function DashboardPage() {
               </div>
           <form className="form" onSubmit={save} key={editing?.id ?? "new"}>
             <label className="field"><span>Actividad o evento</span><input name="activityOrEvent" required defaultValue={editing?.activityOrEvent ?? ""} /></label>
-            <label className="field"><span>Solicitante</span><input name="requestedBy" required defaultValue={editing?.requestedBy ?? ""} /></label>
+            <label className="field"><span>Correo del solicitante</span><input name="requestedBy" type="email" required defaultValue={editing?.requestedBy ?? ""} /></label>
             <label className="field">
               <span>Facultad</span>
               <select name="facultyId" required value={selectedFacultyId} onChange={(event) => setSelectedFacultyId(event.target.value)}>
