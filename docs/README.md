@@ -28,4 +28,5 @@ GitHub renderiza los diagramas Mermaid directamente en los archivos Markdown.
 - Aprobaciones.
 - Auditorias y tracking.
 - Administracion de catalogos, usuarios, marca, archivos y notificaciones.
+- Cierre automático, correo al solicitante y encuesta interna de satisfacción.
 

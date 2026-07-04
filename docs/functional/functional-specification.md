@@ -30,6 +30,7 @@ Centralizar la recepción, planificación, ejecución, aprobación y medición d
 | RF-08 | Configuración | Marca, almacenamiento, notificaciones y carga inicial. |
 | RF-09 | Seguimiento | Auditoría JSON, notificaciones internas y confirmación de recibido. |
 | RF-10 | Analítica | Carga, tiempos, incidencia, participación y usabilidad. |
+| RF-11 | Satisfacción | Notificación al cierre, formulario interno por token, respuesta única y auditoría. |
 
 ## 4. Proceso de negocio
 
@@ -43,6 +44,7 @@ sequenceDiagram
   participant E as Evidencias
   actor A as Aprobador
   participant N as Notificaciones
+  participant SAt as Satisfacción
 
   S->>R: Registra requerimiento
   R-->>C: Notifica nuevo requerimiento
@@ -57,6 +59,9 @@ sequenceDiagram
     A->>P: Aprueba
     P-->>N: Notifica aprobación
     P->>R: Evalúa cierre automático
+    R-->>N: Notifica cierre al solicitante
+    N-->>S: Envía correo con enlace interno
+    S->>SAt: Registra encuesta de satisfacción
   else Producto rechazado
     A->>P: Rechaza con comentario
     P-->>T: Devuelve a proceso
@@ -86,6 +91,8 @@ Reglas:
 3. Un producto rechazado mantiene abierto el requerimiento.
 4. Solo la aprobación de todos los productos permite completar el requerimiento.
 5. La eliminación lógica conserva auditoría y finaliza como rechazado.
+6. Al completar el requerimiento se notifica al correo almacenado en `RequestedBy`.
+7. La finalización manual y la reconciliación automática ejecutan el mismo evento de notificación.
 
 ### Producto
 
@@ -176,8 +183,36 @@ Fuentes principales:
 - `ActivityAuditEvents`.
 - `ApprovalAuditEvents`.
 - Registros de notificaciones y confirmaciones.
+- `RequirementSatisfactionResponses` y evento `Encuesta de satisfacción registrada`.
 
-## 9. Integraciones
+## 9. Encuesta de satisfacción
+
+![Formulario interno de satisfacción](../screenshots/current/29-encuesta-satisfaccion.png)
+
+### Precondiciones
+
+- El requerimiento existe, no está eliminado y tiene estado `Completed`.
+- El enlace contiene un token válido firmado por la API.
+- Todavía no existe una respuesta asociada al requerimiento.
+
+### Datos y validaciones
+
+| Campo | Tipo | Regla |
+| --- | --- | --- |
+| Satisfacción general | Entero | Obligatorio, entre 1 y 5. |
+| Cumplimiento de tiempos | Entero | Obligatorio, entre 1 y 5. |
+| Calidad del resultado | Entero | Obligatorio, entre 1 y 5. |
+| Recomendaría el servicio | Booleano | Sí o no. |
+| Comentarios | Texto | Opcional, máximo 2.000 caracteres. |
+
+### Resultado
+
+1. Se crea una única fila en `RequirementSatisfactionResponses`.
+2. Se registra fecha UTC y relación con el requerimiento.
+3. Se agrega auditoría con usuario lógico, fecha, proceso, acción y JSON de datos.
+4. La pantalla confirma el registro y bloquea nuevos envíos.
+
+## 10. Integraciones
 
 | Integración | Uso | Configuración |
 | --- | --- | --- |
@@ -188,7 +223,7 @@ Fuentes principales:
 | FTP | Evidencias externas | Host y credenciales. |
 | Power BI | Analítica ejecutiva | Conexión SQL Server/PBIR. |
 
-## 10. Criterios de aceptación transversales
+## 11. Criterios de aceptación transversales
 
 1. Crear o editar cierra el popup y refresca el detalle.
 2. Toda acción exitosa o fallida muestra un toast.
@@ -197,3 +232,6 @@ Fuentes principales:
 5. Las eliminaciones son lógicas y solicitan confirmación.
 6. Las acciones respetan rol, permisos y estado del workflow.
 7. Los cambios relevantes quedan auditados.
+8. El cierre genera correo al solicitante con enlace a la encuesta alojada en la aplicación.
+9. El enlace de satisfacción no expone el identificador directo y no acepta manipulación del token.
+10. Una encuesta no puede responderse más de una vez.

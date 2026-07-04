@@ -326,6 +326,21 @@ Eventos esperados:
 - Envío de producto a aprobación.
 - Aprobación/rechazo.
 - Producto aprobado con adjunto.
+- Requerimiento finalizado con encuesta de satisfacción para el solicitante.
+
+### Verificación del correo de cierre
+
+1. Confirme que el requerimiento tenga un correo válido en `Correo del solicitante`.
+2. Confirme que todos sus productos estén aprobados.
+3. Revise que el requerimiento cambie automáticamente a `Completado`.
+4. Busque en `Registro notificaciones` el evento `RequirementCompleted`.
+5. Verifique destinatario, asunto y fecha.
+6. Confirme que Power Automate recibió el payload y ejecutó el envío de correo.
+7. Abra el enlace del correo y compruebe que muestre la encuesta dentro de App Tráfico MKT.
+
+![Encuesta enviada al solicitante](../screenshots/current/29-encuesta-satisfaccion.png)
+
+El formulario permite una sola respuesta. La respuesta queda relacionada con el requerimiento y genera el evento de auditoría `Encuesta de satisfacción registrada`.
 
 ## 16. Bandejas de notificaciones
 
@@ -379,6 +394,8 @@ La recuperación genera una clave temporal y usa la configuración de notificaci
 | No aparece menú | Roles y pantallas visibles del usuario. |
 | No aparece técnico | Usuario activo con rol `Tecnico`. |
 | No se envía aprobación | Evidencia, estado y configuración Power Automate. |
+| No se envía encuesta | Correo del solicitante, evento `RequirementCompleted`, webhook activo y `PUBLIC_APP_URL`. |
+| Enlace de encuesta inválido | Estado completado, dominio configurado y misma `SATISFACTION_SIGNING_KEY` en todas las réplicas. |
 | No abre adjunto | Provider activo, URL/ruta y permisos. |
 | Teams no carga | DNS, certificado confiable, CSP y política Teams. |
 | Datos no refrescan | API saludable, sesión vigente y consola del navegador. |

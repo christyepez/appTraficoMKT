@@ -13,6 +13,7 @@ App Trafico MKT es una plataforma para gestionar requerimientos de marketing/com
 - Contenedores: Docker Compose.
 - Autenticacion: JWT local y Microsoft Entra ID preparado.
 - Notificaciones: Power Automate via webhook.
+- Satisfaccion: formulario publico interno protegido por token HMAC-SHA256.
 - Archivos: Local por defecto, con parametrizacion para Blob Storage o FTP.
 
 ## Microservicios
@@ -139,6 +140,71 @@ Cada servicio ejecuta una rutina idempotente de esquema al iniciar. Estas rutina
 - Inicializan catálogos y configuraciones mínimas.
 
 En producción se recomienda reemplazar este mecanismo por migraciones versionadas y aprobadas por ambiente.
+
+## Cierre, notificacion y satisfaccion
+
+El cierre manual y la reconciliacion automatica convergen en `RequirementNotifications.NotifyCompletedAsync`. Esto evita que el comportamiento dependa de la pantalla o del proceso que detecto el cierre.
+
+```mermaid
+sequenceDiagram
+  participant A as Activities API
+  participant R as Requirements API
+  participant N as Activities/Notifications
+  participant PA as Power Automate
+  actor S as Solicitante
+  participant W as Next.js
+
+  A-->>R: todos los productos aprobados
+  R->>R: estado Completed + auditoria
+  R->>R: genera token HMAC del RequirementId
+  R->>N: POST /notification-records/system
+  N->>N: persiste NotificationRecord
+  N->>PA: webhook con destinatario y HTML
+  PA-->>S: correo con enlace /satisfaction/{token}
+  S->>W: abre formulario interno sin login
+  W->>R: GET /requirements/satisfaction/{token}
+  S->>W: envia calificaciones
+  W->>R: POST /requirements/satisfaction/{token}
+  R->>R: persiste respuesta + auditoria
+```
+
+### API
+
+| Metodo | Ruta | Uso |
+| --- | --- | --- |
+| `GET` | `/requirements/satisfaction/{token}` | Valida token/estado y devuelve los datos mínimos del formulario. |
+| `POST` | `/requirements/satisfaction/{token}` | Valida calificaciones, evita duplicidad y registra la respuesta. |
+| `POST` | `/notification-records/system` | Persiste la notificación y entrega el payload a Power Automate. |
+
+### Persistencia
+
+La tabla `RequirementSatisfactionResponses` pertenece a `RequirementsDb` y contiene:
+
+- `Id`: identificador de la respuesta.
+- `RequirementId`: FK unica a `Requirements`; garantiza una respuesta por requerimiento.
+- `OverallRating`, `TimelinessRating`, `QualityRating`: enteros entre 1 y 5 validados por API.
+- `WouldRecommend`: valor booleano.
+- `Comments`: `nvarchar(2000)`.
+- `SubmittedAt`: fecha UTC.
+
+La auditoria se agrega en `RequirementAuditEvents` con la accion `Encuesta de satisfacción registrada` y contexto JSON.
+
+### Seguridad del enlace
+
+El token contiene los bytes del identificador y una firma truncada HMAC-SHA256. La API compara la firma en tiempo constante antes de consultar o escribir datos. El formulario no requiere JWT, pero solo se habilita para requerimientos completados y no permite una segunda respuesta.
+
+Variables de ambiente:
+
+| Variable | Finalidad | Recomendacion |
+| --- | --- | --- |
+| `PUBLIC_APP_URL` | Dominio usado en el enlace del correo. | `https://marketingtrafico.indoamerica.edu.ec` en producción. |
+| `SATISFACTION_SIGNING_KEY` | Secreto para firmar y validar enlaces. | Secreto largo, aleatorio, igual en todas las instancias y fuera de Git. |
+
+Rotar `SATISFACTION_SIGNING_KEY` invalida enlaces enviados previamente. La variable debe gestionarse como secreto del ambiente.
+
+### Entrega por correo
+
+El evento `RequirementCompleted` contiene asunto, mensaje, `RecipientEmail`, identificador del requerimiento, JSON de auditoria y HTML con el botón de encuesta. Activities API conserva el registro antes de invocar el webhook. Si no existe webhook activo, la notificacion queda registrada pero no se entrega correo externo.
 
 ## Observabilidad y continuidad
 

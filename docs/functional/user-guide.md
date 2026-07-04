@@ -54,6 +54,8 @@ flowchart LR
   H --> J{Todos aprobados}
   J -->|Sí| K[Finalizar requerimiento]
   J -->|No| C
+  K --> L[Correo al solicitante]
+  L --> M[Encuesta de satisfacción interna]
 ```
 
 ## 4. Crear un requerimiento sin login
@@ -158,6 +160,28 @@ Ruta: `/approvals`
 - Un rechazo lo devuelve a `Producto en proceso`.
 - El requerimiento solo se completa cuando todos sus productos están aprobados.
 - `Ver productos aprobados` cambia la bandeja a registros resueltos.
+
+### Cierre y encuesta de satisfacción
+
+Cuando todos los productos quedan aprobados, el sistema completa el requerimiento y ejecuta automáticamente el siguiente proceso:
+
+1. Registra el cambio a `Completado` en la auditoría del requerimiento.
+2. Crea una notificación de tipo `RequirementCompleted` dirigida al correo del solicitante.
+3. Envía a Power Automate el asunto, mensaje, destinatario y contenido HTML.
+4. El correo muestra el botón `Completar encuesta de satisfacción`.
+5. El botón abre una página de App Tráfico MKT; no dirige a formularios externos.
+
+![Encuesta de satisfacción](../screenshots/current/29-encuesta-satisfaccion.png)
+
+La encuesta solicita:
+
+- Satisfacción general, de 1 a 5.
+- Cumplimiento de tiempos, de 1 a 5.
+- Calidad del resultado, de 1 a 5.
+- Confirmación de si recomendaría el servicio.
+- Comentarios opcionales, hasta 2.000 caracteres.
+
+El enlace no requiere login porque está protegido por un token firmado asociado al requerimiento. Solo funciona cuando el requerimiento está completado y permite una única respuesta. Un segundo intento informa que la encuesta ya fue registrada.
 
 ## 9. Métricas
 
@@ -319,3 +343,4 @@ Solo el Administrador consulta el histórico de eventos, destinatarios, mensajes
 - Registre comentarios claros al rechazar.
 - Mantenga los responsables y aprobadores activos y actualizados.
 - Use URL para archivos muy pesados y archivo directo para evidencias que deban conservarse localmente.
+- Registre siempre un correo válido en `Correo del solicitante`; ese dato recibe la notificación de cierre y la encuesta.
