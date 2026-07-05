@@ -61,7 +61,7 @@ services:
     ports:
       - "5103:8080"
     volumes:
-      - evidence-uploads:/app/uploads
+      - ./uploads:/app/uploads
     depends_on:
       sqlserver:
         condition: service_healthy
@@ -134,4 +134,3 @@ services:
 
 volumes:
   sqlserver-data:
-  evidence-uploads:
