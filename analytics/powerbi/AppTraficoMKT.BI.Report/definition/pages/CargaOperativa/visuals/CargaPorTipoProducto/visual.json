@@ -1,0 +1,60 @@
+{
+  "name": "CargaPorTipoProducto",
+  "position": {
+    "x": 650,
+    "y": 60,
+    "z": 2,
+    "height": 300,
+    "width": 580,
+    "tabOrder": 2
+  },
+  "visual": {
+    "visualType": "clusteredColumnChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "DimTipoProducto"
+                    }
+                  },
+                  "Property": "TipoProducto"
+                }
+              },
+              "queryRef": "DimTipoProducto.TipoProducto",
+              "displayName": "Tipo producto"
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "FactProducto"
+                        }
+                      },
+                      "Property": "ProductoId"
+                    }
+                  },
+                  "Function": 5
+                }
+              },
+              "queryRef": "FactProducto.ProductoId",
+              "displayName": "Productos"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/1.0.0/schema.json"
+}

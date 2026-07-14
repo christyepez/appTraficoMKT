@@ -1,0 +1,79 @@
+{
+  "name": "AlertasOperativas",
+  "position": {
+    "x": 30,
+    "y": 450,
+    "z": 7,
+    "height": 230,
+    "width": 1200,
+    "tabOrder": 7
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "FactProducto"
+                    }
+                  },
+                  "Property": "CodigoProducto"
+                }
+              },
+              "queryRef": "FactProducto.CodigoProducto",
+              "displayName": "Producto"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "FactProducto"
+                    }
+                  },
+                  "Property": "EstadoProducto"
+                }
+              },
+              "queryRef": "FactProducto.EstadoProducto",
+              "displayName": "Estado"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "FactProducto"
+                    }
+                  },
+                  "Property": "ResponsableProducto"
+                }
+              },
+              "queryRef": "FactProducto.ResponsableProducto",
+              "displayName": "Responsable"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "FactProducto"
+                    }
+                  },
+                  "Property": "FechaEntregaProducto"
+                }
+              },
+              "queryRef": "FactProducto.FechaEntregaProducto",
+              "displayName": "Fecha entrega"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/1.0.0/schema.json"
+}

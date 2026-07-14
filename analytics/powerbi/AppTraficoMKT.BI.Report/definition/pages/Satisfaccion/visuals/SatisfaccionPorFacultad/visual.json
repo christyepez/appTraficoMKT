@@ -1,0 +1,60 @@
+{
+  "name": "SatisfaccionPorFacultad",
+  "position": {
+    "x": 810,
+    "y": 60,
+    "z": 3,
+    "height": 280,
+    "width": 420,
+    "tabOrder": 3
+  },
+  "visual": {
+    "visualType": "barChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "DimFacultad"
+                    }
+                  },
+                  "Property": "Facultad"
+                }
+              },
+              "queryRef": "DimFacultad.Facultad",
+              "displayName": "Facultad"
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "FactSatisfaccion"
+                        }
+                      },
+                      "Property": "SatisfaccionGeneral"
+                    }
+                  },
+                  "Function": 1
+                }
+              },
+              "queryRef": "FactSatisfaccion.SatisfaccionGeneral",
+              "displayName": "Satisfaccion"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/1.0.0/schema.json"
+}

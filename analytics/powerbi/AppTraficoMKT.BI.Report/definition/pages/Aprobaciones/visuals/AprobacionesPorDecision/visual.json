@@ -1,0 +1,60 @@
+{
+  "name": "AprobacionesPorDecision",
+  "position": {
+    "x": 30,
+    "y": 60,
+    "z": 1,
+    "height": 300,
+    "width": 380,
+    "tabOrder": 1
+  },
+  "visual": {
+    "visualType": "donutChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "FactAprobacion"
+                    }
+                  },
+                  "Property": "Decision"
+                }
+              },
+              "queryRef": "FactAprobacion.Decision",
+              "displayName": "Decision"
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "FactAprobacion"
+                        }
+                      },
+                      "Property": "AprobacionId"
+                    }
+                  },
+                  "Function": 5
+                }
+              },
+              "queryRef": "FactAprobacion.AprobacionId",
+              "displayName": "Aprobaciones"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/1.0.0/schema.json"
+}

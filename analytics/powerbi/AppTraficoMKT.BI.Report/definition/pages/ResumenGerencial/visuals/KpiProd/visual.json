@@ -1,0 +1,37 @@
+{
+  "name": "KpiProd",
+  "position": {
+    "x": 315,
+    "y": 30,
+    "z": 2,
+    "height": 118,
+    "width": 260,
+    "tabOrder": 2
+  },
+  "visual": {
+    "visualType": "card",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Medidas"
+                    }
+                  },
+                  "Property": "Total productos"
+                }
+              },
+              "queryRef": "_Medidas.Total productos",
+              "displayName": "Productos"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/1.0.0/schema.json"
+}

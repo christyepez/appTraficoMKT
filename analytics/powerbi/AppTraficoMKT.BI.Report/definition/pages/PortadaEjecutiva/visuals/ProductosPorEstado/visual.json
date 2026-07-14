@@ -1,0 +1,60 @@
+{
+  "name": "ProductosPorEstado",
+  "position": {
+    "x": 650,
+    "y": 180,
+    "z": 6,
+    "height": 230,
+    "width": 580,
+    "tabOrder": 6
+  },
+  "visual": {
+    "visualType": "barChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "DimEstado"
+                    }
+                  },
+                  "Property": "Estado"
+                }
+              },
+              "queryRef": "DimEstado.Estado",
+              "displayName": "Estado"
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "FactProducto"
+                        }
+                      },
+                      "Property": "ProductoId"
+                    }
+                  },
+                  "Function": 5
+                }
+              },
+              "queryRef": "FactProducto.ProductoId",
+              "displayName": "Productos"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/1.0.0/schema.json"
+}

@@ -310,10 +310,11 @@ SELECT bi.fn_WorkingMinutes('2026-07-13T08:30:00','2026-07-13T17:30:00');
         Fail "El reporte contiene PBIR (definition) y PBIR-Legacy (report.json). Elimina AppTraficoMKT.BI.Report\report.json."
     }
 
-    Get-ChildItem -Path (Join-Path $repoRoot "analytics\powerbi") -Recurse -Include *.json,*.pbip,*.pbir,*.pbism |
+    Get-ChildItem -Path (Join-Path $repoRoot "analytics\powerbi") -Recurse -File -Include *.json,*.pbip,*.pbir,*.pbism |
         ForEach-Object {
-            try { Get-Content -Raw $_.FullName | ConvertFrom-Json | Out-Null }
-            catch { Fail "JSON/PBIR/PBIP invalido en $($_.FullName): $($_.Exception.Message)" }
+            $jsonPath = if ($_.PSObject.Properties.Name -contains "FullName") { $_.FullName } else { $_.ToString() }
+            try { Get-Content -Raw $jsonPath | ConvertFrom-Json | Out-Null }
+            catch { Fail "JSON/PBIR/PBIP invalido en ${jsonPath}: $($_.Exception.Message)" }
         }
 
     $pbip = Get-Content -Raw $pbipPath | ConvertFrom-Json
@@ -381,7 +382,8 @@ SELECT bi.fn_WorkingMinutes('2026-07-13T08:30:00','2026-07-13T17:30:00');
     }
     $pageCount = (Get-ChildItem -Path $reportPagesPath -Recurse -Filter "page.json").Count
     if ($pageCount -lt 5) { Fail "Se esperaban 5 paginas PBIR, pero se encontraron $pageCount." }
-    Write-Ok "PBIP/PBIR/modelo semantico validado. Paginas: $pageCount."
+    $visualCount = (Get-ChildItem -Path $reportPagesPath -Recurse -Filter "visual.json" -ErrorAction SilentlyContinue).Count
+    Write-Ok "PBIP/PBIR/modelo semantico validado. Paginas: $pageCount. Visuales: $visualCount."
 
     if (-not $SkipOpenPowerBI) {
         Write-Step "Abriendo Power BI Desktop"

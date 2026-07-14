@@ -1,0 +1,79 @@
+{
+  "name": "DetalleImpacto",
+  "position": {
+    "x": 30,
+    "y": 390,
+    "z": 4,
+    "height": 290,
+    "width": 1200,
+    "tabOrder": 4
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "FactProducto"
+                    }
+                  },
+                  "Property": "CodigoProducto"
+                }
+              },
+              "queryRef": "FactProducto.CodigoProducto",
+              "displayName": "Producto"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "FactProducto"
+                    }
+                  },
+                  "Property": "TipoProducto"
+                }
+              },
+              "queryRef": "FactProducto.TipoProducto",
+              "displayName": "Tipo"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "FactProducto"
+                    }
+                  },
+                  "Property": "CanalDifusion"
+                }
+              },
+              "queryRef": "FactProducto.CanalDifusion",
+              "displayName": "Canal"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "FactProducto"
+                    }
+                  },
+                  "Property": "KpiPrincipal"
+                }
+              },
+              "queryRef": "FactProducto.KpiPrincipal",
+              "displayName": "KPI"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/1.0.0/schema.json"
+}

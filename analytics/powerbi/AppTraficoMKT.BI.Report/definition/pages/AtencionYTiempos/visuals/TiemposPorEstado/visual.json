@@ -1,0 +1,60 @@
+{
+  "name": "TiemposPorEstado",
+  "position": {
+    "x": 30,
+    "y": 60,
+    "z": 1,
+    "height": 300,
+    "width": 580,
+    "tabOrder": 1
+  },
+  "visual": {
+    "visualType": "clusteredColumnChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "DimEstado"
+                    }
+                  },
+                  "Property": "Estado"
+                }
+              },
+              "queryRef": "DimEstado.Estado",
+              "displayName": "Estado"
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "FactHistorialEstado"
+                        }
+                      },
+                      "Property": "MinutosEnEstado"
+                    }
+                  },
+                  "Function": 1
+                }
+              },
+              "queryRef": "FactHistorialEstado.MinutosEnEstado",
+              "displayName": "Minutos promedio"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/1.0.0/schema.json"
+}

@@ -1,0 +1,79 @@
+{
+  "name": "ComentariosSatisfaccion",
+  "position": {
+    "x": 30,
+    "y": 390,
+    "z": 4,
+    "height": 290,
+    "width": 1200,
+    "tabOrder": 4
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "FactSatisfaccion"
+                    }
+                  },
+                  "Property": "RequerimientoCodigo"
+                }
+              },
+              "queryRef": "FactSatisfaccion.RequerimientoCodigo",
+              "displayName": "Requerimiento"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "FactSatisfaccion"
+                    }
+                  },
+                  "Property": "Solicitante"
+                }
+              },
+              "queryRef": "FactSatisfaccion.Solicitante",
+              "displayName": "Solicitante"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "FactSatisfaccion"
+                    }
+                  },
+                  "Property": "SatisfaccionGeneral"
+                }
+              },
+              "queryRef": "FactSatisfaccion.SatisfaccionGeneral",
+              "displayName": "Satisfaccion"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "FactSatisfaccion"
+                    }
+                  },
+                  "Property": "Comentario"
+                }
+              },
+              "queryRef": "FactSatisfaccion.Comentario",
+              "displayName": "Comentario"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/1.0.0/schema.json"
+}
