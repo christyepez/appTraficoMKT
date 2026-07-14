@@ -1,0 +1,136 @@
+table FactRequerimiento
+	lineageTag: 98fad042-813e-4b8a-95f9-86b2ecb30ac2
+
+	column RequerimientoId
+		dataType: string
+		lineageTag: 749033f4-eb2e-4055-b92b-def84a67b43a
+		sourceColumn: RequerimientoId
+
+	column CodigoRequerimiento
+		dataType: string
+		lineageTag: 67ec8fce-37af-4caf-b0e9-e764fcbddbad
+		sourceColumn: CodigoRequerimiento
+
+	column ActividadEvento
+		dataType: string
+		lineageTag: 666e5ff1-8632-4712-ab55-7163b20ccd68
+		sourceColumn: ActividadEvento
+
+	column Solicitante
+		dataType: string
+		lineageTag: 40a688d5-a522-4912-b129-41a451bcef49
+		sourceColumn: Solicitante
+
+	column FacultadId
+		dataType: string
+		lineageTag: c3ff1cb6-d71b-40d9-aeb4-29d06b3b6cdb
+		sourceColumn: FacultadId
+
+	column CarreraTexto
+		dataType: string
+		lineageTag: 7d46a42a-1d7b-45a9-83b4-457ec6917596
+		sourceColumn: CarreraTexto
+
+	column SedeId
+		dataType: string
+		lineageTag: 6706eb68-9fef-4f03-8339-5b1e316277c9
+		sourceColumn: SedeId
+
+	column Lugar
+		dataType: string
+		lineageTag: 86545395-4ef7-42b7-a562-6e885763174d
+		sourceColumn: Lugar
+
+	column FechaInicioEvento
+		dataType: dateTime
+		lineageTag: 250fbe47-8e6d-43c6-accd-ae753e8af053
+		sourceColumn: FechaInicioEvento
+
+	column FechaFinEvento
+		dataType: dateTime
+		lineageTag: 81c5df63-be08-4f84-9a99-0efbfab051f3
+		sourceColumn: FechaFinEvento
+
+	column FechaSolicitud
+		dataType: dateTime
+		lineageTag: 1a73da33-f07c-43a0-963a-5f9fe79a762c
+		sourceColumn: FechaSolicitud
+
+	column FormatoEventoId
+		dataType: string
+		lineageTag: eac372ad-6060-4fe9-bb8e-71a35c21a89c
+		sourceColumn: FormatoEventoId
+
+	column FormatoEvento
+		dataType: string
+		lineageTag: d8c1e584-6a3b-4a0a-9d50-becad9dd8b49
+		sourceColumn: FormatoEvento
+
+	column EstadoId
+		dataType: string
+		lineageTag: a02c4bda-1541-4bdb-9d0b-3b2fcef19685
+		sourceColumn: EstadoId
+
+	column EstadoCodigo
+		dataType: string
+		lineageTag: 4e33dcd3-d20b-488d-bd66-9032f7405647
+		sourceColumn: EstadoCodigo
+
+	column CreadoUtc
+		dataType: string
+		lineageTag: 430348c4-c471-43fc-9eef-38c5c7b4646d
+		sourceColumn: CreadoUtc
+
+	column ActualizadoUtc
+		dataType: string
+		lineageTag: 5273830d-a56a-42a0-8693-e03b2c60e974
+		sourceColumn: ActualizadoUtc
+
+	column FechaCierreUtc
+		dataType: string
+		lineageTag: ccb5a48a-44a9-494f-9f98-ca256749cdfe
+		sourceColumn: FechaCierreUtc
+
+	column EsEliminado
+		dataType: boolean
+		lineageTag: 8c4a6718-dd33-4f23-b86d-5a05e69e61c0
+		sourceColumn: EsEliminado
+
+	column EsFinalizado
+		dataType: int64
+		lineageTag: 3bff3ff6-12e9-4551-8f70-11bf27aed93c
+		sourceColumn: EsFinalizado
+
+	column EsCompletado
+		dataType: int64
+		lineageTag: b9926c98-ad07-4e2c-ba34-455261474c0a
+		sourceColumn: EsCompletado
+
+	column EsRechazado
+		dataType: int64
+		lineageTag: 6e72cc82-9239-44f7-9ef6-aad5951cb05d
+		sourceColumn: EsRechazado
+
+	column DiasAnticipacion
+		dataType: int64
+		lineageTag: d75a8491-55f8-454f-b6a2-ec7d3aac8c5c
+		sourceColumn: DiasAnticipacion
+
+	column HorasLaborablesCiclo
+		dataType: decimal
+		lineageTag: 52e76a0f-165c-40b3-b8a6-831c18b422d6
+		sourceColumn: HorasLaborablesCiclo
+
+	column HorasLaborablesAntiguedad
+		dataType: decimal
+		lineageTag: 66ea53d0-cab9-4108-8c16-df21cfa8fc39
+		sourceColumn: HorasLaborablesAntiguedad
+
+	partition FactRequerimiento = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(ServerName, DatabaseName, [CreateNavigationProperties=false]),
+				    View = Source{[Schema="bi", Item="FactRequerimiento"]}[Data]
+				in
+				    View

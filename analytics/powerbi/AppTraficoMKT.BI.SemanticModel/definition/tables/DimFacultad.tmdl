@@ -1,0 +1,36 @@
+table DimFacultad
+	lineageTag: 39af2146-f727-437b-a0fe-b06ec17a9815
+
+	column FacultadId
+		dataType: string
+		lineageTag: 739012b7-0865-4819-807a-df62ca1cc836
+		sourceColumn: FacultadId
+
+	column Codigo
+		dataType: string
+		lineageTag: ee68bf93-bd3c-4f69-82a9-4817307a932f
+		sourceColumn: Codigo
+
+	column Facultad
+		dataType: string
+		lineageTag: 03effb7d-070a-4b0f-a6d3-9eb4f14faf3c
+		sourceColumn: Facultad
+
+	column EsActivo
+		dataType: boolean
+		lineageTag: 70109e8a-d526-4225-8600-5b2f474c0476
+		sourceColumn: EsActivo
+
+	column CreatedAt
+		dataType: string
+		lineageTag: 16b06584-3f86-4010-8afc-5ca3cd42156c
+		sourceColumn: CreatedAt
+
+	partition DimFacultad = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(ServerName, DatabaseName, [CreateNavigationProperties=false]),
+				    View = Source{[Schema="bi", Item="DimFacultad"]}[Data]
+				in
+				    View

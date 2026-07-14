@@ -1,0 +1,61 @@
+table FactUsoUsuario
+	lineageTag: 30af676e-fcf0-47ed-8552-4092b4e58f49
+
+	column UsuarioId
+		dataType: string
+		lineageTag: 71b8ab8b-feee-4d19-ad7d-a4c7377d93b2
+		sourceColumn: UsuarioId
+
+	column Correo
+		dataType: string
+		lineageTag: ffbe754b-77f9-48f6-804b-ddf303bcdf0e
+		sourceColumn: Correo
+
+	column Nombre
+		dataType: string
+		lineageTag: b0a6102d-2574-4daa-a7c4-cdb54c56dea2
+		sourceColumn: Nombre
+
+	column Roles
+		dataType: string
+		lineageTag: dcff0478-029d-4507-836d-691fb29f96b1
+		sourceColumn: Roles
+
+	column EsActivo
+		dataType: boolean
+		lineageTag: a3b8e761-f926-419e-ab74-b562318f306f
+		sourceColumn: EsActivo
+
+	column UltimoIngresoUtc
+		dataType: string
+		lineageTag: 13838d31-77b9-49ae-8b97-4a4e311b337e
+		sourceColumn: UltimoIngresoUtc
+
+	column IngresoUltimos7Dias
+		dataType: int64
+		lineageTag: b3cfb5d1-5fab-4284-a7ae-e3f6acceeff5
+		sourceColumn: IngresoUltimos7Dias
+
+	column HorasDesdeUltimoIngreso
+		dataType: int64
+		lineageTag: f1781c41-4318-4636-b0d9-c94dcde372cc
+		sourceColumn: HorasDesdeUltimoIngreso
+
+	column NotificacionesRecibidas
+		dataType: int64
+		lineageTag: 51e3bb37-47e1-40b6-8cb2-dc34d246dcbe
+		sourceColumn: NotificacionesRecibidas
+
+	column NotificacionesLeidas
+		dataType: int64
+		lineageTag: be973ac7-d9ab-425b-91ff-5d108ae59455
+		sourceColumn: NotificacionesLeidas
+
+	partition FactUsoUsuario = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(ServerName, DatabaseName, [CreateNavigationProperties=false]),
+				    View = Source{[Schema="bi", Item="FactUsoUsuario"]}[Data]
+				in
+				    View

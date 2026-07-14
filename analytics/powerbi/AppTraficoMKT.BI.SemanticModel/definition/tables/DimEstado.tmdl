@@ -1,0 +1,36 @@
+table DimEstado
+	lineageTag: 869949ff-f2d5-4abb-a9f6-0f91b5eb7c1f
+
+	column EstadoId
+		dataType: string
+		lineageTag: 7cdf5ef4-b429-43b9-a901-945e69e2a280
+		sourceColumn: EstadoId
+
+	column TipoEstado
+		dataType: string
+		lineageTag: fb9eeb2c-b8fb-4417-a010-e7fafa78c2d5
+		sourceColumn: TipoEstado
+
+	column Codigo
+		dataType: string
+		lineageTag: a7b2febe-442e-41f1-bf82-389216d49ae2
+		sourceColumn: Codigo
+
+	column Estado
+		dataType: string
+		lineageTag: 37de22e7-e646-462f-b1a2-fa27c09c3b9d
+		sourceColumn: Estado
+
+	column EsActivo
+		dataType: boolean
+		lineageTag: 24a1e2cd-595d-4c1a-9255-316658b3b733
+		sourceColumn: EsActivo
+
+	partition DimEstado = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(ServerName, DatabaseName, [CreateNavigationProperties=false]),
+				    View = Source{[Schema="bi", Item="DimEstado"]}[Data]
+				in
+				    View

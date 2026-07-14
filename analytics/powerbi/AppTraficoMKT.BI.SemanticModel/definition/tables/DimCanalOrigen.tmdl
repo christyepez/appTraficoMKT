@@ -1,0 +1,21 @@
+table DimCanalOrigen
+	lineageTag: e72f0538-d394-43f8-ae25-cb712db76c47
+
+	column CanalOrigen
+		dataType: string
+		lineageTag: e3c95dd9-a46f-4fe0-9803-ca7809aa5034
+		sourceColumn: CanalOrigen
+
+	column Registros
+		dataType: int64
+		lineageTag: f7a1df35-085d-4fc6-b9cf-f0a793ef6324
+		sourceColumn: Registros
+
+	partition DimCanalOrigen = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(ServerName, DatabaseName, [CreateNavigationProperties=false]),
+				    View = Source{[Schema="bi", Item="DimCanalOrigen"]}[Data]
+				in
+				    View

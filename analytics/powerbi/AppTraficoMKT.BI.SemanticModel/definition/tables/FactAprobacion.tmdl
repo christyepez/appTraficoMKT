@@ -1,0 +1,66 @@
+table FactAprobacion
+	lineageTag: 372a94df-33ec-48d8-9754-629b70ba76d3
+
+	column AprobacionId
+		dataType: string
+		lineageTag: 0cbd7886-f586-4bb1-abc7-20aafb15791b
+		sourceColumn: AprobacionId
+
+	column ProductoId
+		dataType: string
+		lineageTag: cb25c74a-339e-4f8a-b3c1-2129c222cb29
+		sourceColumn: ProductoId
+
+	column RequerimientoId
+		dataType: string
+		lineageTag: 7f05dd10-1f37-45a7-a3dc-1eaa969682d0
+		sourceColumn: RequerimientoId
+
+	column CodigoProducto
+		dataType: string
+		lineageTag: d8d1b8eb-7e58-4a28-b2b6-2ef09be0dea7
+		sourceColumn: CodigoProducto
+
+	column Decision
+		dataType: string
+		lineageTag: c20890bf-2377-48bb-9190-4597342fbd1a
+		sourceColumn: Decision
+
+	column Aprobador
+		dataType: string
+		lineageTag: 5c117633-0598-4237-8403-3a483da96c0f
+		sourceColumn: Aprobador
+
+	column Comentarios
+		dataType: string
+		lineageTag: 5d55b297-a2bc-4308-b1b4-961c9f9e4500
+		sourceColumn: Comentarios
+
+	column FechaDecisionUtc
+		dataType: string
+		lineageTag: 9c7e1525-c744-4aac-ae00-4f414089a5e5
+		sourceColumn: FechaDecisionUtc
+
+	column VersionAprobacion
+		dataType: int64
+		lineageTag: 5bc8a09c-1d78-4722-8c97-1c29cb5e4ce8
+		sourceColumn: VersionAprobacion
+
+	column EsAprobado
+		dataType: int64
+		lineageTag: 6e72cd32-e6be-4a1c-ba50-fc8ddf43a260
+		sourceColumn: EsAprobado
+
+	column EsRechazado
+		dataType: int64
+		lineageTag: 0c730e72-05c9-4e46-ac40-8393f07cee53
+		sourceColumn: EsRechazado
+
+	partition FactAprobacion = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(ServerName, DatabaseName, [CreateNavigationProperties=false]),
+				    View = Source{[Schema="bi", Item="FactAprobacion"]}[Data]
+				in
+				    View

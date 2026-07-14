@@ -1,0 +1,31 @@
+table DimPublicoObjetivo
+	lineageTag: 0ab978e3-1c2b-4a25-a717-e3aec3869e04
+
+	column PublicoObjetivoId
+		dataType: string
+		lineageTag: 848b4a7b-b6c7-42e6-9210-caab302556ea
+		sourceColumn: PublicoObjetivoId
+
+	column Codigo
+		dataType: string
+		lineageTag: 2dbfc2df-8c9a-4832-9485-7e7cbf1e3732
+		sourceColumn: Codigo
+
+	column PublicoObjetivo
+		dataType: string
+		lineageTag: c0881512-abda-4423-abc0-b684dbabd8ba
+		sourceColumn: PublicoObjetivo
+
+	column EsActivo
+		dataType: boolean
+		lineageTag: 6d49ff05-744a-473d-bb4b-35fce8bbffae
+		sourceColumn: EsActivo
+
+	partition DimPublicoObjetivo = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(ServerName, DatabaseName, [CreateNavigationProperties=false]),
+				    View = Source{[Schema="bi", Item="DimPublicoObjetivo"]}[Data]
+				in
+				    View

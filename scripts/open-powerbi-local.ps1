@@ -318,10 +318,11 @@ SELECT bi.fn_WorkingMinutes('2026-07-13T08:30:00','2026-07-13T17:30:00');
         }
 
     $pbip = Get-Content -Raw $pbipPath | ConvertFrom-Json
-    if (-not $pbip.artifacts -or $pbip.artifacts.Count -lt 1) {
+    $pbipArtifacts = @($pbip.artifacts)
+    if (-not $pbip.artifacts -or $pbipArtifacts.Count -lt 1) {
         Fail "El PBIP no contiene artefactos."
     }
-    foreach ($artifact in @($pbip.artifacts)) {
+    foreach ($artifact in $pbipArtifacts) {
         $artifactProperties = @($artifact.PSObject.Properties.Name)
         if ($artifactProperties.Count -ne 1 -or $artifactProperties[0] -ne "report") {
             Fail "El PBIP de Power BI Desktop solo admite artefactos report en esta version. Propiedades encontradas: $($artifactProperties -join ', ')."
@@ -331,7 +332,7 @@ SELECT bi.fn_WorkingMinutes('2026-07-13T08:30:00','2026-07-13T17:30:00');
     $pbismPath = Join-Path $semanticPath "definition.pbism"
     $pbism = Get-Content -Raw $pbismPath | ConvertFrom-Json
     $pbismProperties = @($pbism.PSObject.Properties.Name)
-    $unsupportedPbismProperties = @($pbismProperties | Where-Object { $_ -notin @("version") })
+    $unsupportedPbismProperties = @($pbismProperties | Where-Object { $_ -notin @("version", "settings") })
     if ($unsupportedPbismProperties.Count -gt 0) {
         Fail "definition.pbism contiene propiedades no soportadas por Power BI Desktop: $($unsupportedPbismProperties -join ', ')."
     }
@@ -356,6 +357,8 @@ SELECT bi.fn_WorkingMinutes('2026-07-13T08:30:00','2026-07-13T17:30:00');
             Fail "definition.pbism version 4.0 o superior requiere definition\model.tmdl."
         }
         $modelText = Get-Content -Raw $modelTmdlPath
+        $modelText = (Get-ChildItem -Path (Join-Path $semanticPath "definition") -Recurse -File -Filter "*.tmdl" |
+            ForEach-Object { Get-Content -Raw $_.FullName }) -join "`n"
         if ($modelText -match "[A-Za-z]:\\") { Fail "El modelo TMDL contiene rutas locales absolutas." }
         if ($modelText -match "(?m)^\s*meta\s+\[") {
             Fail "El modelo TMDL contiene bloques meta no soportados por Power BI Desktop en este contexto."
@@ -376,13 +379,25 @@ SELECT bi.fn_WorkingMinutes('2026-07-13T08:30:00','2026-07-13T17:30:00');
         if ($modelText -match [regex]::Escape($pattern)) { Fail "El modelo semantico parece contener credenciales." }
     }
 
+    $legacyReportJsonPath = Join-Path $reportPath "report.json"
     $reportPagesPath = Join-Path $reportPath "definition\pages"
-    if (-not (Test-Path $reportPagesPath -PathType Container)) {
-        $reportPagesPath = Join-Path $reportPath "pages"
+    if (Test-Path $legacyReportJsonPath -PathType Leaf) {
+        $legacyReport = Get-Content -Raw $legacyReportJsonPath | ConvertFrom-Json
+        $legacySections = @($legacyReport.sections)
+        $pageCount = $legacySections.Count
+        $visualCount = 0
+        foreach ($section in $legacySections) {
+            $visualCount += @($section.visualContainers).Count
+        }
     }
-    $pageCount = (Get-ChildItem -Path $reportPagesPath -Recurse -Filter "page.json").Count
-    if ($pageCount -lt 5) { Fail "Se esperaban 5 paginas PBIR, pero se encontraron $pageCount." }
-    $visualCount = (Get-ChildItem -Path $reportPagesPath -Recurse -Filter "visual.json" -ErrorAction SilentlyContinue).Count
+    else {
+        if (-not (Test-Path $reportPagesPath -PathType Container)) {
+            $reportPagesPath = Join-Path $reportPath "pages"
+        }
+        $pageCount = @(Get-ChildItem -Path $reportPagesPath -Recurse -Filter "page.json").Count
+        $visualCount = @(Get-ChildItem -Path $reportPagesPath -Recurse -Filter "visual.json" -ErrorAction SilentlyContinue).Count
+    }
+    if ($pageCount -lt 5) { Fail "Se esperaban 5 paginas del reporte, pero se encontraron $pageCount." }
     Write-Ok "PBIP/PBIR/modelo semantico validado. Paginas: $pageCount. Visuales: $visualCount."
 
     if (-not $SkipOpenPowerBI) {

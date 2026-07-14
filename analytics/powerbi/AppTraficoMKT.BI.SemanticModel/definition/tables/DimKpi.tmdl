@@ -1,0 +1,31 @@
+table DimKpi
+	lineageTag: ad5735e6-a7f4-4fea-948b-3a88842d1b94
+
+	column KpiId
+		dataType: string
+		lineageTag: 6fd5dba4-5624-48d1-b774-273647034c82
+		sourceColumn: KpiId
+
+	column Codigo
+		dataType: string
+		lineageTag: eb874ec5-64f2-40a1-90a4-d4969b7587c0
+		sourceColumn: Codigo
+
+	column KpiPrincipal
+		dataType: string
+		lineageTag: 185b67b4-9d4e-45fb-a3d4-117057706d13
+		sourceColumn: KpiPrincipal
+
+	column EsActivo
+		dataType: boolean
+		lineageTag: 71d8aea8-7a5e-4ca9-82a0-733732caf4cb
+		sourceColumn: EsActivo
+
+	partition DimKpi = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(ServerName, DatabaseName, [CreateNavigationProperties=false]),
+				    View = Source{[Schema="bi", Item="DimKpi"]}[Data]
+				in
+				    View

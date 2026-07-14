@@ -1,0 +1,8 @@
+expression ServerName = "localhost,14333"
+	lineageTag: ffe30486-577d-470f-95a4-04b6f8cea104
+
+expression DatabaseName = "RequirementsDb"
+	lineageTag: 9db322ff-ba5b-4d6e-9523-94a200aca8b6
+
+expression EnvironmentName = "dev"
+	lineageTag: 826c9eb3-bbe7-4fed-bdd2-c79daae70d0c

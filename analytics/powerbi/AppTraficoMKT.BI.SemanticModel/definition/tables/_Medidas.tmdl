@@ -1,0 +1,33 @@
+table _Medidas
+	isHidden
+	lineageTag: 78ffbd44-2c9f-4ef3-8589-3836eed3a519
+
+	measure 'Total requerimientos' = COUNTROWS ( FactRequerimiento )
+		formatString: 0
+		lineageTag: 840627bf-9fac-4ec6-b7c9-a21cbe5dc2f6
+
+	measure 'Total productos' = COUNTROWS ( FactProducto )
+		formatString: 0
+		lineageTag: eb304825-fb9c-4199-8c5f-aa2c6382dfa0
+
+	measure 'Productos aprobados' = CALCULATE ( [Total productos], FactProducto[EsAprobado] = TRUE () )
+		formatString: 0
+		lineageTag: 1d3f3442-88f1-4dbf-b350-d8de2e71beea
+
+	measure 'Satisfaccion promedio' = AVERAGE ( FactSatisfaccion[SatisfaccionGeneral] )
+		formatString: 0.00
+		lineageTag: 63dec9cd-e921-4981-a694-e798941a3b56
+
+	column Key
+		dataType: string
+		isHidden
+		lineageTag: 3a512df2-4ed8-403d-9916-28d27de6a0ef
+		sourceColumn: Key
+
+	partition _Medidas = m
+		mode: import
+		source =
+				let
+				    Source = #table(type table [Key = text], {{"Medidas"}})
+				in
+				    Source

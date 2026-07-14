@@ -1,0 +1,56 @@
+table DimFecha
+	lineageTag: 3762a6b3-8081-4c40-890f-c0e129b641f4
+
+	column FechaKey
+		dataType: dateTime
+		lineageTag: b0e8c315-2b78-48e0-a355-9626f1a3d44b
+		sourceColumn: FechaKey
+
+	column Anio
+		dataType: int64
+		lineageTag: 822745e2-a2a4-4023-bd26-716dda377058
+		sourceColumn: Anio
+
+	column MesNumero
+		dataType: int64
+		lineageTag: 16dd0f2c-6b7d-47f4-9cac-59adc0023b8c
+		sourceColumn: MesNumero
+
+	column Mes
+		dataType: string
+		lineageTag: b73b7896-ddc5-47b9-956c-d97e7625cfba
+		sourceColumn: Mes
+
+	column Dia
+		dataType: int64
+		lineageTag: 82ea8d41-53ca-4175-9778-c18e453a41d8
+		sourceColumn: Dia
+
+	column Trimestre
+		dataType: int64
+		lineageTag: 1666772e-45d6-4a76-bbd2-8312b90f524b
+		sourceColumn: Trimestre
+
+	column AnioMes
+		dataType: string
+		lineageTag: 82ad49b0-2cfc-464b-8d7c-4d6810e47af6
+		sourceColumn: AnioMes
+
+	column EsFinDeSemana
+		dataType: int64
+		lineageTag: 1a206f82-4fc5-427c-90db-6ddba1da3d64
+		sourceColumn: EsFinDeSemana
+
+	column EsFeriado
+		dataType: int64
+		lineageTag: f7da7c4d-6489-4276-838e-37577b21389d
+		sourceColumn: EsFeriado
+
+	partition DimFecha = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(ServerName, DatabaseName, [CreateNavigationProperties=false]),
+				    View = Source{[Schema="bi", Item="DimFecha"]}[Data]
+				in
+				    View

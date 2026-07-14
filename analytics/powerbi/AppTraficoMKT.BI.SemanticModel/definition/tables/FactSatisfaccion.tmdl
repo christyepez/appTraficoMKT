@@ -1,0 +1,61 @@
+table FactSatisfaccion
+	lineageTag: 1d62eeed-4e59-4f3c-b42b-3c4cae920bfe
+
+	column SatisfaccionId
+		dataType: string
+		lineageTag: 23cce5d7-542d-4086-80e9-ae7232922ebc
+		sourceColumn: SatisfaccionId
+
+	column RequerimientoId
+		dataType: string
+		lineageTag: 13d565a3-6764-4fa0-a6d3-9fd27f3bf10c
+		sourceColumn: RequerimientoId
+
+	column FacultadId
+		dataType: string
+		lineageTag: 33d3580d-5db6-43d3-97ad-25669778b074
+		sourceColumn: FacultadId
+
+	column SedeId
+		dataType: string
+		lineageTag: cdaf4303-58ba-4b4f-ad81-933972911fe6
+		sourceColumn: SedeId
+
+	column SatisfaccionGeneral
+		dataType: int64
+		lineageTag: ee035557-8ee4-48b0-9a35-d92b1483073a
+		sourceColumn: SatisfaccionGeneral
+
+	column CumplimientoTiempo
+		dataType: int64
+		lineageTag: 909a372a-18f8-432e-904d-fe4ba5f32c12
+		sourceColumn: CumplimientoTiempo
+
+	column Calidad
+		dataType: int64
+		lineageTag: 14b30e79-aada-41ed-a6eb-aead134425d5
+		sourceColumn: Calidad
+
+	column Recomienda
+		dataType: int64
+		lineageTag: 0757d3be-40cd-4626-bd4e-86c60eea159c
+		sourceColumn: Recomienda
+
+	column Comentarios
+		dataType: string
+		lineageTag: d223aced-3a1a-4851-b199-71106f1919d4
+		sourceColumn: Comentarios
+
+	column FechaRespuestaUtc
+		dataType: string
+		lineageTag: 31cb4d20-1376-4f48-9984-e58285925177
+		sourceColumn: FechaRespuestaUtc
+
+	partition FactSatisfaccion = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(ServerName, DatabaseName, [CreateNavigationProperties=false]),
+				    View = Source{[Schema="bi", Item="FactSatisfaccion"]}[Data]
+				in
+				    View

@@ -1,0 +1,31 @@
+table DimComplejidad
+	lineageTag: 90f01385-40d9-4a97-bcc3-0e2fdb7d1d13
+
+	column Complejidad
+		dataType: string
+		lineageTag: bb65961a-3069-4f65-8135-1e8c27b814a1
+		sourceColumn: Complejidad
+
+	column HorasEstimadas
+		dataType: decimal
+		lineageTag: 76695489-c41a-4cf6-8e6d-43cb80f34d26
+		sourceColumn: HorasEstimadas
+
+	column PesoOperativo
+		dataType: decimal
+		lineageTag: 2a72da1c-c98d-4be1-9ce4-2d76aeedb001
+		sourceColumn: PesoOperativo
+
+	column EsDemo
+		dataType: boolean
+		lineageTag: 3709be02-f9ca-4b1d-875e-207ada5207a4
+		sourceColumn: EsDemo
+
+	partition DimComplejidad = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(ServerName, DatabaseName, [CreateNavigationProperties=false]),
+				    View = Source{[Schema="bi", Item="DimComplejidad"]}[Data]
+				in
+				    View

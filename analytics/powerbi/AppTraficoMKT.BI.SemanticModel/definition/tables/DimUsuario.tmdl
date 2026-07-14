@@ -1,0 +1,66 @@
+table DimUsuario
+	lineageTag: 64181634-3815-4ac8-bd81-481f5e1a54e4
+
+	column UsuarioId
+		dataType: string
+		lineageTag: 220218ac-63eb-4dbc-9510-550824e0cd21
+		sourceColumn: UsuarioId
+
+	column Nombre
+		dataType: string
+		lineageTag: 1f502ca1-80d9-46dc-b891-5cf5c2c89bc0
+		sourceColumn: Nombre
+
+	column Correo
+		dataType: string
+		lineageTag: e28514bf-dde7-4c1a-9dbd-4f30b1ab844f
+		sourceColumn: Correo
+
+	column ProveedorAutenticacion
+		dataType: string
+		lineageTag: 9a418ff1-7369-45b0-a24a-e45ff890e31d
+		sourceColumn: ProveedorAutenticacion
+
+	column Roles
+		dataType: string
+		lineageTag: 1d4c6515-af2c-4b1d-9d60-3d2226186982
+		sourceColumn: Roles
+
+	column PermisosPantalla
+		dataType: string
+		lineageTag: f962a64c-ca00-4303-b43d-77a93293a191
+		sourceColumn: PermisosPantalla
+
+	column EsActivo
+		dataType: boolean
+		lineageTag: 7e23e299-1637-4d29-8728-5fe49f31c77d
+		sourceColumn: EsActivo
+
+	column PermiteOffice365
+		dataType: boolean
+		lineageTag: ebc9b7ee-d838-4fed-846a-36618cf57e5a
+		sourceColumn: PermiteOffice365
+
+	column UltimoIngresoUtc
+		dataType: string
+		lineageTag: 2523a49c-d227-49ab-926c-f6f80eb0f1ae
+		sourceColumn: UltimoIngresoUtc
+
+	column FacultyId
+		dataType: string
+		lineageTag: 7996ea91-88b7-4850-88ab-77b7783298b2
+		sourceColumn: FacultyId
+
+	column CampusId
+		dataType: string
+		lineageTag: 4286d8ed-e339-4214-8749-e0f6b7694352
+		sourceColumn: CampusId
+
+	partition DimUsuario = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(ServerName, DatabaseName, [CreateNavigationProperties=false]),
+				    View = Source{[Schema="bi", Item="DimUsuario"]}[Data]
+				in
+				    View

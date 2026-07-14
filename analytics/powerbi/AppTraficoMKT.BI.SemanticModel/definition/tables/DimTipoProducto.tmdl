@@ -1,0 +1,51 @@
+table DimTipoProducto
+	lineageTag: e1df8fb4-a895-4c29-ab56-154a77e792d8
+
+	column TipoProductoId
+		dataType: string
+		lineageTag: 29387002-9046-487c-b4fd-24300663eb05
+		sourceColumn: TipoProductoId
+
+	column Codigo
+		dataType: string
+		lineageTag: bd051b75-a8f6-4128-a6ca-a4e62db3937f
+		sourceColumn: Codigo
+
+	column TipoProducto
+		dataType: string
+		lineageTag: f8a3c66c-6394-48f2-b8c7-1221838e578a
+		sourceColumn: TipoProducto
+
+	column Complejidad
+		dataType: string
+		lineageTag: a4ef8eb1-9da2-4fc2-a973-30abebdee953
+		sourceColumn: Complejidad
+
+	column HorasEstimadas
+		dataType: decimal
+		lineageTag: b1ad11a4-3db9-440f-95a3-1691c31034e0
+		sourceColumn: HorasEstimadas
+
+	column PesoOperativo
+		dataType: decimal
+		lineageTag: 549f77b3-b784-493f-91b4-627f6a749dcd
+		sourceColumn: PesoOperativo
+
+	column EsPesoDemo
+		dataType: int64
+		lineageTag: 112198e4-8bb6-45b4-9d3c-144723f08ba9
+		sourceColumn: EsPesoDemo
+
+	column EsActivo
+		dataType: boolean
+		lineageTag: 6f75ba40-6314-4340-a164-f3fad68c06ca
+		sourceColumn: EsActivo
+
+	partition DimTipoProducto = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(ServerName, DatabaseName, [CreateNavigationProperties=false]),
+				    View = Source{[Schema="bi", Item="DimTipoProducto"]}[Data]
+				in
+				    View

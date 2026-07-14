@@ -1,0 +1,41 @@
+table DimCarrera
+	lineageTag: fa1ba119-6a0f-4688-ae68-7afd3f57fd56
+
+	column CarreraId
+		dataType: string
+		lineageTag: f2ecf773-f492-4ba0-b81f-30185cb4de29
+		sourceColumn: CarreraId
+
+	column Codigo
+		dataType: string
+		lineageTag: 1fc39dc9-60bb-4048-9d48-d938b2e3cc8e
+		sourceColumn: Codigo
+
+	column Carrera
+		dataType: string
+		lineageTag: 8401a4ba-47ca-47a3-8054-f38011c1eec1
+		sourceColumn: Carrera
+
+	column FacultadId
+		dataType: string
+		lineageTag: b174e12c-837a-4c44-a85c-ecad49ac6942
+		sourceColumn: FacultadId
+
+	column EsActivo
+		dataType: boolean
+		lineageTag: f94cf9ce-11cc-46ce-b1c4-5fd20232ca8c
+		sourceColumn: EsActivo
+
+	column CreatedAt
+		dataType: string
+		lineageTag: 44424b28-94af-46e5-9f5d-e921ba52939f
+		sourceColumn: CreatedAt
+
+	partition DimCarrera = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(ServerName, DatabaseName, [CreateNavigationProperties=false]),
+				    View = Source{[Schema="bi", Item="DimCarrera"]}[Data]
+				in
+				    View

@@ -1,0 +1,28 @@
+model Model
+	culture: es-EC
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	discourageImplicitMeasures
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table DimCanalDifusion
+ref table DimCanalOrigen
+ref table DimCarrera
+ref table DimComplejidad
+ref table DimEstado
+ref table DimFacultad
+ref table DimFecha
+ref table DimKpi
+ref table DimPublicoObjetivo
+ref table DimSede
+ref table DimTipoProducto
+ref table DimTipoRequerimiento
+ref table DimUsuario
+ref table FactAprobacion
+ref table FactHistorialEstado
+ref table FactKpiResultado
+ref table FactProducto
+ref table FactRequerimiento
+ref table FactSatisfaccion
+ref table FactUsoUsuario
+ref table _Medidas

@@ -1,0 +1,31 @@
+table DimTipoRequerimiento
+	lineageTag: 3c4ae1ae-193d-47ff-b1e4-3491e0660962
+
+	column TipoRequerimientoId
+		dataType: string
+		lineageTag: 6a463cdc-3cc5-4bbe-91ff-d5f8b54d9d7e
+		sourceColumn: TipoRequerimientoId
+
+	column Codigo
+		dataType: string
+		lineageTag: 03540110-7358-4207-b6a8-aca534d32b66
+		sourceColumn: Codigo
+
+	column TipoRequerimiento
+		dataType: string
+		lineageTag: c9618ada-cd97-4588-982e-82aac0fe1657
+		sourceColumn: TipoRequerimiento
+
+	column EsActivo
+		dataType: boolean
+		lineageTag: dde2ab26-1c58-458b-816f-3f9b56629ae4
+		sourceColumn: EsActivo
+
+	partition DimTipoRequerimiento = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(ServerName, DatabaseName, [CreateNavigationProperties=false]),
+				    View = Source{[Schema="bi", Item="DimTipoRequerimiento"]}[Data]
+				in
+				    View

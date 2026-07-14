@@ -1,0 +1,41 @@
+table FactKpiResultado
+	lineageTag: 56ad64cb-e57e-4d39-a05d-a673004d2567
+
+	column KpiId
+		dataType: string
+		lineageTag: 8dcea3e3-db3d-40f9-9dff-dc52d8d520d1
+		sourceColumn: KpiId
+
+	column KpiTexto
+		dataType: string
+		lineageTag: 2656ca20-c06e-4529-a65c-8caa83554484
+		sourceColumn: KpiTexto
+
+	column TotalProductos
+		dataType: int64
+		lineageTag: 8121c7bc-ea6d-4f50-8eea-53678dd63d21
+		sourceColumn: TotalProductos
+
+	column ProductosAprobados
+		dataType: int64
+		lineageTag: 082bc866-b080-43f6-95d5-c919cff0c9b7
+		sourceColumn: ProductosAprobados
+
+	column ProductosPendientesAprobacion
+		dataType: int64
+		lineageTag: 8a3c0f6b-8129-4c56-a405-f245ff46f1cf
+		sourceColumn: ProductosPendientesAprobacion
+
+	column CargaPonderada
+		dataType: decimal
+		lineageTag: ccbb9b1d-423e-4529-8c4b-caaeb5b7233f
+		sourceColumn: CargaPonderada
+
+	partition FactKpiResultado = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(ServerName, DatabaseName, [CreateNavigationProperties=false]),
+				    View = Source{[Schema="bi", Item="FactKpiResultado"]}[Data]
+				in
+				    View

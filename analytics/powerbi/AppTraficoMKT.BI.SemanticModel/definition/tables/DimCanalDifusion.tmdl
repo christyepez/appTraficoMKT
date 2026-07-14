@@ -1,0 +1,31 @@
+table DimCanalDifusion
+	lineageTag: e49f5018-99e8-413b-a813-e96e38cb7287
+
+	column CanalDifusionId
+		dataType: string
+		lineageTag: 4acc8f2e-bbe6-49b8-b242-7af74b851d0c
+		sourceColumn: CanalDifusionId
+
+	column Codigo
+		dataType: string
+		lineageTag: 4729b672-916a-448f-9506-aaa9f7fa7d97
+		sourceColumn: Codigo
+
+	column CanalDifusion
+		dataType: string
+		lineageTag: d13a24f2-1d1c-4cd4-ba77-6e8d041d808b
+		sourceColumn: CanalDifusion
+
+	column EsActivo
+		dataType: boolean
+		lineageTag: c8590c9c-2288-4ee3-9e95-ec579d0e94b0
+		sourceColumn: EsActivo
+
+	partition DimCanalDifusion = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(ServerName, DatabaseName, [CreateNavigationProperties=false]),
+				    View = Source{[Schema="bi", Item="DimCanalDifusion"]}[Data]
+				in
+				    View
