@@ -18,6 +18,31 @@ table _Medidas
 		formatString: 0.00
 		lineageTag: 63dec9cd-e921-4981-a694-e798941a3b56
 
+
+	measure 'Dias promedio ciclo requerimiento' = DIVIDE ( AVERAGE ( FactRequerimiento[HorasLaborablesCiclo] ), 8 )
+		formatString: 0.0
+		lineageTag: 11111111-1111-4111-8111-111111111101
+
+	measure 'Dias promedio antiguedad requerimiento' = DIVIDE ( AVERAGE ( FactRequerimiento[HorasLaborablesAntiguedad] ), 8 )
+		formatString: 0.0
+		lineageTag: 11111111-1111-4111-8111-111111111102
+
+	measure 'Dias promedio anticipacion' = AVERAGE ( FactRequerimiento[DiasAnticipacion] )
+		formatString: 0.0
+		lineageTag: 11111111-1111-4111-8111-111111111103
+
+	measure 'Dias promedio ejecucion tecnica' = DIVIDE ( AVERAGE ( FactProducto[HorasTecnicasLaborables] ), 8 )
+		formatString: 0.0
+		lineageTag: 11111111-1111-4111-8111-111111111104
+
+	measure 'Dias promedio aprobacion' = DIVIDE ( AVERAGE ( FactProducto[HorasAprobacionLaborables] ), 8 )
+		formatString: 0.0
+		lineageTag: 11111111-1111-4111-8111-111111111105
+
+	measure 'Horas estimadas promedio' = AVERAGE ( FactProducto[HorasEstimadas] )
+		formatString: 0.0
+		lineageTag: 11111111-1111-4111-8111-111111111106
+
 	column Key
 		dataType: string
 		isHidden
