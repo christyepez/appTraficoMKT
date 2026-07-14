@@ -80,7 +80,7 @@ URLs locales:
 - Evidence API Swagger: http://localhost:5103/swagger
 - Identity API Swagger: http://localhost:5104/swagger
 - Administration API Swagger: http://localhost:5105/swagger
-- SQL Server: `localhost,14333`, usuario `sa`, password `Passw0rd!Local`
+- SQL Server: `localhost,14333`, usuario `sa`; usa la clave local configurada en `APPTRAFICOMKT_SQL_PASSWORD`.
 
 Usuario inicial:
 

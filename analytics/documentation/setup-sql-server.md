@@ -11,10 +11,12 @@ docker compose up -d sqlserver requirements-api activities-api evidence-api iden
 2. Ejecutar scripts BI en `RequirementsDb`:
 
 ```powershell
-sqlcmd -S localhost,14333 -U sa -P "Passw0rd!Local" -d RequirementsDb -i analytics/sql/00-create-bi-schema.sql
-sqlcmd -S localhost,14333 -U sa -P "Passw0rd!Local" -d RequirementsDb -i analytics/sql/01-working-time.sql
-sqlcmd -S localhost,14333 -U sa -P "Passw0rd!Local" -d RequirementsDb -i analytics/sql/02-analytic-views.sql
-sqlcmd -S localhost,14333 -U sa -P "Passw0rd!Local" -d RequirementsDb -i analytics/sql/03-quality-validations.sql
+$env:SQLCMDPASSWORD = $env:APPTRAFICOMKT_SQL_PASSWORD
+sqlcmd -S localhost,14333 -U sa -d RequirementsDb -i analytics/sql/00-create-bi-schema.sql
+sqlcmd -S localhost,14333 -U sa -d RequirementsDb -i analytics/sql/01-working-time.sql
+sqlcmd -S localhost,14333 -U sa -d RequirementsDb -i analytics/sql/02-analytic-views.sql
+sqlcmd -S localhost,14333 -U sa -d RequirementsDb -i analytics/sql/03-quality-validations.sql
+$env:SQLCMDPASSWORD = $null
 ```
 
 3. Confirmar que existen las vistas:

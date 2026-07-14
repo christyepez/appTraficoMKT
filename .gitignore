@@ -12,3 +12,14 @@ out/
 .env
 deploy/certs/local/
 ~$*.xlsx
+
+# Configuracion y rastros locales de analitica/Power BI
+analytics/config/*.psd1
+!analytics/config/local.example.psd1
+analytics/**/*.log
+analytics/**/*.tmp
+analytics/**/*.cache
+*.pbitmp
+*.pbix
+*.pbix.bak
+*.pbiBackup
