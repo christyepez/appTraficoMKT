@@ -1,0 +1,177 @@
+-- Tabla de medidas: _Medidas
+
+Total requerimientos =
+COUNTROWS ( FactRequerimiento )
+
+Requerimientos activos =
+CALCULATE (
+    [Total requerimientos],
+    FactRequerimiento[EsFinalizado] = 0,
+    FactRequerimiento[EsEliminado] = FALSE ()
+)
+
+Requerimientos completados =
+CALCULATE ( [Total requerimientos], FactRequerimiento[EsCompletado] = 1 )
+
+Requerimientos rechazados =
+CALCULATE ( [Total requerimientos], FactRequerimiento[EsRechazado] = 1 )
+
+Total productos =
+COUNTROWS ( FactProducto )
+
+Productos activos =
+CALCULATE (
+    [Total productos],
+    FactProducto[EsAprobado] = 0,
+    FactProducto[EsEliminado] = FALSE ()
+)
+
+Productos pendientes de iniciar =
+CALCULATE ( [Total productos], FactProducto[EstadoCodigo] = "Todo", FactProducto[EsEliminado] = FALSE () )
+
+Productos en ejecucion =
+CALCULATE ( [Total productos], FactProducto[EstadoCodigo] IN { "InProgress", "EvidenceAttached" }, FactProducto[EsEliminado] = FALSE () )
+
+Productos en correccion =
+CALCULATE ( [Total productos], FactProducto[EsEnCorreccion] = 1, FactProducto[EsEliminado] = FALSE () )
+
+Productos pendientes de aprobacion =
+CALCULATE ( [Total productos], FactProducto[EsPendienteAprobacion] = 1, FactProducto[EsEliminado] = FALSE () )
+
+Productos aprobados =
+CALCULATE ( [Total productos], FactProducto[EsAprobado] = 1 )
+
+Productos rechazados =
+CALCULATE ( COUNTROWS ( FactAprobacion ), FactAprobacion[EsRechazado] = 1 )
+
+Porcentaje de cierre =
+DIVIDE ( [Requerimientos completados], [Total requerimientos] )
+
+Tiempo promedio respuesta inicial horas =
+AVERAGEX (
+    FILTER ( FactHistorialEstado, FactHistorialEstado[TipoEntidad] = "Requerimiento" && FactHistorialEstado[EstadoNuevo] = "InAnalysis" ),
+    DATEDIFF (
+        LOOKUPVALUE ( FactRequerimiento[CreadoUtc], FactRequerimiento[RequerimientoId], FactHistorialEstado[RequerimientoId] ),
+        FactHistorialEstado[FechaEventoUtc],
+        HOUR
+    )
+)
+
+Tiempo promedio asignacion horas =
+AVERAGEX (
+    FILTER ( FactProducto, NOT ISBLANK ( FactProducto[CreadoUtc] ) ),
+    DATEDIFF ( RELATED ( FactRequerimiento[CreadoUtc] ), FactProducto[CreadoUtc], HOUR )
+)
+
+Tiempo promedio tecnico horas =
+AVERAGEX (
+    FILTER ( FactProducto, FactProducto[EstadoCodigo] = "Approved" || NOT ISBLANK ( FactProducto[FechaEnvioAprobacionUtc] ) ),
+    FactProducto[HorasTecnicasLaborables]
+)
+
+Antiguedad tecnica abierta horas =
+AVERAGEX (
+    FILTER ( FactProducto, FactProducto[EsCargaTecnica] = 1 && FactProducto[EsEliminado] = FALSE () ),
+    FactProducto[HorasTecnicasLaborables]
+)
+
+Tiempo promedio aprobacion horas =
+AVERAGEX (
+    FILTER ( FactProducto, FactProducto[EsPendienteAprobacion] = 1 || NOT ISBLANK ( FactProducto[FechaUltimaDecisionUtc] ) ),
+    FactProducto[HorasAprobacionLaborables]
+)
+
+Tiempo promedio total cerrado horas =
+AVERAGEX (
+    FILTER ( FactRequerimiento, FactRequerimiento[EsCompletado] = 1 || FactRequerimiento[EsRechazado] = 1 ),
+    FactRequerimiento[HorasLaborablesCiclo]
+)
+
+Antiguedad requerimientos abiertos horas =
+AVERAGEX (
+    FILTER ( FactRequerimiento, FactRequerimiento[EsFinalizado] = 0 && FactRequerimiento[EsEliminado] = FALSE () ),
+    FactRequerimiento[HorasLaborablesAntiguedad]
+)
+
+Dias de anticipacion =
+AVERAGE ( FactRequerimiento[DiasAnticipacion] )
+
+Carga ponderada =
+SUMX (
+    FILTER ( FactProducto, FactProducto[EsEliminado] = FALSE () && FactProducto[EsAprobado] = 0 ),
+    FactProducto[PesoOperativo]
+)
+
+Horas estimadas pendientes =
+SUMX (
+    FILTER ( FactProducto, FactProducto[EsEliminado] = FALSE () && FactProducto[EsAprobado] = 0 ),
+    FactProducto[HorasEstimadas]
+)
+
+Capacidad disponible horas =
+VAR Tecnicos =
+    CALCULATE (
+        DISTINCTCOUNT ( DimUsuario[UsuarioId] ),
+        CONTAINSSTRING ( DimUsuario[Roles], "Tecnico" ),
+        DimUsuario[EsActivo] = TRUE ()
+    )
+RETURN
+    Tecnicos * 9
+
+Porcentaje de ocupacion =
+DIVIDE ( [Horas estimadas pendientes], [Capacidad disponible horas] )
+
+Capacidad versus demanda =
+[Capacidad disponible horas] - [Horas estimadas pendientes]
+
+Aprobacion al primer intento =
+VAR ProductosAprobadosPrimerIntento =
+    COUNTROWS (
+        FILTER (
+            ADDCOLUMNS (
+                SUMMARIZE ( FactAprobacion, FactAprobacion[ProductoId] ),
+                "Intentos", CALCULATE ( COUNTROWS ( FactAprobacion ) ),
+                "Aprobados", CALCULATE ( COUNTROWS ( FactAprobacion ), FactAprobacion[EsAprobado] = 1 )
+            ),
+            [Intentos] = 1 && [Aprobados] = 1
+        )
+    )
+RETURN
+    DIVIDE ( ProductosAprobadosPrimerIntento, DISTINCTCOUNT ( FactAprobacion[ProductoId] ) )
+
+Numero de reprocesos =
+CALCULATE ( COUNTROWS ( FactAprobacion ), FactAprobacion[EsRechazado] = 1 )
+
+Satisfaccion promedio =
+AVERAGE ( FactSatisfaccion[SatisfaccionGeneral] )
+
+Calidad promedio =
+AVERAGE ( FactSatisfaccion[Calidad] )
+
+Cumplimiento percibido promedio =
+AVERAGE ( FactSatisfaccion[CumplimientoTiempo] )
+
+Recomendacion porcentaje =
+DIVIDE ( SUM ( FactSatisfaccion[Recomienda] ), COUNTROWS ( FactSatisfaccion ) )
+
+Tasa de respuesta encuesta =
+DIVIDE ( DISTINCTCOUNT ( FactSatisfaccion[RequerimientoId] ), [Requerimientos completados] )
+
+Variacion mensual requerimientos =
+VAR Actual = [Total requerimientos]
+VAR Anterior =
+    CALCULATE ( [Total requerimientos], DATEADD ( DimFecha[FechaKey], -1, MONTH ) )
+RETURN
+    Actual - Anterior
+
+Acumulado anual requerimientos =
+TOTALYTD ( [Total requerimientos], DimFecha[FechaKey] )
+
+Usuarios activos =
+CALCULATE ( DISTINCTCOUNT ( DimUsuario[UsuarioId] ), DimUsuario[EsActivo] = TRUE () )
+
+Usuarios con ingreso ultimos 7 dias =
+CALCULATE ( DISTINCTCOUNT ( FactUsoUsuario[UsuarioId] ), FactUsoUsuario[IngresoUltimos7Dias] = 1 )
+
+Notificaciones leidas porcentaje =
+DIVIDE ( SUM ( FactUsoUsuario[NotificacionesLeidas] ), SUM ( FactUsoUsuario[NotificacionesRecibidas] ) )

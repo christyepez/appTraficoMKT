@@ -1,0 +1,13 @@
+{
+  "name": "AtencionYTiempos",
+  "displayName": "Atencion y tiempos",
+  "layout": "16:9",
+  "visuals": [
+    "Tarjetas: respuesta inicial, asignacion, tecnico, aprobacion, ciclo total",
+    "Barras: tecnico versus aprobador",
+    "Tabla: registros sin actividad reciente",
+    "Histograma: antiguedad de pendientes",
+    "Linea: tiempos mensuales cerrados sin mezclar registros abiertos"
+  ],
+  "filters": ["Fecha solicitud", "Estado", "Responsable", "Aprobador"]
+}
