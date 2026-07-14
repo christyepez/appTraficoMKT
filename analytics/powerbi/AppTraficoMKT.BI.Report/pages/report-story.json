@@ -1,0 +1,118 @@
+{
+  "report": "AppTraficoMKT.BI",
+  "audience": "Direccion, coordinacion, aprobadores y equipo tecnico de marketing",
+  "purpose": "Contar la historia completa de demanda, ejecucion, aprobacion, satisfaccion y uso operativo de la plataforma.",
+  "tabs": [
+    {
+      "page": "Portada ejecutiva",
+      "question": "Como esta la operacion hoy y donde debe enfocarse la direccion?",
+      "visuals": [
+        "Tarjetas KPI: requerimientos abiertos, productos en proceso, productos en aprobacion, productos aprobados, satisfaccion promedio.",
+        "Semaforo ejecutivo: riesgo operativo por vencimiento, rechazo o acumulacion de aprobaciones.",
+        "Linea narrativa: recibido, asignado, en proceso, en aprobacion, aprobado y cerrado.",
+        "Top alertas: requerimientos sin movimiento, productos proximos a vencer y aprobaciones demoradas."
+      ],
+      "decisions": [
+        "Priorizar bloqueos del dia.",
+        "Definir refuerzo de capacidad.",
+        "Identificar areas que requieren seguimiento ejecutivo."
+      ]
+    },
+    {
+      "page": "Resumen gerencial",
+      "question": "Como evoluciona la demanda institucional y que volumen se esta cerrando?",
+      "visuals": [
+        "Tarjetas: total requerimientos, total productos, activos, finalizados y rechazados.",
+        "Linea mensual: requerimientos recibidos versus completados.",
+        "Columnas por sede y facultad: demanda acumulada.",
+        "Barras apiladas por estado: salud del portafolio.",
+        "Matriz ejecutiva: facultad, carrera, sede, estado y cantidad de productos."
+      ],
+      "filters": ["Fecha solicitud", "Sede", "Facultad", "Carrera", "Estado requerimiento"]
+    },
+    {
+      "page": "Captacion e impacto",
+      "question": "Que iniciativas aportan mas a captacion, posicionamiento y fidelizacion?",
+      "visuals": [
+        "Mapa/columnas por sede: concentracion de eventos y campanas.",
+        "Donut por publico objetivo: foco de audiencia.",
+        "Columnas por canal de difusion: uso de medios.",
+        "Tabla KPI principal: impactos, alcance, asistentes e interacciones reportadas.",
+        "Ranking de requerimientos por incidencia institucional."
+      ],
+      "filters": ["Publico objetivo", "Canal difusion", "KPI principal", "Tipo requerimiento"]
+    },
+    {
+      "page": "Carga operativa",
+      "question": "Como esta distribuida la carga del equipo y donde hay saturacion?",
+      "visuals": [
+        "Barras por tecnico: productos asignados abiertos.",
+        "Columnas apiladas por tecnico y estado: pendiente, proceso, aprobacion y rechazado.",
+        "Indicador de ocupacion: carga ponderada por tipo de producto.",
+        "Tabla de proximos vencimientos por responsable.",
+        "Tendencia semanal de nuevas asignaciones versus cierres."
+      ],
+      "filters": ["Responsable producto", "Tipo producto", "Estado producto", "Fecha entrega"]
+    },
+    {
+      "page": "Atencion y tiempos",
+      "question": "Cuanto tarda cada etapa y donde se generan cuellos de botella?",
+      "visuals": [
+        "Tarjetas: tiempo promedio de asignacion, ejecucion, aprobacion y ciclo total.",
+        "Barras por etapa: tiempo promedio y percentil 80.",
+        "Tabla: requerimientos sin actividad reciente.",
+        "Histograma de antiguedad de pendientes.",
+        "Linea mensual de tiempos cerrados."
+      ],
+      "filters": ["Fecha", "Responsable", "Aprobador", "Estado"]
+    },
+    {
+      "page": "Aprobaciones",
+      "question": "Que productos esperan aprobacion y que reprocesos existen?",
+      "visuals": [
+        "Tarjetas: pendientes, aprobados, rechazados, tiempo promedio y aprobacion al primer intento.",
+        "Barras por aprobador: pendientes y vencidos.",
+        "Matriz por producto: version enviada, decision, fecha, comentario y adjunto.",
+        "Tabla de antiguedad de pendientes.",
+        "Detalle de versiones enviadas a aprobacion."
+      ],
+      "filters": ["Aprobador", "Decision", "Tipo producto", "Fecha decision"]
+    },
+    {
+      "page": "Satisfaccion",
+      "question": "Como percibe el solicitante la entrega del requerimiento?",
+      "visuals": [
+        "Tarjetas: satisfaccion promedio, respuestas recibidas, NPS operativo y comentarios criticos.",
+        "Barras por facultad, sede y tipo de evento.",
+        "Linea de satisfaccion mensual.",
+        "Tabla de comentarios con requerimiento y solicitante.",
+        "Cruce satisfaccion versus tiempo de ciclo."
+      ],
+      "filters": ["Fecha cierre", "Facultad", "Sede", "Solicitante"]
+    },
+    {
+      "page": "Usabilidad",
+      "question": "Quienes usan la plataforma y como gestionan sus actividades?",
+      "visuals": [
+        "Tarjetas: usuarios activos, sesiones, acciones registradas y tasa de confirmacion de notificaciones.",
+        "Barras por usuario: acciones de gestion, aprobaciones, adjuntos y cambios de estado.",
+        "Linea diaria: actividad de usuarios.",
+        "Tabla detalle: fecha, usuario, proceso, accion, entidad y descripcion.",
+        "Ranking de usuarios sin actividad reciente."
+      ],
+      "filters": ["Usuario", "Rol", "Proceso", "Fecha"]
+    },
+    {
+      "page": "Detalle operativo",
+      "question": "Cual es el registro exacto para seguimiento y auditoria?",
+      "visuals": [
+        "Tabla principal: requerimiento, producto, responsable, aprobador, estado, fechas, sede, facultad, carrera, canal y KPI.",
+        "Buscador y filtros cruzados para investigacion.",
+        "Detalle de adjuntos y versiones de aprobacion.",
+        "Historial de auditoria por entidad.",
+        "Exportacion controlada para seguimiento operativo."
+      ],
+      "filters": ["Estado", "Fecha", "Sede", "Facultad", "Tecnico", "Aprobador"]
+    }
+  ]
+}

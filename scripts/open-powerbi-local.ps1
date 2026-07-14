@@ -160,6 +160,12 @@ function Find-PowerBIDesktop {
         if (Test-Path $candidate -PathType Leaf) { return $candidate }
     }
 
+    $storePackage = Get-AppxPackage -Name "Microsoft.MicrosoftPowerBIDesktop" -ErrorAction SilentlyContinue
+    if ($storePackage) {
+        $storeExe = Join-Path $storePackage.InstallLocation "bin\PBIDesktop.exe"
+        if (Test-Path $storeExe -PathType Leaf) { return $storeExe }
+    }
+
     $command = Get-Command "PBIDesktop.exe" -ErrorAction SilentlyContinue
     if ($command) { return $command.Source }
 
@@ -292,13 +298,17 @@ SELECT bi.fn_WorkingMinutes('2026-07-13T08:30:00','2026-07-13T17:30:00');
     if ($workingMinutes -le 0) { Fail "bi.fn_WorkingMinutes devolvio $workingMinutes; se esperaba un valor positivo para la prueba solicitada." }
     Write-Ok "Vistas BI: $viewCount. Funcion laboral: $workingMinutes minutos."
 
-    Write-Step "Validando PBIP, PBIR, JSON y TMDL"
+    Write-Step "Validando PBIP, PBIR y modelo semantico"
     $pbipPath = Join-Path $repoRoot "analytics\powerbi\AppTraficoMKT.BI.pbip"
     $reportPath = Join-Path $repoRoot "analytics\powerbi\AppTraficoMKT.BI.Report"
     $semanticPath = Join-Path $repoRoot "analytics\powerbi\AppTraficoMKT.BI.SemanticModel"
     if (-not (Test-Path $pbipPath -PathType Leaf)) { Fail "No existe el archivo PBIP: $pbipPath" }
     if (-not (Test-Path $reportPath -PathType Container)) { Fail "No existe la carpeta del reporte PBIR: $reportPath" }
     if (-not (Test-Path $semanticPath -PathType Container)) { Fail "No existe la carpeta del modelo semantico: $semanticPath" }
+    if ((Test-Path (Join-Path $reportPath "definition") -PathType Container) -and
+        (Test-Path (Join-Path $reportPath "report.json") -PathType Leaf)) {
+        Fail "El reporte contiene PBIR (definition) y PBIR-Legacy (report.json). Elimina AppTraficoMKT.BI.Report\report.json."
+    }
 
     Get-ChildItem -Path (Join-Path $repoRoot "analytics\powerbi") -Recurse -Include *.json,*.pbip,*.pbir,*.pbism |
         ForEach-Object {
@@ -306,19 +316,72 @@ SELECT bi.fn_WorkingMinutes('2026-07-13T08:30:00','2026-07-13T17:30:00');
             catch { Fail "JSON/PBIR/PBIP invalido en $($_.FullName): $($_.Exception.Message)" }
         }
 
-    $modelText = Get-Content -Raw (Join-Path $semanticPath "model.tmdl")
-    foreach ($required in @("ServerName", "DatabaseName", "EnvironmentName", "FactRequerimiento", "FactProducto", "FactAprobacion", "FactSatisfaccion", "FactUsoUsuario", "FactKpiResultado")) {
-        if ($modelText -notmatch [regex]::Escape($required)) { Fail "El modelo TMDL no contiene $required." }
+    $pbip = Get-Content -Raw $pbipPath | ConvertFrom-Json
+    if (-not $pbip.artifacts -or $pbip.artifacts.Count -lt 1) {
+        Fail "El PBIP no contiene artefactos."
     }
-    if ($modelText -match "[A-Za-z]:\\") { Fail "El modelo TMDL contiene rutas locales absolutas." }
-    $credentialPatterns = @("Pass" + "w0rd", "SqlPassword", "Password=")
-    foreach ($pattern in $credentialPatterns) {
-        if ($modelText -match [regex]::Escape($pattern)) { Fail "El modelo TMDL parece contener credenciales." }
+    foreach ($artifact in @($pbip.artifacts)) {
+        $artifactProperties = @($artifact.PSObject.Properties.Name)
+        if ($artifactProperties.Count -ne 1 -or $artifactProperties[0] -ne "report") {
+            Fail "El PBIP de Power BI Desktop solo admite artefactos report en esta version. Propiedades encontradas: $($artifactProperties -join ', ')."
+        }
     }
 
-    $pageCount = (Get-ChildItem -Path (Join-Path $reportPath "pages") -Filter "*.json").Count
+    $pbismPath = Join-Path $semanticPath "definition.pbism"
+    $pbism = Get-Content -Raw $pbismPath | ConvertFrom-Json
+    $pbismProperties = @($pbism.PSObject.Properties.Name)
+    $unsupportedPbismProperties = @($pbismProperties | Where-Object { $_ -notin @("version") })
+    if ($unsupportedPbismProperties.Count -gt 0) {
+        Fail "definition.pbism contiene propiedades no soportadas por Power BI Desktop: $($unsupportedPbismProperties -join ', ')."
+    }
+    $modelBimPath = Join-Path $semanticPath "model.bim"
+    $modelTmdlPath = Join-Path $semanticPath "definition\model.tmdl"
+    if ([string]$pbism.version -eq "1.0") {
+        if (-not (Test-Path $modelBimPath -PathType Leaf)) {
+            Fail "definition.pbism version 1.0 requiere model.bim en el modelo semantico."
+        }
+        if (Test-Path $modelTmdlPath -PathType Leaf) {
+            Fail "El modelo semantico tiene model.bim y TMDL al mismo tiempo. Elimina definition\model.tmdl."
+        }
+        $modelText = Get-Content -Raw $modelBimPath
+        try { $modelJson = $modelText | ConvertFrom-Json }
+        catch { Fail "model.bim no es JSON valido: $($_.Exception.Message)" }
+        if (-not $modelJson.model -or -not $modelJson.model.tables) {
+            Fail "model.bim no contiene model.tables."
+        }
+    }
+    elseif ([string]$pbism.version -ge "4.0") {
+        if (-not (Test-Path $modelTmdlPath -PathType Leaf)) {
+            Fail "definition.pbism version 4.0 o superior requiere definition\model.tmdl."
+        }
+        $modelText = Get-Content -Raw $modelTmdlPath
+        if ($modelText -match "[A-Za-z]:\\") { Fail "El modelo TMDL contiene rutas locales absolutas." }
+        if ($modelText -match "(?m)^\s*meta\s+\[") {
+            Fail "El modelo TMDL contiene bloques meta no soportados por Power BI Desktop en este contexto."
+        }
+        if ($modelText -match '`r`n') {
+            Fail 'El modelo TMDL contiene secuencias literales de salto de linea (`r`n).'
+        }
+    }
+    else {
+        Fail "Version de definition.pbism no soportada: $($pbism.version)."
+    }
+
+    foreach ($required in @("ServerName", "DatabaseName", "EnvironmentName", "FactRequerimiento", "FactProducto", "FactAprobacion", "FactSatisfaccion", "FactUsoUsuario", "FactKpiResultado")) {
+        if ($modelText -notmatch [regex]::Escape($required)) { Fail "El modelo semantico no contiene $required." }
+    }
+    $credentialPatterns = @("Pass" + "w0rd", "SqlPassword", "Password=")
+    foreach ($pattern in $credentialPatterns) {
+        if ($modelText -match [regex]::Escape($pattern)) { Fail "El modelo semantico parece contener credenciales." }
+    }
+
+    $reportPagesPath = Join-Path $reportPath "definition\pages"
+    if (-not (Test-Path $reportPagesPath -PathType Container)) {
+        $reportPagesPath = Join-Path $reportPath "pages"
+    }
+    $pageCount = (Get-ChildItem -Path $reportPagesPath -Recurse -Filter "page.json").Count
     if ($pageCount -lt 5) { Fail "Se esperaban 5 paginas PBIR, pero se encontraron $pageCount." }
-    Write-Ok "PBIP/PBIR/TMDL validado. Paginas: $pageCount."
+    Write-Ok "PBIP/PBIR/modelo semantico validado. Paginas: $pageCount."
 
     if (-not $SkipOpenPowerBI) {
         Write-Step "Abriendo Power BI Desktop"
