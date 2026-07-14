@@ -3,7 +3,9 @@
 Ejecutar en SQL Server despues de crear las vistas:
 
 ```powershell
-sqlcmd -S localhost,14333 -U sa -P "Passw0rd!Local" -d RequirementsDb -i analytics/sql/03-quality-validations.sql
+$env:SQLCMDPASSWORD = $env:APPTRAFICOMKT_SQL_PASSWORD
+sqlcmd -S localhost,14333 -U sa -d RequirementsDb -i analytics/sql/03-quality-validations.sql
+$env:SQLCMDPASSWORD = $null
 ```
 
 Criterio de aceptacion:

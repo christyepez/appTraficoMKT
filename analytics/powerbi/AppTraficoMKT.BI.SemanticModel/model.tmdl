@@ -81,6 +81,16 @@ model AppTraficoMKT_BI
             mode: directQuery
             source = Source{[Schema="bi", Item="DimKpi"]}[Data]
 
+    table DimComplejidad
+        partition DimComplejidad = m
+            mode: directQuery
+            source = Source{[Schema="bi", Item="DimComplejidad"]}[Data]
+
+    table DimCanalOrigen
+        partition DimCanalOrigen = m
+            mode: directQuery
+            source = Source{[Schema="bi", Item="DimCanalOrigen"]}[Data]
+
     table FactRequerimiento
         partition FactRequerimiento = m
             mode: directQuery
@@ -111,6 +121,11 @@ model AppTraficoMKT_BI
             mode: directQuery
             source = Source{[Schema="bi", Item="FactUsoUsuario"]}[Data]
 
+    table FactKpiResultado
+        partition FactKpiResultado = m
+            mode: directQuery
+            source = Source{[Schema="bi", Item="FactKpiResultado"]}[Data]
+
     relationship Requerimiento_Producto
         fromColumn: FactProducto.RequerimientoId
         toColumn: FactRequerimiento.RequerimientoId
@@ -134,3 +149,11 @@ model AppTraficoMKT_BI
     relationship TipoProducto_Producto
         fromColumn: FactProducto.TipoProductoId
         toColumn: DimTipoProducto.TipoProductoId
+
+    relationship Kpi_Producto
+        fromColumn: FactProducto.KpiId
+        toColumn: DimKpi.KpiId
+
+    relationship Kpi_Resultado
+        fromColumn: FactKpiResultado.KpiId
+        toColumn: DimKpi.KpiId
