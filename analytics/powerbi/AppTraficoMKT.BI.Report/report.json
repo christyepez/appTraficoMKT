@@ -7,6 +7,7 @@
     {
       "name": "PortadaEjecutiva",
       "displayName": "Portada ejecutiva",
+      "displayOption": 1,
       "config": "{\"objects\":{\"background\":[{\"properties\":{\"color\":{\"solid\":{\"color\":\"#FFFFFF\"}},\"transparency\":0}}]},\"visibility\":0}",
       "filters": "[]",
       "ordinal": 0,
@@ -15,99 +16,105 @@
       "visualContainers": [
         {
           "x": 30,
-          "y": 24,
+          "y": 18,
           "z": 1,
           "width": 1220,
-          "height": 60,
-          "config": "{\"name\":\"PortadaEjecutiva_Titulo\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":24,\"z\":1,\"width\":1220,\"height\":60,\"tabOrder\":1}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Portada ejecutiva\",\"textStyle\":{\"fontSize\":\"26pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 1
+          "height": 54,
+          "config": "{\"name\":\"PortadaEjecutiva_Titulo\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":18,\"z\":1,\"width\":1220,\"height\":54,\"tabOrder\":1}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Portada ejecutiva\",\"textStyle\":{\"fontSize\":\"25pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
+          "filters": "[]"
         },
         {
           "x": 30,
-          "y": 92,
+          "y": 78,
           "z": 2,
           "width": 1220,
-          "height": 50,
-          "config": "{\"name\":\"PortadaEjecutiva_Desc\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":92,\"z\":2,\"width\":1220,\"height\":50,\"tabOrder\":2}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Estado general de requerimientos, productos, aprobaciones y alertas operativas.\",\"textStyle\":{\"fontSize\":\"13pt\",\"fontWeight\":\"normal\",\"color\":\"#536271\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 2
+          "height": 42,
+          "config": "{\"name\":\"PortadaEjecutiva_Desc\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":78,\"z\":2,\"width\":1220,\"height\":42,\"tabOrder\":2}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Vista gerencial del estado general de la operaci\\u00f3n.\",\"textStyle\":{\"fontSize\":\"12pt\",\"fontWeight\":\"normal\",\"color\":\"#536271\"}}]}]}}]}}}",
+          "filters": "[]"
         },
         {
           "x": 30,
-          "y": 165,
+          "y": 140,
           "z": 3,
           "width": 280,
-          "height": 110,
-          "config": "{\"name\":\"PortadaEjecutiva_Kpi1\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":165,\"z\":3,\"width\":280,\"height\":110,\"tabOrder\":3}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"KPI principal\\nActualizar datos\",\"textStyle\":{\"fontSize\":\"16pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
+          "height": 105,
+          "config": "{\"name\":\"KpiReq\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":140,\"z\":3,\"width\":280,\"height\":105,\"tabOrder\":3}}],\"singleVisual\":{\"visualType\":\"card\",\"projections\":{\"Values\":[{\"queryRef\":\"_Medidas.Total requerimientos\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"m\",\"Entity\":\"_Medidas\",\"Type\":0}],\"Select\":[{\"Measure\":{\"Expression\":{\"SourceRef\":{\"Source\":\"m\"}},\"Property\":\"Total requerimientos\"},\"Name\":\"_Medidas.Total requerimientos\"}]},\"drillFilterOtherVisuals\":true}}",
           "filters": "[]",
-          "tabOrder": 3
+          "query": "{}",
+          "dataTransforms": "{\"queryMetadata\":{\"Select\":[{\"Restatement\":\"Total requerimientos\",\"Name\":\"_Medidas.Total requerimientos\",\"Type\":4}]},\"selects\":[{\"displayName\":\"Total requerimientos\",\"queryName\":\"_Medidas.Total requerimientos\",\"roles\":{\"Values\":true}}],\"projectionOrdering\":{\"Values\":[0]},\"visualElements\":[]}"
         },
         {
           "x": 330,
-          "y": 165,
+          "y": 140,
           "z": 4,
           "width": 280,
-          "height": 110,
-          "config": "{\"name\":\"PortadaEjecutiva_Kpi2\",\"layouts\":[{\"id\":0,\"position\":{\"x\":330,\"y\":165,\"z\":4,\"width\":280,\"height\":110,\"tabOrder\":4}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Seguimiento\\nVer detalle\",\"textStyle\":{\"fontSize\":\"16pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
+          "height": 105,
+          "config": "{\"name\":\"KpiProd\",\"layouts\":[{\"id\":0,\"position\":{\"x\":330,\"y\":140,\"z\":4,\"width\":280,\"height\":105,\"tabOrder\":4}}],\"singleVisual\":{\"visualType\":\"card\",\"projections\":{\"Values\":[{\"queryRef\":\"_Medidas.Total productos\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"m\",\"Entity\":\"_Medidas\",\"Type\":0}],\"Select\":[{\"Measure\":{\"Expression\":{\"SourceRef\":{\"Source\":\"m\"}},\"Property\":\"Total productos\"},\"Name\":\"_Medidas.Total productos\"}]},\"drillFilterOtherVisuals\":true}}",
           "filters": "[]",
-          "tabOrder": 4
+          "query": "{}",
+          "dataTransforms": "{\"queryMetadata\":{\"Select\":[{\"Restatement\":\"Total productos\",\"Name\":\"_Medidas.Total productos\",\"Type\":4}]},\"selects\":[{\"displayName\":\"Total productos\",\"queryName\":\"_Medidas.Total productos\",\"roles\":{\"Values\":true}}],\"projectionOrdering\":{\"Values\":[0]},\"visualElements\":[]}"
         },
         {
           "x": 630,
-          "y": 165,
+          "y": 140,
           "z": 5,
           "width": 280,
-          "height": 110,
-          "config": "{\"name\":\"PortadaEjecutiva_Kpi3\",\"layouts\":[{\"id\":0,\"position\":{\"x\":630,\"y\":165,\"z\":5,\"width\":280,\"height\":110,\"tabOrder\":5}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Riesgo operativo\\nValidar alertas\",\"textStyle\":{\"fontSize\":\"16pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
+          "height": 105,
+          "config": "{\"name\":\"KpiAprob\",\"layouts\":[{\"id\":0,\"position\":{\"x\":630,\"y\":140,\"z\":5,\"width\":280,\"height\":105,\"tabOrder\":5}}],\"singleVisual\":{\"visualType\":\"card\",\"projections\":{\"Values\":[{\"queryRef\":\"_Medidas.Productos aprobados\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"m\",\"Entity\":\"_Medidas\",\"Type\":0}],\"Select\":[{\"Measure\":{\"Expression\":{\"SourceRef\":{\"Source\":\"m\"}},\"Property\":\"Productos aprobados\"},\"Name\":\"_Medidas.Productos aprobados\"}]},\"drillFilterOtherVisuals\":true}}",
           "filters": "[]",
-          "tabOrder": 5
+          "query": "{}",
+          "dataTransforms": "{\"queryMetadata\":{\"Select\":[{\"Restatement\":\"Productos aprobados\",\"Name\":\"_Medidas.Productos aprobados\",\"Type\":4}]},\"selects\":[{\"displayName\":\"Productos aprobados\",\"queryName\":\"_Medidas.Productos aprobados\",\"roles\":{\"Values\":true}}],\"projectionOrdering\":{\"Values\":[0]},\"visualElements\":[]}"
         },
         {
           "x": 930,
-          "y": 165,
+          "y": 140,
           "z": 6,
-          "width": 300,
-          "height": 110,
-          "config": "{\"name\":\"PortadaEjecutiva_Kpi4\",\"layouts\":[{\"id\":0,\"position\":{\"x\":930,\"y\":165,\"z\":6,\"width\":300,\"height\":110,\"tabOrder\":6}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Decision gerencial\\nPriorizar acciones\",\"textStyle\":{\"fontSize\":\"16pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
+          "width": 280,
+          "height": 105,
+          "config": "{\"name\":\"KpiSat\",\"layouts\":[{\"id\":0,\"position\":{\"x\":930,\"y\":140,\"z\":6,\"width\":280,\"height\":105,\"tabOrder\":6}}],\"singleVisual\":{\"visualType\":\"card\",\"projections\":{\"Values\":[{\"queryRef\":\"_Medidas.Satisfaccion promedio\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"m\",\"Entity\":\"_Medidas\",\"Type\":0}],\"Select\":[{\"Measure\":{\"Expression\":{\"SourceRef\":{\"Source\":\"m\"}},\"Property\":\"Satisfaccion promedio\"},\"Name\":\"_Medidas.Satisfaccion promedio\"}]},\"drillFilterOtherVisuals\":true}}",
           "filters": "[]",
-          "tabOrder": 6
+          "query": "{}",
+          "dataTransforms": "{\"queryMetadata\":{\"Select\":[{\"Restatement\":\"Satisfacci\\u00f3n promedio\",\"Name\":\"_Medidas.Satisfaccion promedio\",\"Type\":4}]},\"selects\":[{\"displayName\":\"Satisfacci\\u00f3n promedio\",\"queryName\":\"_Medidas.Satisfaccion promedio\",\"roles\":{\"Values\":true}}],\"projectionOrdering\":{\"Values\":[0]},\"visualElements\":[]}"
         },
         {
           "x": 30,
-          "y": 315,
+          "y": 285,
           "z": 7,
           "width": 580,
-          "height": 270,
-          "config": "{\"name\":\"PortadaEjecutiva_Grafico1\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":315,\"z\":7,\"width\":580,\"height\":270,\"tabOrder\":7}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Grafico principal\\nUse campos del panel Datos para cruzar esta vista con la informacion actualizada.\",\"textStyle\":{\"fontSize\":\"18pt\",\"fontWeight\":\"bold\",\"color\":\"#263238\"}}]}]}}]}}}",
+          "height": 245,
+          "config": "{\"name\":\"ReqPorEstado\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":285,\"z\":7,\"width\":580,\"height\":245,\"tabOrder\":7}}],\"singleVisual\":{\"visualType\":\"clusteredColumnChart\",\"projections\":{\"Category\":[{\"queryRef\":\"DimEstado.Estado\"}],\"Y\":[{\"queryRef\":\"CountNonNull(FactRequerimiento.RequerimientoId)\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"c\",\"Entity\":\"DimEstado\",\"Type\":0},{\"Name\":\"f\",\"Entity\":\"FactRequerimiento\",\"Type\":0}],\"Select\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"Estado\"},\"Name\":\"DimEstado.Estado\"},{\"Aggregation\":{\"Expression\":{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"f\"}},\"Property\":\"RequerimientoId\"}},\"Function\":5},\"Name\":\"CountNonNull(FactRequerimiento.RequerimientoId)\"}]},\"drillFilterOtherVisuals\":true}}",
           "filters": "[]",
-          "tabOrder": 7
+          "query": "{}",
+          "dataTransforms": "{\"queryMetadata\":{\"Select\":[{\"Restatement\":\"Estado\",\"Name\":\"DimEstado.Estado\",\"Type\":2048},{\"Restatement\":\"Requerimientos\",\"Name\":\"CountNonNull(FactRequerimiento.RequerimientoId)\",\"Type\":4}]},\"selects\":[{\"displayName\":\"Estado\",\"queryName\":\"DimEstado.Estado\",\"roles\":{\"Category\":true}},{\"displayName\":\"Requerimientos\",\"queryName\":\"CountNonNull(FactRequerimiento.RequerimientoId)\",\"roles\":{\"Y\":true,\"Values\":true}}],\"projectionOrdering\":{\"Category\":[0],\"Y\":[1]},\"visualElements\":[]}"
         },
         {
           "x": 650,
-          "y": 315,
+          "y": 285,
           "z": 8,
           "width": 580,
-          "height": 270,
-          "config": "{\"name\":\"PortadaEjecutiva_Grafico2\",\"layouts\":[{\"id\":0,\"position\":{\"x\":650,\"y\":315,\"z\":8,\"width\":580,\"height\":270,\"tabOrder\":8}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Detalle y seguimiento\\nEsta zona esta preparada para tabla, barras o matriz segun la pagina.\",\"textStyle\":{\"fontSize\":\"18pt\",\"fontWeight\":\"bold\",\"color\":\"#263238\"}}]}]}}]}}}",
+          "height": 245,
+          "config": "{\"name\":\"ProdPorEstado\",\"layouts\":[{\"id\":0,\"position\":{\"x\":650,\"y\":285,\"z\":8,\"width\":580,\"height\":245,\"tabOrder\":8}}],\"singleVisual\":{\"visualType\":\"barChart\",\"projections\":{\"Category\":[{\"queryRef\":\"DimEstado.Estado\"}],\"Y\":[{\"queryRef\":\"CountNonNull(FactProducto.ProductoId)\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"c\",\"Entity\":\"DimEstado\",\"Type\":0},{\"Name\":\"f\",\"Entity\":\"FactProducto\",\"Type\":0}],\"Select\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"Estado\"},\"Name\":\"DimEstado.Estado\"},{\"Aggregation\":{\"Expression\":{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"f\"}},\"Property\":\"ProductoId\"}},\"Function\":5},\"Name\":\"CountNonNull(FactProducto.ProductoId)\"}]},\"drillFilterOtherVisuals\":true}}",
           "filters": "[]",
-          "tabOrder": 8
+          "query": "{}",
+          "dataTransforms": "{\"queryMetadata\":{\"Select\":[{\"Restatement\":\"Estado\",\"Name\":\"DimEstado.Estado\",\"Type\":2048},{\"Restatement\":\"Productos\",\"Name\":\"CountNonNull(FactProducto.ProductoId)\",\"Type\":4}]},\"selects\":[{\"displayName\":\"Estado\",\"queryName\":\"DimEstado.Estado\",\"roles\":{\"Category\":true}},{\"displayName\":\"Productos\",\"queryName\":\"CountNonNull(FactProducto.ProductoId)\",\"roles\":{\"Y\":true,\"Values\":true}}],\"projectionOrdering\":{\"Category\":[0],\"Y\":[1]},\"visualElements\":[]}"
         },
         {
           "x": 30,
-          "y": 620,
+          "y": 560,
           "z": 9,
           "width": 1200,
-          "height": 52,
-          "config": "{\"name\":\"PortadaEjecutiva_Nota\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":620,\"z\":9,\"width\":1200,\"height\":52,\"tabOrder\":9}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Historia: revise primero los KPI, luego los graficos y finalmente el detalle operativo para tomar decisiones.\",\"textStyle\":{\"fontSize\":\"12pt\",\"fontWeight\":\"normal\",\"color\":\"#536271\"}}]}]}}]}}}",
+          "height": 125,
+          "config": "{\"name\":\"TablaAlertas\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":560,\"z\":9,\"width\":1200,\"height\":125,\"tabOrder\":9}}],\"singleVisual\":{\"visualType\":\"tableEx\",\"projections\":{\"Values\":[{\"queryRef\":\"FactProducto.CodigoProducto\"},{\"queryRef\":\"FactProducto.EstadoProducto\"},{\"queryRef\":\"FactProducto.ResponsableProducto\"},{\"queryRef\":\"FactProducto.FechaEntregaProducto\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"a\",\"Entity\":\"FactProducto\",\"Type\":0}],\"Select\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"a\"}},\"Property\":\"CodigoProducto\"},\"Name\":\"FactProducto.CodigoProducto\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"a\"}},\"Property\":\"EstadoProducto\"},\"Name\":\"FactProducto.EstadoProducto\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"a\"}},\"Property\":\"ResponsableProducto\"},\"Name\":\"FactProducto.ResponsableProducto\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"a\"}},\"Property\":\"FechaEntregaProducto\"},\"Name\":\"FactProducto.FechaEntregaProducto\"}]},\"drillFilterOtherVisuals\":true}}",
           "filters": "[]",
-          "tabOrder": 9
+          "query": "{}",
+          "dataTransforms": "{\"queryMetadata\":{\"Select\":[{\"Restatement\":\"Producto\",\"Name\":\"FactProducto.CodigoProducto\",\"Type\":2048},{\"Restatement\":\"Estado\",\"Name\":\"FactProducto.EstadoProducto\",\"Type\":2048},{\"Restatement\":\"Responsable\",\"Name\":\"FactProducto.ResponsableProducto\",\"Type\":2048},{\"Restatement\":\"Entrega\",\"Name\":\"FactProducto.FechaEntregaProducto\",\"Type\":2048}]},\"selects\":[{\"displayName\":\"Producto\",\"queryName\":\"FactProducto.CodigoProducto\",\"roles\":{\"Values\":true}},{\"displayName\":\"Estado\",\"queryName\":\"FactProducto.EstadoProducto\",\"roles\":{\"Values\":true}},{\"displayName\":\"Responsable\",\"queryName\":\"FactProducto.ResponsableProducto\",\"roles\":{\"Values\":true}},{\"displayName\":\"Entrega\",\"queryName\":\"FactProducto.FechaEntregaProducto\",\"roles\":{\"Values\":true}}],\"projectionOrdering\":{\"Values\":[0,1,2,3]},\"visualElements\":[]}"
         }
       ]
     },
     {
       "name": "ResumenGerencial",
       "displayName": "Resumen gerencial",
+      "displayOption": 1,
       "config": "{\"objects\":{\"background\":[{\"properties\":{\"color\":{\"solid\":{\"color\":\"#FFFFFF\"}},\"transparency\":0}}]},\"visibility\":0}",
       "filters": "[]",
       "ordinal": 1,
@@ -116,99 +123,83 @@
       "visualContainers": [
         {
           "x": 30,
-          "y": 24,
+          "y": 18,
           "z": 1,
           "width": 1220,
-          "height": 60,
-          "config": "{\"name\":\"ResumenGerencial_Titulo\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":24,\"z\":1,\"width\":1220,\"height\":60,\"tabOrder\":1}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Resumen gerencial\",\"textStyle\":{\"fontSize\":\"26pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 1
+          "height": 54,
+          "config": "{\"name\":\"ResumenGerencial_Titulo\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":18,\"z\":1,\"width\":1220,\"height\":54,\"tabOrder\":1}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Resumen gerencial\",\"textStyle\":{\"fontSize\":\"25pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
+          "filters": "[]"
         },
         {
           "x": 30,
-          "y": 92,
+          "y": 78,
           "z": 2,
           "width": 1220,
-          "height": 50,
-          "config": "{\"name\":\"ResumenGerencial_Desc\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":92,\"z\":2,\"width\":1220,\"height\":50,\"tabOrder\":2}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Demanda institucional, cierre mensual y distribucion por sede, facultad y carrera.\",\"textStyle\":{\"fontSize\":\"13pt\",\"fontWeight\":\"normal\",\"color\":\"#536271\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 2
+          "height": 42,
+          "config": "{\"name\":\"ResumenGerencial_Desc\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":78,\"z\":2,\"width\":1220,\"height\":42,\"tabOrder\":2}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Demanda institucional y distribuci\\u00f3n por unidades.\",\"textStyle\":{\"fontSize\":\"12pt\",\"fontWeight\":\"normal\",\"color\":\"#536271\"}}]}]}}]}}}",
+          "filters": "[]"
         },
         {
           "x": 30,
-          "y": 165,
+          "y": 140,
           "z": 3,
           "width": 280,
-          "height": 110,
-          "config": "{\"name\":\"ResumenGerencial_Kpi1\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":165,\"z\":3,\"width\":280,\"height\":110,\"tabOrder\":3}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"KPI principal\\nActualizar datos\",\"textStyle\":{\"fontSize\":\"16pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
+          "height": 105,
+          "config": "{\"name\":\"KpiReqRG\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":140,\"z\":3,\"width\":280,\"height\":105,\"tabOrder\":3}}],\"singleVisual\":{\"visualType\":\"card\",\"projections\":{\"Values\":[{\"queryRef\":\"_Medidas.Total requerimientos\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"m\",\"Entity\":\"_Medidas\",\"Type\":0}],\"Select\":[{\"Measure\":{\"Expression\":{\"SourceRef\":{\"Source\":\"m\"}},\"Property\":\"Total requerimientos\"},\"Name\":\"_Medidas.Total requerimientos\"}]},\"drillFilterOtherVisuals\":true}}",
           "filters": "[]",
-          "tabOrder": 3
+          "query": "{}",
+          "dataTransforms": "{\"queryMetadata\":{\"Select\":[{\"Restatement\":\"Requerimientos\",\"Name\":\"_Medidas.Total requerimientos\",\"Type\":4}]},\"selects\":[{\"displayName\":\"Requerimientos\",\"queryName\":\"_Medidas.Total requerimientos\",\"roles\":{\"Values\":true}}],\"projectionOrdering\":{\"Values\":[0]},\"visualElements\":[]}"
         },
         {
           "x": 330,
-          "y": 165,
+          "y": 140,
           "z": 4,
           "width": 280,
-          "height": 110,
-          "config": "{\"name\":\"ResumenGerencial_Kpi2\",\"layouts\":[{\"id\":0,\"position\":{\"x\":330,\"y\":165,\"z\":4,\"width\":280,\"height\":110,\"tabOrder\":4}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Seguimiento\\nVer detalle\",\"textStyle\":{\"fontSize\":\"16pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
+          "height": 105,
+          "config": "{\"name\":\"KpiProdRG\",\"layouts\":[{\"id\":0,\"position\":{\"x\":330,\"y\":140,\"z\":4,\"width\":280,\"height\":105,\"tabOrder\":4}}],\"singleVisual\":{\"visualType\":\"card\",\"projections\":{\"Values\":[{\"queryRef\":\"_Medidas.Total productos\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"m\",\"Entity\":\"_Medidas\",\"Type\":0}],\"Select\":[{\"Measure\":{\"Expression\":{\"SourceRef\":{\"Source\":\"m\"}},\"Property\":\"Total productos\"},\"Name\":\"_Medidas.Total productos\"}]},\"drillFilterOtherVisuals\":true}}",
           "filters": "[]",
-          "tabOrder": 4
-        },
-        {
-          "x": 630,
-          "y": 165,
-          "z": 5,
-          "width": 280,
-          "height": 110,
-          "config": "{\"name\":\"ResumenGerencial_Kpi3\",\"layouts\":[{\"id\":0,\"position\":{\"x\":630,\"y\":165,\"z\":5,\"width\":280,\"height\":110,\"tabOrder\":5}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Riesgo operativo\\nValidar alertas\",\"textStyle\":{\"fontSize\":\"16pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 5
-        },
-        {
-          "x": 930,
-          "y": 165,
-          "z": 6,
-          "width": 300,
-          "height": 110,
-          "config": "{\"name\":\"ResumenGerencial_Kpi4\",\"layouts\":[{\"id\":0,\"position\":{\"x\":930,\"y\":165,\"z\":6,\"width\":300,\"height\":110,\"tabOrder\":6}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Decision gerencial\\nPriorizar acciones\",\"textStyle\":{\"fontSize\":\"16pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 6
+          "query": "{}",
+          "dataTransforms": "{\"queryMetadata\":{\"Select\":[{\"Restatement\":\"Productos\",\"Name\":\"_Medidas.Total productos\",\"Type\":4}]},\"selects\":[{\"displayName\":\"Productos\",\"queryName\":\"_Medidas.Total productos\",\"roles\":{\"Values\":true}}],\"projectionOrdering\":{\"Values\":[0]},\"visualElements\":[]}"
         },
         {
           "x": 30,
-          "y": 315,
-          "z": 7,
+          "y": 285,
+          "z": 5,
           "width": 580,
-          "height": 270,
-          "config": "{\"name\":\"ResumenGerencial_Grafico1\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":315,\"z\":7,\"width\":580,\"height\":270,\"tabOrder\":7}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Grafico principal\\nUse campos del panel Datos para cruzar esta vista con la informacion actualizada.\",\"textStyle\":{\"fontSize\":\"18pt\",\"fontWeight\":\"bold\",\"color\":\"#263238\"}}]}]}}]}}}",
+          "height": 245,
+          "config": "{\"name\":\"ReqSede\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":285,\"z\":5,\"width\":580,\"height\":245,\"tabOrder\":5}}],\"singleVisual\":{\"visualType\":\"clusteredColumnChart\",\"projections\":{\"Category\":[{\"queryRef\":\"DimSede.Sede\"}],\"Y\":[{\"queryRef\":\"CountNonNull(FactRequerimiento.RequerimientoId)\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"c\",\"Entity\":\"DimSede\",\"Type\":0},{\"Name\":\"f\",\"Entity\":\"FactRequerimiento\",\"Type\":0}],\"Select\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"Sede\"},\"Name\":\"DimSede.Sede\"},{\"Aggregation\":{\"Expression\":{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"f\"}},\"Property\":\"RequerimientoId\"}},\"Function\":5},\"Name\":\"CountNonNull(FactRequerimiento.RequerimientoId)\"}]},\"drillFilterOtherVisuals\":true}}",
           "filters": "[]",
-          "tabOrder": 7
+          "query": "{}",
+          "dataTransforms": "{\"queryMetadata\":{\"Select\":[{\"Restatement\":\"Sede\",\"Name\":\"DimSede.Sede\",\"Type\":2048},{\"Restatement\":\"Requerimientos\",\"Name\":\"CountNonNull(FactRequerimiento.RequerimientoId)\",\"Type\":4}]},\"selects\":[{\"displayName\":\"Sede\",\"queryName\":\"DimSede.Sede\",\"roles\":{\"Category\":true}},{\"displayName\":\"Requerimientos\",\"queryName\":\"CountNonNull(FactRequerimiento.RequerimientoId)\",\"roles\":{\"Y\":true,\"Values\":true}}],\"projectionOrdering\":{\"Category\":[0],\"Y\":[1]},\"visualElements\":[]}"
         },
         {
           "x": 650,
-          "y": 315,
-          "z": 8,
+          "y": 285,
+          "z": 6,
           "width": 580,
-          "height": 270,
-          "config": "{\"name\":\"ResumenGerencial_Grafico2\",\"layouts\":[{\"id\":0,\"position\":{\"x\":650,\"y\":315,\"z\":8,\"width\":580,\"height\":270,\"tabOrder\":8}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Detalle y seguimiento\\nEsta zona esta preparada para tabla, barras o matriz segun la pagina.\",\"textStyle\":{\"fontSize\":\"18pt\",\"fontWeight\":\"bold\",\"color\":\"#263238\"}}]}]}}]}}}",
+          "height": 245,
+          "config": "{\"name\":\"ReqFacultad\",\"layouts\":[{\"id\":0,\"position\":{\"x\":650,\"y\":285,\"z\":6,\"width\":580,\"height\":245,\"tabOrder\":6}}],\"singleVisual\":{\"visualType\":\"barChart\",\"projections\":{\"Category\":[{\"queryRef\":\"DimFacultad.Facultad\"}],\"Y\":[{\"queryRef\":\"CountNonNull(FactRequerimiento.RequerimientoId)\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"c\",\"Entity\":\"DimFacultad\",\"Type\":0},{\"Name\":\"f\",\"Entity\":\"FactRequerimiento\",\"Type\":0}],\"Select\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"Facultad\"},\"Name\":\"DimFacultad.Facultad\"},{\"Aggregation\":{\"Expression\":{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"f\"}},\"Property\":\"RequerimientoId\"}},\"Function\":5},\"Name\":\"CountNonNull(FactRequerimiento.RequerimientoId)\"}]},\"drillFilterOtherVisuals\":true}}",
           "filters": "[]",
-          "tabOrder": 8
+          "query": "{}",
+          "dataTransforms": "{\"queryMetadata\":{\"Select\":[{\"Restatement\":\"Facultad\",\"Name\":\"DimFacultad.Facultad\",\"Type\":2048},{\"Restatement\":\"Requerimientos\",\"Name\":\"CountNonNull(FactRequerimiento.RequerimientoId)\",\"Type\":4}]},\"selects\":[{\"displayName\":\"Facultad\",\"queryName\":\"DimFacultad.Facultad\",\"roles\":{\"Category\":true}},{\"displayName\":\"Requerimientos\",\"queryName\":\"CountNonNull(FactRequerimiento.RequerimientoId)\",\"roles\":{\"Y\":true,\"Values\":true}}],\"projectionOrdering\":{\"Category\":[0],\"Y\":[1]},\"visualElements\":[]}"
         },
         {
           "x": 30,
-          "y": 620,
-          "z": 9,
+          "y": 560,
+          "z": 7,
           "width": 1200,
-          "height": 52,
-          "config": "{\"name\":\"ResumenGerencial_Nota\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":620,\"z\":9,\"width\":1200,\"height\":52,\"tabOrder\":9}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Historia: revise primero los KPI, luego los graficos y finalmente el detalle operativo para tomar decisiones.\",\"textStyle\":{\"fontSize\":\"12pt\",\"fontWeight\":\"normal\",\"color\":\"#536271\"}}]}]}}]}}}",
+          "height": 125,
+          "config": "{\"name\":\"DetalleReq\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":560,\"z\":7,\"width\":1200,\"height\":125,\"tabOrder\":7}}],\"singleVisual\":{\"visualType\":\"tableEx\",\"projections\":{\"Values\":[{\"queryRef\":\"FactRequerimiento.Codigo\"},{\"queryRef\":\"FactRequerimiento.ActividadEvento\"},{\"queryRef\":\"FactRequerimiento.Solicitante\"},{\"queryRef\":\"FactRequerimiento.Estado\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"a\",\"Entity\":\"FactRequerimiento\",\"Type\":0}],\"Select\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"a\"}},\"Property\":\"Codigo\"},\"Name\":\"FactRequerimiento.Codigo\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"a\"}},\"Property\":\"ActividadEvento\"},\"Name\":\"FactRequerimiento.ActividadEvento\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"a\"}},\"Property\":\"Solicitante\"},\"Name\":\"FactRequerimiento.Solicitante\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"a\"}},\"Property\":\"Estado\"},\"Name\":\"FactRequerimiento.Estado\"}]},\"drillFilterOtherVisuals\":true}}",
           "filters": "[]",
-          "tabOrder": 9
+          "query": "{}",
+          "dataTransforms": "{\"queryMetadata\":{\"Select\":[{\"Restatement\":\"C\\u00f3digo\",\"Name\":\"FactRequerimiento.Codigo\",\"Type\":2048},{\"Restatement\":\"Actividad\",\"Name\":\"FactRequerimiento.ActividadEvento\",\"Type\":2048},{\"Restatement\":\"Solicitante\",\"Name\":\"FactRequerimiento.Solicitante\",\"Type\":2048},{\"Restatement\":\"Estado\",\"Name\":\"FactRequerimiento.Estado\",\"Type\":2048}]},\"selects\":[{\"displayName\":\"C\\u00f3digo\",\"queryName\":\"FactRequerimiento.Codigo\",\"roles\":{\"Values\":true}},{\"displayName\":\"Actividad\",\"queryName\":\"FactRequerimiento.ActividadEvento\",\"roles\":{\"Values\":true}},{\"displayName\":\"Solicitante\",\"queryName\":\"FactRequerimiento.Solicitante\",\"roles\":{\"Values\":true}},{\"displayName\":\"Estado\",\"queryName\":\"FactRequerimiento.Estado\",\"roles\":{\"Values\":true}}],\"projectionOrdering\":{\"Values\":[0,1,2,3]},\"visualElements\":[]}"
         }
       ]
     },
     {
       "name": "CaptacionImpacto",
-      "displayName": "Captacion e impacto",
+      "displayName": "Captación e impacto",
+      "displayOption": 1,
       "config": "{\"objects\":{\"background\":[{\"properties\":{\"color\":{\"solid\":{\"color\":\"#FFFFFF\"}},\"transparency\":0}}]},\"visibility\":0}",
       "filters": "[]",
       "ordinal": 2,
@@ -217,99 +208,72 @@
       "visualContainers": [
         {
           "x": 30,
-          "y": 24,
+          "y": 18,
           "z": 1,
           "width": 1220,
-          "height": 60,
-          "config": "{\"name\":\"CaptacionImpacto_Titulo\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":24,\"z\":1,\"width\":1220,\"height\":60,\"tabOrder\":1}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Captacion e impacto\",\"textStyle\":{\"fontSize\":\"26pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 1
+          "height": 54,
+          "config": "{\"name\":\"CaptacionImpacto_Titulo\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":18,\"z\":1,\"width\":1220,\"height\":54,\"tabOrder\":1}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Captaci\\u00f3n e impacto\",\"textStyle\":{\"fontSize\":\"25pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
+          "filters": "[]"
         },
         {
           "x": 30,
-          "y": 92,
+          "y": 78,
           "z": 2,
           "width": 1220,
-          "height": 50,
-          "config": "{\"name\":\"CaptacionImpacto_Desc\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":92,\"z\":2,\"width\":1220,\"height\":50,\"tabOrder\":2}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Publico objetivo, canales, KPI principal e incidencia institucional.\",\"textStyle\":{\"fontSize\":\"13pt\",\"fontWeight\":\"normal\",\"color\":\"#536271\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 2
+          "height": 42,
+          "config": "{\"name\":\"CaptacionImpacto_Desc\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":78,\"z\":2,\"width\":1220,\"height\":42,\"tabOrder\":2}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Audiencias, canales y KPI principales.\",\"textStyle\":{\"fontSize\":\"12pt\",\"fontWeight\":\"normal\",\"color\":\"#536271\"}}]}]}}]}}}",
+          "filters": "[]"
         },
         {
           "x": 30,
-          "y": 165,
+          "y": 145,
           "z": 3,
-          "width": 280,
-          "height": 110,
-          "config": "{\"name\":\"CaptacionImpacto_Kpi1\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":165,\"z\":3,\"width\":280,\"height\":110,\"tabOrder\":3}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"KPI principal\\nActualizar datos\",\"textStyle\":{\"fontSize\":\"16pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
+          "width": 380,
+          "height": 270,
+          "config": "{\"name\":\"PublicoObjetivo\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":145,\"z\":3,\"width\":380,\"height\":270,\"tabOrder\":3}}],\"singleVisual\":{\"visualType\":\"donutChart\",\"projections\":{\"Category\":[{\"queryRef\":\"DimPublicoObjetivo.PublicoObjetivo\"}],\"Y\":[{\"queryRef\":\"CountNonNull(FactProducto.ProductoId)\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"c\",\"Entity\":\"DimPublicoObjetivo\",\"Type\":0},{\"Name\":\"f\",\"Entity\":\"FactProducto\",\"Type\":0}],\"Select\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"PublicoObjetivo\"},\"Name\":\"DimPublicoObjetivo.PublicoObjetivo\"},{\"Aggregation\":{\"Expression\":{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"f\"}},\"Property\":\"ProductoId\"}},\"Function\":5},\"Name\":\"CountNonNull(FactProducto.ProductoId)\"}]},\"drillFilterOtherVisuals\":true}}",
           "filters": "[]",
-          "tabOrder": 3
+          "query": "{}",
+          "dataTransforms": "{\"queryMetadata\":{\"Select\":[{\"Restatement\":\"P\\u00fablico\",\"Name\":\"DimPublicoObjetivo.PublicoObjetivo\",\"Type\":2048},{\"Restatement\":\"Productos\",\"Name\":\"CountNonNull(FactProducto.ProductoId)\",\"Type\":4}]},\"selects\":[{\"displayName\":\"P\\u00fablico\",\"queryName\":\"DimPublicoObjetivo.PublicoObjetivo\",\"roles\":{\"Category\":true}},{\"displayName\":\"Productos\",\"queryName\":\"CountNonNull(FactProducto.ProductoId)\",\"roles\":{\"Y\":true,\"Values\":true}}],\"projectionOrdering\":{\"Category\":[0],\"Y\":[1]},\"visualElements\":[]}"
         },
         {
-          "x": 330,
-          "y": 165,
+          "x": 450,
+          "y": 145,
           "z": 4,
-          "width": 280,
-          "height": 110,
-          "config": "{\"name\":\"CaptacionImpacto_Kpi2\",\"layouts\":[{\"id\":0,\"position\":{\"x\":330,\"y\":165,\"z\":4,\"width\":280,\"height\":110,\"tabOrder\":4}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Seguimiento\\nVer detalle\",\"textStyle\":{\"fontSize\":\"16pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
+          "width": 380,
+          "height": 270,
+          "config": "{\"name\":\"CanalDifusion\",\"layouts\":[{\"id\":0,\"position\":{\"x\":450,\"y\":145,\"z\":4,\"width\":380,\"height\":270,\"tabOrder\":4}}],\"singleVisual\":{\"visualType\":\"clusteredColumnChart\",\"projections\":{\"Category\":[{\"queryRef\":\"DimCanalDifusion.CanalDifusion\"}],\"Y\":[{\"queryRef\":\"CountNonNull(FactProducto.ProductoId)\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"c\",\"Entity\":\"DimCanalDifusion\",\"Type\":0},{\"Name\":\"f\",\"Entity\":\"FactProducto\",\"Type\":0}],\"Select\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"CanalDifusion\"},\"Name\":\"DimCanalDifusion.CanalDifusion\"},{\"Aggregation\":{\"Expression\":{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"f\"}},\"Property\":\"ProductoId\"}},\"Function\":5},\"Name\":\"CountNonNull(FactProducto.ProductoId)\"}]},\"drillFilterOtherVisuals\":true}}",
           "filters": "[]",
-          "tabOrder": 4
+          "query": "{}",
+          "dataTransforms": "{\"queryMetadata\":{\"Select\":[{\"Restatement\":\"Canal\",\"Name\":\"DimCanalDifusion.CanalDifusion\",\"Type\":2048},{\"Restatement\":\"Productos\",\"Name\":\"CountNonNull(FactProducto.ProductoId)\",\"Type\":4}]},\"selects\":[{\"displayName\":\"Canal\",\"queryName\":\"DimCanalDifusion.CanalDifusion\",\"roles\":{\"Category\":true}},{\"displayName\":\"Productos\",\"queryName\":\"CountNonNull(FactProducto.ProductoId)\",\"roles\":{\"Y\":true,\"Values\":true}}],\"projectionOrdering\":{\"Category\":[0],\"Y\":[1]},\"visualElements\":[]}"
         },
         {
-          "x": 630,
-          "y": 165,
+          "x": 870,
+          "y": 145,
           "z": 5,
-          "width": 280,
-          "height": 110,
-          "config": "{\"name\":\"CaptacionImpacto_Kpi3\",\"layouts\":[{\"id\":0,\"position\":{\"x\":630,\"y\":165,\"z\":5,\"width\":280,\"height\":110,\"tabOrder\":5}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Riesgo operativo\\nValidar alertas\",\"textStyle\":{\"fontSize\":\"16pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
+          "width": 360,
+          "height": 270,
+          "config": "{\"name\":\"KpiPrincipal\",\"layouts\":[{\"id\":0,\"position\":{\"x\":870,\"y\":145,\"z\":5,\"width\":360,\"height\":270,\"tabOrder\":5}}],\"singleVisual\":{\"visualType\":\"barChart\",\"projections\":{\"Category\":[{\"queryRef\":\"DimKpi.KpiPrincipal\"}],\"Y\":[{\"queryRef\":\"CountNonNull(FactProducto.ProductoId)\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"c\",\"Entity\":\"DimKpi\",\"Type\":0},{\"Name\":\"f\",\"Entity\":\"FactProducto\",\"Type\":0}],\"Select\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"KpiPrincipal\"},\"Name\":\"DimKpi.KpiPrincipal\"},{\"Aggregation\":{\"Expression\":{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"f\"}},\"Property\":\"ProductoId\"}},\"Function\":5},\"Name\":\"CountNonNull(FactProducto.ProductoId)\"}]},\"drillFilterOtherVisuals\":true}}",
           "filters": "[]",
-          "tabOrder": 5
+          "query": "{}",
+          "dataTransforms": "{\"queryMetadata\":{\"Select\":[{\"Restatement\":\"KPI\",\"Name\":\"DimKpi.KpiPrincipal\",\"Type\":2048},{\"Restatement\":\"Productos\",\"Name\":\"CountNonNull(FactProducto.ProductoId)\",\"Type\":4}]},\"selects\":[{\"displayName\":\"KPI\",\"queryName\":\"DimKpi.KpiPrincipal\",\"roles\":{\"Category\":true}},{\"displayName\":\"Productos\",\"queryName\":\"CountNonNull(FactProducto.ProductoId)\",\"roles\":{\"Y\":true,\"Values\":true}}],\"projectionOrdering\":{\"Category\":[0],\"Y\":[1]},\"visualElements\":[]}"
         },
         {
-          "x": 930,
-          "y": 165,
+          "x": 30,
+          "y": 455,
           "z": 6,
-          "width": 300,
-          "height": 110,
-          "config": "{\"name\":\"CaptacionImpacto_Kpi4\",\"layouts\":[{\"id\":0,\"position\":{\"x\":930,\"y\":165,\"z\":6,\"width\":300,\"height\":110,\"tabOrder\":6}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Decision gerencial\\nPriorizar acciones\",\"textStyle\":{\"fontSize\":\"16pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 6
-        },
-        {
-          "x": 30,
-          "y": 315,
-          "z": 7,
-          "width": 580,
-          "height": 270,
-          "config": "{\"name\":\"CaptacionImpacto_Grafico1\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":315,\"z\":7,\"width\":580,\"height\":270,\"tabOrder\":7}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Grafico principal\\nUse campos del panel Datos para cruzar esta vista con la informacion actualizada.\",\"textStyle\":{\"fontSize\":\"18pt\",\"fontWeight\":\"bold\",\"color\":\"#263238\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 7
-        },
-        {
-          "x": 650,
-          "y": 315,
-          "z": 8,
-          "width": 580,
-          "height": 270,
-          "config": "{\"name\":\"CaptacionImpacto_Grafico2\",\"layouts\":[{\"id\":0,\"position\":{\"x\":650,\"y\":315,\"z\":8,\"width\":580,\"height\":270,\"tabOrder\":8}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Detalle y seguimiento\\nEsta zona esta preparada para tabla, barras o matriz segun la pagina.\",\"textStyle\":{\"fontSize\":\"18pt\",\"fontWeight\":\"bold\",\"color\":\"#263238\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 8
-        },
-        {
-          "x": 30,
-          "y": 620,
-          "z": 9,
           "width": 1200,
-          "height": 52,
-          "config": "{\"name\":\"CaptacionImpacto_Nota\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":620,\"z\":9,\"width\":1200,\"height\":52,\"tabOrder\":9}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Historia: revise primero los KPI, luego los graficos y finalmente el detalle operativo para tomar decisiones.\",\"textStyle\":{\"fontSize\":\"12pt\",\"fontWeight\":\"normal\",\"color\":\"#536271\"}}]}]}}]}}}",
+          "height": 220,
+          "config": "{\"name\":\"DetalleImpacto\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":455,\"z\":6,\"width\":1200,\"height\":220,\"tabOrder\":6}}],\"singleVisual\":{\"visualType\":\"tableEx\",\"projections\":{\"Values\":[{\"queryRef\":\"FactProducto.CodigoProducto\"},{\"queryRef\":\"FactProducto.TipoProducto\"},{\"queryRef\":\"FactProducto.CanalDifusion\"},{\"queryRef\":\"FactProducto.KpiPrincipal\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"a\",\"Entity\":\"FactProducto\",\"Type\":0}],\"Select\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"a\"}},\"Property\":\"CodigoProducto\"},\"Name\":\"FactProducto.CodigoProducto\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"a\"}},\"Property\":\"TipoProducto\"},\"Name\":\"FactProducto.TipoProducto\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"a\"}},\"Property\":\"CanalDifusion\"},\"Name\":\"FactProducto.CanalDifusion\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"a\"}},\"Property\":\"KpiPrincipal\"},\"Name\":\"FactProducto.KpiPrincipal\"}]},\"drillFilterOtherVisuals\":true}}",
           "filters": "[]",
-          "tabOrder": 9
+          "query": "{}",
+          "dataTransforms": "{\"queryMetadata\":{\"Select\":[{\"Restatement\":\"Producto\",\"Name\":\"FactProducto.CodigoProducto\",\"Type\":2048},{\"Restatement\":\"Tipo\",\"Name\":\"FactProducto.TipoProducto\",\"Type\":2048},{\"Restatement\":\"Canal\",\"Name\":\"FactProducto.CanalDifusion\",\"Type\":2048},{\"Restatement\":\"KPI\",\"Name\":\"FactProducto.KpiPrincipal\",\"Type\":2048}]},\"selects\":[{\"displayName\":\"Producto\",\"queryName\":\"FactProducto.CodigoProducto\",\"roles\":{\"Values\":true}},{\"displayName\":\"Tipo\",\"queryName\":\"FactProducto.TipoProducto\",\"roles\":{\"Values\":true}},{\"displayName\":\"Canal\",\"queryName\":\"FactProducto.CanalDifusion\",\"roles\":{\"Values\":true}},{\"displayName\":\"KPI\",\"queryName\":\"FactProducto.KpiPrincipal\",\"roles\":{\"Values\":true}}],\"projectionOrdering\":{\"Values\":[0,1,2,3]},\"visualElements\":[]}"
         }
       ]
     },
     {
       "name": "CargaOperativa",
       "displayName": "Carga operativa",
+      "displayOption": 1,
       "config": "{\"objects\":{\"background\":[{\"properties\":{\"color\":{\"solid\":{\"color\":\"#FFFFFF\"}},\"transparency\":0}}]},\"visibility\":0}",
       "filters": "[]",
       "ordinal": 3,
@@ -318,99 +282,61 @@
       "visualContainers": [
         {
           "x": 30,
-          "y": 24,
+          "y": 18,
           "z": 1,
           "width": 1220,
-          "height": 60,
-          "config": "{\"name\":\"CargaOperativa_Titulo\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":24,\"z\":1,\"width\":1220,\"height\":60,\"tabOrder\":1}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Carga operativa\",\"textStyle\":{\"fontSize\":\"26pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 1
+          "height": 54,
+          "config": "{\"name\":\"CargaOperativa_Titulo\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":18,\"z\":1,\"width\":1220,\"height\":54,\"tabOrder\":1}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Carga operativa\",\"textStyle\":{\"fontSize\":\"25pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
+          "filters": "[]"
         },
         {
           "x": 30,
-          "y": 92,
+          "y": 78,
           "z": 2,
           "width": 1220,
-          "height": 50,
-          "config": "{\"name\":\"CargaOperativa_Desc\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":92,\"z\":2,\"width\":1220,\"height\":50,\"tabOrder\":2}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Carga por responsable tecnico, tipo de producto y proximos vencimientos.\",\"textStyle\":{\"fontSize\":\"13pt\",\"fontWeight\":\"normal\",\"color\":\"#536271\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 2
+          "height": 42,
+          "config": "{\"name\":\"CargaOperativa_Desc\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":78,\"z\":2,\"width\":1220,\"height\":42,\"tabOrder\":2}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Distribuci\\u00f3n de trabajo por responsable y tipo de producto.\",\"textStyle\":{\"fontSize\":\"12pt\",\"fontWeight\":\"normal\",\"color\":\"#536271\"}}]}]}}]}}}",
+          "filters": "[]"
         },
         {
           "x": 30,
-          "y": 165,
+          "y": 145,
           "z": 3,
-          "width": 280,
-          "height": 110,
-          "config": "{\"name\":\"CargaOperativa_Kpi1\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":165,\"z\":3,\"width\":280,\"height\":110,\"tabOrder\":3}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"KPI principal\\nActualizar datos\",\"textStyle\":{\"fontSize\":\"16pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 3
-        },
-        {
-          "x": 330,
-          "y": 165,
-          "z": 4,
-          "width": 280,
-          "height": 110,
-          "config": "{\"name\":\"CargaOperativa_Kpi2\",\"layouts\":[{\"id\":0,\"position\":{\"x\":330,\"y\":165,\"z\":4,\"width\":280,\"height\":110,\"tabOrder\":4}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Seguimiento\\nVer detalle\",\"textStyle\":{\"fontSize\":\"16pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 4
-        },
-        {
-          "x": 630,
-          "y": 165,
-          "z": 5,
-          "width": 280,
-          "height": 110,
-          "config": "{\"name\":\"CargaOperativa_Kpi3\",\"layouts\":[{\"id\":0,\"position\":{\"x\":630,\"y\":165,\"z\":5,\"width\":280,\"height\":110,\"tabOrder\":5}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Riesgo operativo\\nValidar alertas\",\"textStyle\":{\"fontSize\":\"16pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 5
-        },
-        {
-          "x": 930,
-          "y": 165,
-          "z": 6,
-          "width": 300,
-          "height": 110,
-          "config": "{\"name\":\"CargaOperativa_Kpi4\",\"layouts\":[{\"id\":0,\"position\":{\"x\":930,\"y\":165,\"z\":6,\"width\":300,\"height\":110,\"tabOrder\":6}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Decision gerencial\\nPriorizar acciones\",\"textStyle\":{\"fontSize\":\"16pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 6
-        },
-        {
-          "x": 30,
-          "y": 315,
-          "z": 7,
           "width": 580,
-          "height": 270,
-          "config": "{\"name\":\"CargaOperativa_Grafico1\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":315,\"z\":7,\"width\":580,\"height\":270,\"tabOrder\":7}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Grafico principal\\nUse campos del panel Datos para cruzar esta vista con la informacion actualizada.\",\"textStyle\":{\"fontSize\":\"18pt\",\"fontWeight\":\"bold\",\"color\":\"#263238\"}}]}]}}]}}}",
+          "height": 300,
+          "config": "{\"name\":\"CargaResponsable\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":145,\"z\":3,\"width\":580,\"height\":300,\"tabOrder\":3}}],\"singleVisual\":{\"visualType\":\"barChart\",\"projections\":{\"Category\":[{\"queryRef\":\"DimUsuario.Nombre\"}],\"Y\":[{\"queryRef\":\"CountNonNull(FactProducto.ProductoId)\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"c\",\"Entity\":\"DimUsuario\",\"Type\":0},{\"Name\":\"f\",\"Entity\":\"FactProducto\",\"Type\":0}],\"Select\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"Nombre\"},\"Name\":\"DimUsuario.Nombre\"},{\"Aggregation\":{\"Expression\":{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"f\"}},\"Property\":\"ProductoId\"}},\"Function\":5},\"Name\":\"CountNonNull(FactProducto.ProductoId)\"}]},\"drillFilterOtherVisuals\":true}}",
           "filters": "[]",
-          "tabOrder": 7
+          "query": "{}",
+          "dataTransforms": "{\"queryMetadata\":{\"Select\":[{\"Restatement\":\"Responsable\",\"Name\":\"DimUsuario.Nombre\",\"Type\":2048},{\"Restatement\":\"Productos\",\"Name\":\"CountNonNull(FactProducto.ProductoId)\",\"Type\":4}]},\"selects\":[{\"displayName\":\"Responsable\",\"queryName\":\"DimUsuario.Nombre\",\"roles\":{\"Category\":true}},{\"displayName\":\"Productos\",\"queryName\":\"CountNonNull(FactProducto.ProductoId)\",\"roles\":{\"Y\":true,\"Values\":true}}],\"projectionOrdering\":{\"Category\":[0],\"Y\":[1]},\"visualElements\":[]}"
         },
         {
           "x": 650,
-          "y": 315,
-          "z": 8,
+          "y": 145,
+          "z": 4,
           "width": 580,
-          "height": 270,
-          "config": "{\"name\":\"CargaOperativa_Grafico2\",\"layouts\":[{\"id\":0,\"position\":{\"x\":650,\"y\":315,\"z\":8,\"width\":580,\"height\":270,\"tabOrder\":8}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Detalle y seguimiento\\nEsta zona esta preparada para tabla, barras o matriz segun la pagina.\",\"textStyle\":{\"fontSize\":\"18pt\",\"fontWeight\":\"bold\",\"color\":\"#263238\"}}]}]}}]}}}",
+          "height": 300,
+          "config": "{\"name\":\"TipoProducto\",\"layouts\":[{\"id\":0,\"position\":{\"x\":650,\"y\":145,\"z\":4,\"width\":580,\"height\":300,\"tabOrder\":4}}],\"singleVisual\":{\"visualType\":\"clusteredColumnChart\",\"projections\":{\"Category\":[{\"queryRef\":\"DimTipoProducto.TipoProducto\"}],\"Y\":[{\"queryRef\":\"CountNonNull(FactProducto.ProductoId)\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"c\",\"Entity\":\"DimTipoProducto\",\"Type\":0},{\"Name\":\"f\",\"Entity\":\"FactProducto\",\"Type\":0}],\"Select\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"TipoProducto\"},\"Name\":\"DimTipoProducto.TipoProducto\"},{\"Aggregation\":{\"Expression\":{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"f\"}},\"Property\":\"ProductoId\"}},\"Function\":5},\"Name\":\"CountNonNull(FactProducto.ProductoId)\"}]},\"drillFilterOtherVisuals\":true}}",
           "filters": "[]",
-          "tabOrder": 8
+          "query": "{}",
+          "dataTransforms": "{\"queryMetadata\":{\"Select\":[{\"Restatement\":\"Tipo\",\"Name\":\"DimTipoProducto.TipoProducto\",\"Type\":2048},{\"Restatement\":\"Productos\",\"Name\":\"CountNonNull(FactProducto.ProductoId)\",\"Type\":4}]},\"selects\":[{\"displayName\":\"Tipo\",\"queryName\":\"DimTipoProducto.TipoProducto\",\"roles\":{\"Category\":true}},{\"displayName\":\"Productos\",\"queryName\":\"CountNonNull(FactProducto.ProductoId)\",\"roles\":{\"Y\":true,\"Values\":true}}],\"projectionOrdering\":{\"Category\":[0],\"Y\":[1]},\"visualElements\":[]}"
         },
         {
           "x": 30,
-          "y": 620,
-          "z": 9,
+          "y": 485,
+          "z": 5,
           "width": 1200,
-          "height": 52,
-          "config": "{\"name\":\"CargaOperativa_Nota\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":620,\"z\":9,\"width\":1200,\"height\":52,\"tabOrder\":9}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Historia: revise primero los KPI, luego los graficos y finalmente el detalle operativo para tomar decisiones.\",\"textStyle\":{\"fontSize\":\"12pt\",\"fontWeight\":\"normal\",\"color\":\"#536271\"}}]}]}}]}}}",
+          "height": 200,
+          "config": "{\"name\":\"Vencimientos\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":485,\"z\":5,\"width\":1200,\"height\":200,\"tabOrder\":5}}],\"singleVisual\":{\"visualType\":\"tableEx\",\"projections\":{\"Values\":[{\"queryRef\":\"FactProducto.CodigoProducto\"},{\"queryRef\":\"FactProducto.ResponsableProducto\"},{\"queryRef\":\"FactProducto.EstadoProducto\"},{\"queryRef\":\"FactProducto.FechaEntregaProducto\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"a\",\"Entity\":\"FactProducto\",\"Type\":0}],\"Select\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"a\"}},\"Property\":\"CodigoProducto\"},\"Name\":\"FactProducto.CodigoProducto\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"a\"}},\"Property\":\"ResponsableProducto\"},\"Name\":\"FactProducto.ResponsableProducto\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"a\"}},\"Property\":\"EstadoProducto\"},\"Name\":\"FactProducto.EstadoProducto\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"a\"}},\"Property\":\"FechaEntregaProducto\"},\"Name\":\"FactProducto.FechaEntregaProducto\"}]},\"drillFilterOtherVisuals\":true}}",
           "filters": "[]",
-          "tabOrder": 9
+          "query": "{}",
+          "dataTransforms": "{\"queryMetadata\":{\"Select\":[{\"Restatement\":\"Producto\",\"Name\":\"FactProducto.CodigoProducto\",\"Type\":2048},{\"Restatement\":\"Responsable\",\"Name\":\"FactProducto.ResponsableProducto\",\"Type\":2048},{\"Restatement\":\"Estado\",\"Name\":\"FactProducto.EstadoProducto\",\"Type\":2048},{\"Restatement\":\"Entrega\",\"Name\":\"FactProducto.FechaEntregaProducto\",\"Type\":2048}]},\"selects\":[{\"displayName\":\"Producto\",\"queryName\":\"FactProducto.CodigoProducto\",\"roles\":{\"Values\":true}},{\"displayName\":\"Responsable\",\"queryName\":\"FactProducto.ResponsableProducto\",\"roles\":{\"Values\":true}},{\"displayName\":\"Estado\",\"queryName\":\"FactProducto.EstadoProducto\",\"roles\":{\"Values\":true}},{\"displayName\":\"Entrega\",\"queryName\":\"FactProducto.FechaEntregaProducto\",\"roles\":{\"Values\":true}}],\"projectionOrdering\":{\"Values\":[0,1,2,3]},\"visualElements\":[]}"
         }
       ]
     },
     {
       "name": "AtencionYTiempos",
-      "displayName": "Atencion y tiempos",
+      "displayName": "Atención y tiempos",
+      "displayOption": 1,
       "config": "{\"objects\":{\"background\":[{\"properties\":{\"color\":{\"solid\":{\"color\":\"#FFFFFF\"}},\"transparency\":0}}]},\"visibility\":0}",
       "filters": "[]",
       "ordinal": 4,
@@ -419,99 +345,61 @@
       "visualContainers": [
         {
           "x": 30,
-          "y": 24,
+          "y": 18,
           "z": 1,
           "width": 1220,
-          "height": 60,
-          "config": "{\"name\":\"AtencionYTiempos_Titulo\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":24,\"z\":1,\"width\":1220,\"height\":60,\"tabOrder\":1}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Atencion y tiempos\",\"textStyle\":{\"fontSize\":\"26pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 1
+          "height": 54,
+          "config": "{\"name\":\"AtencionYTiempos_Titulo\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":18,\"z\":1,\"width\":1220,\"height\":54,\"tabOrder\":1}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Atenci\\u00f3n y tiempos\",\"textStyle\":{\"fontSize\":\"25pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
+          "filters": "[]"
         },
         {
           "x": 30,
-          "y": 92,
+          "y": 78,
           "z": 2,
           "width": 1220,
-          "height": 50,
-          "config": "{\"name\":\"AtencionYTiempos_Desc\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":92,\"z\":2,\"width\":1220,\"height\":50,\"tabOrder\":2}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Tiempo por etapa, cuellos de botella y registros sin movimiento.\",\"textStyle\":{\"fontSize\":\"13pt\",\"fontWeight\":\"normal\",\"color\":\"#536271\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 2
+          "height": 42,
+          "config": "{\"name\":\"AtencionYTiempos_Desc\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":78,\"z\":2,\"width\":1220,\"height\":42,\"tabOrder\":2}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Tiempos de gesti\\u00f3n y actividad por proceso.\",\"textStyle\":{\"fontSize\":\"12pt\",\"fontWeight\":\"normal\",\"color\":\"#536271\"}}]}]}}]}}}",
+          "filters": "[]"
         },
         {
           "x": 30,
-          "y": 165,
+          "y": 145,
           "z": 3,
-          "width": 280,
-          "height": 110,
-          "config": "{\"name\":\"AtencionYTiempos_Kpi1\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":165,\"z\":3,\"width\":280,\"height\":110,\"tabOrder\":3}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"KPI principal\\nActualizar datos\",\"textStyle\":{\"fontSize\":\"16pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 3
-        },
-        {
-          "x": 330,
-          "y": 165,
-          "z": 4,
-          "width": 280,
-          "height": 110,
-          "config": "{\"name\":\"AtencionYTiempos_Kpi2\",\"layouts\":[{\"id\":0,\"position\":{\"x\":330,\"y\":165,\"z\":4,\"width\":280,\"height\":110,\"tabOrder\":4}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Seguimiento\\nVer detalle\",\"textStyle\":{\"fontSize\":\"16pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 4
-        },
-        {
-          "x": 630,
-          "y": 165,
-          "z": 5,
-          "width": 280,
-          "height": 110,
-          "config": "{\"name\":\"AtencionYTiempos_Kpi3\",\"layouts\":[{\"id\":0,\"position\":{\"x\":630,\"y\":165,\"z\":5,\"width\":280,\"height\":110,\"tabOrder\":5}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Riesgo operativo\\nValidar alertas\",\"textStyle\":{\"fontSize\":\"16pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 5
-        },
-        {
-          "x": 930,
-          "y": 165,
-          "z": 6,
-          "width": 300,
-          "height": 110,
-          "config": "{\"name\":\"AtencionYTiempos_Kpi4\",\"layouts\":[{\"id\":0,\"position\":{\"x\":930,\"y\":165,\"z\":6,\"width\":300,\"height\":110,\"tabOrder\":6}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Decision gerencial\\nPriorizar acciones\",\"textStyle\":{\"fontSize\":\"16pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 6
-        },
-        {
-          "x": 30,
-          "y": 315,
-          "z": 7,
           "width": 580,
-          "height": 270,
-          "config": "{\"name\":\"AtencionYTiempos_Grafico1\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":315,\"z\":7,\"width\":580,\"height\":270,\"tabOrder\":7}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Grafico principal\\nUse campos del panel Datos para cruzar esta vista con la informacion actualizada.\",\"textStyle\":{\"fontSize\":\"18pt\",\"fontWeight\":\"bold\",\"color\":\"#263238\"}}]}]}}]}}}",
+          "height": 300,
+          "config": "{\"name\":\"EventosProceso\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":145,\"z\":3,\"width\":580,\"height\":300,\"tabOrder\":3}}],\"singleVisual\":{\"visualType\":\"clusteredColumnChart\",\"projections\":{\"Category\":[{\"queryRef\":\"FactHistorialEstado.Proceso\"}],\"Y\":[{\"queryRef\":\"CountNonNull(FactHistorialEstado.HistorialId)\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"c\",\"Entity\":\"FactHistorialEstado\",\"Type\":0},{\"Name\":\"f\",\"Entity\":\"FactHistorialEstado\",\"Type\":0}],\"Select\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"Proceso\"},\"Name\":\"FactHistorialEstado.Proceso\"},{\"Aggregation\":{\"Expression\":{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"f\"}},\"Property\":\"HistorialId\"}},\"Function\":5},\"Name\":\"CountNonNull(FactHistorialEstado.HistorialId)\"}]},\"drillFilterOtherVisuals\":true}}",
           "filters": "[]",
-          "tabOrder": 7
+          "query": "{}",
+          "dataTransforms": "{\"queryMetadata\":{\"Select\":[{\"Restatement\":\"Proceso\",\"Name\":\"FactHistorialEstado.Proceso\",\"Type\":2048},{\"Restatement\":\"Eventos\",\"Name\":\"CountNonNull(FactHistorialEstado.HistorialId)\",\"Type\":4}]},\"selects\":[{\"displayName\":\"Proceso\",\"queryName\":\"FactHistorialEstado.Proceso\",\"roles\":{\"Category\":true}},{\"displayName\":\"Eventos\",\"queryName\":\"CountNonNull(FactHistorialEstado.HistorialId)\",\"roles\":{\"Y\":true,\"Values\":true}}],\"projectionOrdering\":{\"Category\":[0],\"Y\":[1]},\"visualElements\":[]}"
         },
         {
           "x": 650,
-          "y": 315,
-          "z": 8,
+          "y": 145,
+          "z": 4,
           "width": 580,
-          "height": 270,
-          "config": "{\"name\":\"AtencionYTiempos_Grafico2\",\"layouts\":[{\"id\":0,\"position\":{\"x\":650,\"y\":315,\"z\":8,\"width\":580,\"height\":270,\"tabOrder\":8}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Detalle y seguimiento\\nEsta zona esta preparada para tabla, barras o matriz segun la pagina.\",\"textStyle\":{\"fontSize\":\"18pt\",\"fontWeight\":\"bold\",\"color\":\"#263238\"}}]}]}}]}}}",
+          "height": 300,
+          "config": "{\"name\":\"EventosEntidad\",\"layouts\":[{\"id\":0,\"position\":{\"x\":650,\"y\":145,\"z\":4,\"width\":580,\"height\":300,\"tabOrder\":4}}],\"singleVisual\":{\"visualType\":\"barChart\",\"projections\":{\"Category\":[{\"queryRef\":\"FactHistorialEstado.EntidadTipo\"}],\"Y\":[{\"queryRef\":\"CountNonNull(FactHistorialEstado.HistorialId)\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"c\",\"Entity\":\"FactHistorialEstado\",\"Type\":0},{\"Name\":\"f\",\"Entity\":\"FactHistorialEstado\",\"Type\":0}],\"Select\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"EntidadTipo\"},\"Name\":\"FactHistorialEstado.EntidadTipo\"},{\"Aggregation\":{\"Expression\":{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"f\"}},\"Property\":\"HistorialId\"}},\"Function\":5},\"Name\":\"CountNonNull(FactHistorialEstado.HistorialId)\"}]},\"drillFilterOtherVisuals\":true}}",
           "filters": "[]",
-          "tabOrder": 8
+          "query": "{}",
+          "dataTransforms": "{\"queryMetadata\":{\"Select\":[{\"Restatement\":\"Entidad\",\"Name\":\"FactHistorialEstado.EntidadTipo\",\"Type\":2048},{\"Restatement\":\"Eventos\",\"Name\":\"CountNonNull(FactHistorialEstado.HistorialId)\",\"Type\":4}]},\"selects\":[{\"displayName\":\"Entidad\",\"queryName\":\"FactHistorialEstado.EntidadTipo\",\"roles\":{\"Category\":true}},{\"displayName\":\"Eventos\",\"queryName\":\"CountNonNull(FactHistorialEstado.HistorialId)\",\"roles\":{\"Y\":true,\"Values\":true}}],\"projectionOrdering\":{\"Category\":[0],\"Y\":[1]},\"visualElements\":[]}"
         },
         {
           "x": 30,
-          "y": 620,
-          "z": 9,
+          "y": 485,
+          "z": 5,
           "width": 1200,
-          "height": 52,
-          "config": "{\"name\":\"AtencionYTiempos_Nota\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":620,\"z\":9,\"width\":1200,\"height\":52,\"tabOrder\":9}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Historia: revise primero los KPI, luego los graficos y finalmente el detalle operativo para tomar decisiones.\",\"textStyle\":{\"fontSize\":\"12pt\",\"fontWeight\":\"normal\",\"color\":\"#536271\"}}]}]}}]}}}",
+          "height": 200,
+          "config": "{\"name\":\"DetalleTiempos\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":485,\"z\":5,\"width\":1200,\"height\":200,\"tabOrder\":5}}],\"singleVisual\":{\"visualType\":\"tableEx\",\"projections\":{\"Values\":[{\"queryRef\":\"FactHistorialEstado.EntidadTipo\"},{\"queryRef\":\"FactHistorialEstado.Proceso\"},{\"queryRef\":\"FactHistorialEstado.EstadoHasta\"},{\"queryRef\":\"FactHistorialEstado.FechaEvento\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"a\",\"Entity\":\"FactHistorialEstado\",\"Type\":0}],\"Select\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"a\"}},\"Property\":\"EntidadTipo\"},\"Name\":\"FactHistorialEstado.EntidadTipo\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"a\"}},\"Property\":\"Proceso\"},\"Name\":\"FactHistorialEstado.Proceso\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"a\"}},\"Property\":\"EstadoHasta\"},\"Name\":\"FactHistorialEstado.EstadoHasta\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"a\"}},\"Property\":\"FechaEvento\"},\"Name\":\"FactHistorialEstado.FechaEvento\"}]},\"drillFilterOtherVisuals\":true}}",
           "filters": "[]",
-          "tabOrder": 9
+          "query": "{}",
+          "dataTransforms": "{\"queryMetadata\":{\"Select\":[{\"Restatement\":\"Entidad\",\"Name\":\"FactHistorialEstado.EntidadTipo\",\"Type\":2048},{\"Restatement\":\"Proceso\",\"Name\":\"FactHistorialEstado.Proceso\",\"Type\":2048},{\"Restatement\":\"Estado\",\"Name\":\"FactHistorialEstado.EstadoHasta\",\"Type\":2048},{\"Restatement\":\"Fecha\",\"Name\":\"FactHistorialEstado.FechaEvento\",\"Type\":2048}]},\"selects\":[{\"displayName\":\"Entidad\",\"queryName\":\"FactHistorialEstado.EntidadTipo\",\"roles\":{\"Values\":true}},{\"displayName\":\"Proceso\",\"queryName\":\"FactHistorialEstado.Proceso\",\"roles\":{\"Values\":true}},{\"displayName\":\"Estado\",\"queryName\":\"FactHistorialEstado.EstadoHasta\",\"roles\":{\"Values\":true}},{\"displayName\":\"Fecha\",\"queryName\":\"FactHistorialEstado.FechaEvento\",\"roles\":{\"Values\":true}}],\"projectionOrdering\":{\"Values\":[0,1,2,3]},\"visualElements\":[]}"
         }
       ]
     },
     {
       "name": "Aprobaciones",
       "displayName": "Aprobaciones",
+      "displayOption": 1,
       "config": "{\"objects\":{\"background\":[{\"properties\":{\"color\":{\"solid\":{\"color\":\"#FFFFFF\"}},\"transparency\":0}}]},\"visibility\":0}",
       "filters": "[]",
       "ordinal": 5,
@@ -520,99 +408,61 @@
       "visualContainers": [
         {
           "x": 30,
-          "y": 24,
+          "y": 18,
           "z": 1,
           "width": 1220,
-          "height": 60,
-          "config": "{\"name\":\"Aprobaciones_Titulo\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":24,\"z\":1,\"width\":1220,\"height\":60,\"tabOrder\":1}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Aprobaciones\",\"textStyle\":{\"fontSize\":\"26pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 1
+          "height": 54,
+          "config": "{\"name\":\"Aprobaciones_Titulo\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":18,\"z\":1,\"width\":1220,\"height\":54,\"tabOrder\":1}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Aprobaciones\",\"textStyle\":{\"fontSize\":\"25pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
+          "filters": "[]"
         },
         {
           "x": 30,
-          "y": 92,
+          "y": 78,
           "z": 2,
           "width": 1220,
-          "height": 50,
-          "config": "{\"name\":\"Aprobaciones_Desc\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":92,\"z\":2,\"width\":1220,\"height\":50,\"tabOrder\":2}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Pendientes, aprobados, rechazados, versiones y adjuntos enviados.\",\"textStyle\":{\"fontSize\":\"13pt\",\"fontWeight\":\"normal\",\"color\":\"#536271\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 2
+          "height": 42,
+          "config": "{\"name\":\"Aprobaciones_Desc\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":78,\"z\":2,\"width\":1220,\"height\":42,\"tabOrder\":2}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Seguimiento de decisiones, pendientes y responsables.\",\"textStyle\":{\"fontSize\":\"12pt\",\"fontWeight\":\"normal\",\"color\":\"#536271\"}}]}]}}]}}}",
+          "filters": "[]"
         },
         {
           "x": 30,
-          "y": 165,
+          "y": 145,
           "z": 3,
-          "width": 280,
-          "height": 110,
-          "config": "{\"name\":\"Aprobaciones_Kpi1\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":165,\"z\":3,\"width\":280,\"height\":110,\"tabOrder\":3}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"KPI principal\\nActualizar datos\",\"textStyle\":{\"fontSize\":\"16pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
+          "width": 380,
+          "height": 300,
+          "config": "{\"name\":\"Decision\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":145,\"z\":3,\"width\":380,\"height\":300,\"tabOrder\":3}}],\"singleVisual\":{\"visualType\":\"donutChart\",\"projections\":{\"Category\":[{\"queryRef\":\"FactAprobacion.Decision\"}],\"Y\":[{\"queryRef\":\"CountNonNull(FactAprobacion.AprobacionId)\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"c\",\"Entity\":\"FactAprobacion\",\"Type\":0},{\"Name\":\"f\",\"Entity\":\"FactAprobacion\",\"Type\":0}],\"Select\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"Decision\"},\"Name\":\"FactAprobacion.Decision\"},{\"Aggregation\":{\"Expression\":{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"f\"}},\"Property\":\"AprobacionId\"}},\"Function\":5},\"Name\":\"CountNonNull(FactAprobacion.AprobacionId)\"}]},\"drillFilterOtherVisuals\":true}}",
           "filters": "[]",
-          "tabOrder": 3
+          "query": "{}",
+          "dataTransforms": "{\"queryMetadata\":{\"Select\":[{\"Restatement\":\"Decisi\\u00f3n\",\"Name\":\"FactAprobacion.Decision\",\"Type\":2048},{\"Restatement\":\"Aprobaciones\",\"Name\":\"CountNonNull(FactAprobacion.AprobacionId)\",\"Type\":4}]},\"selects\":[{\"displayName\":\"Decisi\\u00f3n\",\"queryName\":\"FactAprobacion.Decision\",\"roles\":{\"Category\":true}},{\"displayName\":\"Aprobaciones\",\"queryName\":\"CountNonNull(FactAprobacion.AprobacionId)\",\"roles\":{\"Y\":true,\"Values\":true}}],\"projectionOrdering\":{\"Category\":[0],\"Y\":[1]},\"visualElements\":[]}"
         },
         {
-          "x": 330,
-          "y": 165,
+          "x": 450,
+          "y": 145,
           "z": 4,
-          "width": 280,
-          "height": 110,
-          "config": "{\"name\":\"Aprobaciones_Kpi2\",\"layouts\":[{\"id\":0,\"position\":{\"x\":330,\"y\":165,\"z\":4,\"width\":280,\"height\":110,\"tabOrder\":4}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Seguimiento\\nVer detalle\",\"textStyle\":{\"fontSize\":\"16pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
+          "width": 780,
+          "height": 300,
+          "config": "{\"name\":\"Aprobador\",\"layouts\":[{\"id\":0,\"position\":{\"x\":450,\"y\":145,\"z\":4,\"width\":780,\"height\":300,\"tabOrder\":4}}],\"singleVisual\":{\"visualType\":\"barChart\",\"projections\":{\"Category\":[{\"queryRef\":\"FactAprobacion.AprobadorNombre\"}],\"Y\":[{\"queryRef\":\"CountNonNull(FactAprobacion.AprobacionId)\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"c\",\"Entity\":\"FactAprobacion\",\"Type\":0},{\"Name\":\"f\",\"Entity\":\"FactAprobacion\",\"Type\":0}],\"Select\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"AprobadorNombre\"},\"Name\":\"FactAprobacion.AprobadorNombre\"},{\"Aggregation\":{\"Expression\":{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"f\"}},\"Property\":\"AprobacionId\"}},\"Function\":5},\"Name\":\"CountNonNull(FactAprobacion.AprobacionId)\"}]},\"drillFilterOtherVisuals\":true}}",
           "filters": "[]",
-          "tabOrder": 4
+          "query": "{}",
+          "dataTransforms": "{\"queryMetadata\":{\"Select\":[{\"Restatement\":\"Aprobador\",\"Name\":\"FactAprobacion.AprobadorNombre\",\"Type\":2048},{\"Restatement\":\"Aprobaciones\",\"Name\":\"CountNonNull(FactAprobacion.AprobacionId)\",\"Type\":4}]},\"selects\":[{\"displayName\":\"Aprobador\",\"queryName\":\"FactAprobacion.AprobadorNombre\",\"roles\":{\"Category\":true}},{\"displayName\":\"Aprobaciones\",\"queryName\":\"CountNonNull(FactAprobacion.AprobacionId)\",\"roles\":{\"Y\":true,\"Values\":true}}],\"projectionOrdering\":{\"Category\":[0],\"Y\":[1]},\"visualElements\":[]}"
         },
         {
-          "x": 630,
-          "y": 165,
+          "x": 30,
+          "y": 485,
           "z": 5,
-          "width": 280,
-          "height": 110,
-          "config": "{\"name\":\"Aprobaciones_Kpi3\",\"layouts\":[{\"id\":0,\"position\":{\"x\":630,\"y\":165,\"z\":5,\"width\":280,\"height\":110,\"tabOrder\":5}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Riesgo operativo\\nValidar alertas\",\"textStyle\":{\"fontSize\":\"16pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 5
-        },
-        {
-          "x": 930,
-          "y": 165,
-          "z": 6,
-          "width": 300,
-          "height": 110,
-          "config": "{\"name\":\"Aprobaciones_Kpi4\",\"layouts\":[{\"id\":0,\"position\":{\"x\":930,\"y\":165,\"z\":6,\"width\":300,\"height\":110,\"tabOrder\":6}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Decision gerencial\\nPriorizar acciones\",\"textStyle\":{\"fontSize\":\"16pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 6
-        },
-        {
-          "x": 30,
-          "y": 315,
-          "z": 7,
-          "width": 580,
-          "height": 270,
-          "config": "{\"name\":\"Aprobaciones_Grafico1\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":315,\"z\":7,\"width\":580,\"height\":270,\"tabOrder\":7}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Grafico principal\\nUse campos del panel Datos para cruzar esta vista con la informacion actualizada.\",\"textStyle\":{\"fontSize\":\"18pt\",\"fontWeight\":\"bold\",\"color\":\"#263238\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 7
-        },
-        {
-          "x": 650,
-          "y": 315,
-          "z": 8,
-          "width": 580,
-          "height": 270,
-          "config": "{\"name\":\"Aprobaciones_Grafico2\",\"layouts\":[{\"id\":0,\"position\":{\"x\":650,\"y\":315,\"z\":8,\"width\":580,\"height\":270,\"tabOrder\":8}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Detalle y seguimiento\\nEsta zona esta preparada para tabla, barras o matriz segun la pagina.\",\"textStyle\":{\"fontSize\":\"18pt\",\"fontWeight\":\"bold\",\"color\":\"#263238\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 8
-        },
-        {
-          "x": 30,
-          "y": 620,
-          "z": 9,
           "width": 1200,
-          "height": 52,
-          "config": "{\"name\":\"Aprobaciones_Nota\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":620,\"z\":9,\"width\":1200,\"height\":52,\"tabOrder\":9}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Historia: revise primero los KPI, luego los graficos y finalmente el detalle operativo para tomar decisiones.\",\"textStyle\":{\"fontSize\":\"12pt\",\"fontWeight\":\"normal\",\"color\":\"#536271\"}}]}]}}]}}}",
+          "height": 200,
+          "config": "{\"name\":\"DetalleAprob\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":485,\"z\":5,\"width\":1200,\"height\":200,\"tabOrder\":5}}],\"singleVisual\":{\"visualType\":\"tableEx\",\"projections\":{\"Values\":[{\"queryRef\":\"FactAprobacion.ProductoCodigo\"},{\"queryRef\":\"FactAprobacion.AprobadorNombre\"},{\"queryRef\":\"FactAprobacion.Decision\"},{\"queryRef\":\"FactAprobacion.FechaDecision\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"a\",\"Entity\":\"FactAprobacion\",\"Type\":0}],\"Select\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"a\"}},\"Property\":\"ProductoCodigo\"},\"Name\":\"FactAprobacion.ProductoCodigo\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"a\"}},\"Property\":\"AprobadorNombre\"},\"Name\":\"FactAprobacion.AprobadorNombre\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"a\"}},\"Property\":\"Decision\"},\"Name\":\"FactAprobacion.Decision\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"a\"}},\"Property\":\"FechaDecision\"},\"Name\":\"FactAprobacion.FechaDecision\"}]},\"drillFilterOtherVisuals\":true}}",
           "filters": "[]",
-          "tabOrder": 9
+          "query": "{}",
+          "dataTransforms": "{\"queryMetadata\":{\"Select\":[{\"Restatement\":\"Producto\",\"Name\":\"FactAprobacion.ProductoCodigo\",\"Type\":2048},{\"Restatement\":\"Aprobador\",\"Name\":\"FactAprobacion.AprobadorNombre\",\"Type\":2048},{\"Restatement\":\"Decisi\\u00f3n\",\"Name\":\"FactAprobacion.Decision\",\"Type\":2048},{\"Restatement\":\"Fecha\",\"Name\":\"FactAprobacion.FechaDecision\",\"Type\":2048}]},\"selects\":[{\"displayName\":\"Producto\",\"queryName\":\"FactAprobacion.ProductoCodigo\",\"roles\":{\"Values\":true}},{\"displayName\":\"Aprobador\",\"queryName\":\"FactAprobacion.AprobadorNombre\",\"roles\":{\"Values\":true}},{\"displayName\":\"Decisi\\u00f3n\",\"queryName\":\"FactAprobacion.Decision\",\"roles\":{\"Values\":true}},{\"displayName\":\"Fecha\",\"queryName\":\"FactAprobacion.FechaDecision\",\"roles\":{\"Values\":true}}],\"projectionOrdering\":{\"Values\":[0,1,2,3]},\"visualElements\":[]}"
         }
       ]
     },
     {
       "name": "Satisfaccion",
-      "displayName": "Satisfaccion",
+      "displayName": "Satisfacción",
+      "displayOption": 1,
       "config": "{\"objects\":{\"background\":[{\"properties\":{\"color\":{\"solid\":{\"color\":\"#FFFFFF\"}},\"transparency\":0}}]},\"visibility\":0}",
       "filters": "[]",
       "ordinal": 6,
@@ -621,99 +471,72 @@
       "visualContainers": [
         {
           "x": 30,
-          "y": 24,
+          "y": 18,
           "z": 1,
           "width": 1220,
-          "height": 60,
-          "config": "{\"name\":\"Satisfaccion_Titulo\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":24,\"z\":1,\"width\":1220,\"height\":60,\"tabOrder\":1}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Satisfaccion\",\"textStyle\":{\"fontSize\":\"26pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 1
+          "height": 54,
+          "config": "{\"name\":\"Satisfaccion_Titulo\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":18,\"z\":1,\"width\":1220,\"height\":54,\"tabOrder\":1}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Satisfacci\\u00f3n\",\"textStyle\":{\"fontSize\":\"25pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
+          "filters": "[]"
         },
         {
           "x": 30,
-          "y": 92,
+          "y": 78,
           "z": 2,
           "width": 1220,
-          "height": 50,
-          "config": "{\"name\":\"Satisfaccion_Desc\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":92,\"z\":2,\"width\":1220,\"height\":50,\"tabOrder\":2}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Opinion del solicitante y cruce con tiempos de entrega.\",\"textStyle\":{\"fontSize\":\"13pt\",\"fontWeight\":\"normal\",\"color\":\"#536271\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 2
+          "height": 42,
+          "config": "{\"name\":\"Satisfaccion_Desc\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":78,\"z\":2,\"width\":1220,\"height\":42,\"tabOrder\":2}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Percepci\\u00f3n del solicitante al cierre del requerimiento.\",\"textStyle\":{\"fontSize\":\"12pt\",\"fontWeight\":\"normal\",\"color\":\"#536271\"}}]}]}}]}}}",
+          "filters": "[]"
         },
         {
           "x": 30,
-          "y": 165,
+          "y": 145,
           "z": 3,
           "width": 280,
-          "height": 110,
-          "config": "{\"name\":\"Satisfaccion_Kpi1\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":165,\"z\":3,\"width\":280,\"height\":110,\"tabOrder\":3}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"KPI principal\\nActualizar datos\",\"textStyle\":{\"fontSize\":\"16pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
+          "height": 105,
+          "config": "{\"name\":\"SatProm\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":145,\"z\":3,\"width\":280,\"height\":105,\"tabOrder\":3}}],\"singleVisual\":{\"visualType\":\"card\",\"projections\":{\"Values\":[{\"queryRef\":\"_Medidas.Satisfaccion promedio\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"m\",\"Entity\":\"_Medidas\",\"Type\":0}],\"Select\":[{\"Measure\":{\"Expression\":{\"SourceRef\":{\"Source\":\"m\"}},\"Property\":\"Satisfaccion promedio\"},\"Name\":\"_Medidas.Satisfaccion promedio\"}]},\"drillFilterOtherVisuals\":true}}",
           "filters": "[]",
-          "tabOrder": 3
+          "query": "{}",
+          "dataTransforms": "{\"queryMetadata\":{\"Select\":[{\"Restatement\":\"Satisfacci\\u00f3n promedio\",\"Name\":\"_Medidas.Satisfaccion promedio\",\"Type\":4}]},\"selects\":[{\"displayName\":\"Satisfacci\\u00f3n promedio\",\"queryName\":\"_Medidas.Satisfaccion promedio\",\"roles\":{\"Values\":true}}],\"projectionOrdering\":{\"Values\":[0]},\"visualElements\":[]}"
         },
         {
           "x": 330,
-          "y": 165,
+          "y": 145,
           "z": 4,
-          "width": 280,
-          "height": 110,
-          "config": "{\"name\":\"Satisfaccion_Kpi2\",\"layouts\":[{\"id\":0,\"position\":{\"x\":330,\"y\":165,\"z\":4,\"width\":280,\"height\":110,\"tabOrder\":4}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Seguimiento\\nVer detalle\",\"textStyle\":{\"fontSize\":\"16pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
+          "width": 440,
+          "height": 300,
+          "config": "{\"name\":\"SatSede\",\"layouts\":[{\"id\":0,\"position\":{\"x\":330,\"y\":145,\"z\":4,\"width\":440,\"height\":300,\"tabOrder\":4}}],\"singleVisual\":{\"visualType\":\"clusteredColumnChart\",\"projections\":{\"Category\":[{\"queryRef\":\"DimSede.Sede\"}],\"Y\":[{\"queryRef\":\"CountNonNull(FactSatisfaccion.SatisfaccionId)\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"c\",\"Entity\":\"DimSede\",\"Type\":0},{\"Name\":\"f\",\"Entity\":\"FactSatisfaccion\",\"Type\":0}],\"Select\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"Sede\"},\"Name\":\"DimSede.Sede\"},{\"Aggregation\":{\"Expression\":{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"f\"}},\"Property\":\"SatisfaccionId\"}},\"Function\":5},\"Name\":\"CountNonNull(FactSatisfaccion.SatisfaccionId)\"}]},\"drillFilterOtherVisuals\":true}}",
           "filters": "[]",
-          "tabOrder": 4
+          "query": "{}",
+          "dataTransforms": "{\"queryMetadata\":{\"Select\":[{\"Restatement\":\"Sede\",\"Name\":\"DimSede.Sede\",\"Type\":2048},{\"Restatement\":\"Respuestas\",\"Name\":\"CountNonNull(FactSatisfaccion.SatisfaccionId)\",\"Type\":4}]},\"selects\":[{\"displayName\":\"Sede\",\"queryName\":\"DimSede.Sede\",\"roles\":{\"Category\":true}},{\"displayName\":\"Respuestas\",\"queryName\":\"CountNonNull(FactSatisfaccion.SatisfaccionId)\",\"roles\":{\"Y\":true,\"Values\":true}}],\"projectionOrdering\":{\"Category\":[0],\"Y\":[1]},\"visualElements\":[]}"
         },
         {
-          "x": 630,
-          "y": 165,
+          "x": 810,
+          "y": 145,
           "z": 5,
-          "width": 280,
-          "height": 110,
-          "config": "{\"name\":\"Satisfaccion_Kpi3\",\"layouts\":[{\"id\":0,\"position\":{\"x\":630,\"y\":165,\"z\":5,\"width\":280,\"height\":110,\"tabOrder\":5}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Riesgo operativo\\nValidar alertas\",\"textStyle\":{\"fontSize\":\"16pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
+          "width": 420,
+          "height": 300,
+          "config": "{\"name\":\"SatFac\",\"layouts\":[{\"id\":0,\"position\":{\"x\":810,\"y\":145,\"z\":5,\"width\":420,\"height\":300,\"tabOrder\":5}}],\"singleVisual\":{\"visualType\":\"barChart\",\"projections\":{\"Category\":[{\"queryRef\":\"DimFacultad.Facultad\"}],\"Y\":[{\"queryRef\":\"CountNonNull(FactSatisfaccion.SatisfaccionId)\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"c\",\"Entity\":\"DimFacultad\",\"Type\":0},{\"Name\":\"f\",\"Entity\":\"FactSatisfaccion\",\"Type\":0}],\"Select\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"Facultad\"},\"Name\":\"DimFacultad.Facultad\"},{\"Aggregation\":{\"Expression\":{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"f\"}},\"Property\":\"SatisfaccionId\"}},\"Function\":5},\"Name\":\"CountNonNull(FactSatisfaccion.SatisfaccionId)\"}]},\"drillFilterOtherVisuals\":true}}",
           "filters": "[]",
-          "tabOrder": 5
+          "query": "{}",
+          "dataTransforms": "{\"queryMetadata\":{\"Select\":[{\"Restatement\":\"Facultad\",\"Name\":\"DimFacultad.Facultad\",\"Type\":2048},{\"Restatement\":\"Respuestas\",\"Name\":\"CountNonNull(FactSatisfaccion.SatisfaccionId)\",\"Type\":4}]},\"selects\":[{\"displayName\":\"Facultad\",\"queryName\":\"DimFacultad.Facultad\",\"roles\":{\"Category\":true}},{\"displayName\":\"Respuestas\",\"queryName\":\"CountNonNull(FactSatisfaccion.SatisfaccionId)\",\"roles\":{\"Y\":true,\"Values\":true}}],\"projectionOrdering\":{\"Category\":[0],\"Y\":[1]},\"visualElements\":[]}"
         },
         {
-          "x": 930,
-          "y": 165,
+          "x": 30,
+          "y": 485,
           "z": 6,
-          "width": 300,
-          "height": 110,
-          "config": "{\"name\":\"Satisfaccion_Kpi4\",\"layouts\":[{\"id\":0,\"position\":{\"x\":930,\"y\":165,\"z\":6,\"width\":300,\"height\":110,\"tabOrder\":6}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Decision gerencial\\nPriorizar acciones\",\"textStyle\":{\"fontSize\":\"16pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 6
-        },
-        {
-          "x": 30,
-          "y": 315,
-          "z": 7,
-          "width": 580,
-          "height": 270,
-          "config": "{\"name\":\"Satisfaccion_Grafico1\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":315,\"z\":7,\"width\":580,\"height\":270,\"tabOrder\":7}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Grafico principal\\nUse campos del panel Datos para cruzar esta vista con la informacion actualizada.\",\"textStyle\":{\"fontSize\":\"18pt\",\"fontWeight\":\"bold\",\"color\":\"#263238\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 7
-        },
-        {
-          "x": 650,
-          "y": 315,
-          "z": 8,
-          "width": 580,
-          "height": 270,
-          "config": "{\"name\":\"Satisfaccion_Grafico2\",\"layouts\":[{\"id\":0,\"position\":{\"x\":650,\"y\":315,\"z\":8,\"width\":580,\"height\":270,\"tabOrder\":8}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Detalle y seguimiento\\nEsta zona esta preparada para tabla, barras o matriz segun la pagina.\",\"textStyle\":{\"fontSize\":\"18pt\",\"fontWeight\":\"bold\",\"color\":\"#263238\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 8
-        },
-        {
-          "x": 30,
-          "y": 620,
-          "z": 9,
           "width": 1200,
-          "height": 52,
-          "config": "{\"name\":\"Satisfaccion_Nota\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":620,\"z\":9,\"width\":1200,\"height\":52,\"tabOrder\":9}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Historia: revise primero los KPI, luego los graficos y finalmente el detalle operativo para tomar decisiones.\",\"textStyle\":{\"fontSize\":\"12pt\",\"fontWeight\":\"normal\",\"color\":\"#536271\"}}]}]}}]}}}",
+          "height": 200,
+          "config": "{\"name\":\"Comentarios\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":485,\"z\":6,\"width\":1200,\"height\":200,\"tabOrder\":6}}],\"singleVisual\":{\"visualType\":\"tableEx\",\"projections\":{\"Values\":[{\"queryRef\":\"FactSatisfaccion.RequerimientoCodigo\"},{\"queryRef\":\"FactSatisfaccion.Solicitante\"},{\"queryRef\":\"FactSatisfaccion.SatisfaccionGeneral\"},{\"queryRef\":\"FactSatisfaccion.Comentario\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"a\",\"Entity\":\"FactSatisfaccion\",\"Type\":0}],\"Select\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"a\"}},\"Property\":\"RequerimientoCodigo\"},\"Name\":\"FactSatisfaccion.RequerimientoCodigo\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"a\"}},\"Property\":\"Solicitante\"},\"Name\":\"FactSatisfaccion.Solicitante\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"a\"}},\"Property\":\"SatisfaccionGeneral\"},\"Name\":\"FactSatisfaccion.SatisfaccionGeneral\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"a\"}},\"Property\":\"Comentario\"},\"Name\":\"FactSatisfaccion.Comentario\"}]},\"drillFilterOtherVisuals\":true}}",
           "filters": "[]",
-          "tabOrder": 9
+          "query": "{}",
+          "dataTransforms": "{\"queryMetadata\":{\"Select\":[{\"Restatement\":\"Requerimiento\",\"Name\":\"FactSatisfaccion.RequerimientoCodigo\",\"Type\":2048},{\"Restatement\":\"Solicitante\",\"Name\":\"FactSatisfaccion.Solicitante\",\"Type\":2048},{\"Restatement\":\"Satisfacci\\u00f3n\",\"Name\":\"FactSatisfaccion.SatisfaccionGeneral\",\"Type\":2048},{\"Restatement\":\"Comentario\",\"Name\":\"FactSatisfaccion.Comentario\",\"Type\":2048}]},\"selects\":[{\"displayName\":\"Requerimiento\",\"queryName\":\"FactSatisfaccion.RequerimientoCodigo\",\"roles\":{\"Values\":true}},{\"displayName\":\"Solicitante\",\"queryName\":\"FactSatisfaccion.Solicitante\",\"roles\":{\"Values\":true}},{\"displayName\":\"Satisfacci\\u00f3n\",\"queryName\":\"FactSatisfaccion.SatisfaccionGeneral\",\"roles\":{\"Values\":true}},{\"displayName\":\"Comentario\",\"queryName\":\"FactSatisfaccion.Comentario\",\"roles\":{\"Values\":true}}],\"projectionOrdering\":{\"Values\":[0,1,2,3]},\"visualElements\":[]}"
         }
       ]
     },
     {
       "name": "Usabilidad",
       "displayName": "Usabilidad",
+      "displayOption": 1,
       "config": "{\"objects\":{\"background\":[{\"properties\":{\"color\":{\"solid\":{\"color\":\"#FFFFFF\"}},\"transparency\":0}}]},\"visibility\":0}",
       "filters": "[]",
       "ordinal": 7,
@@ -722,99 +545,61 @@
       "visualContainers": [
         {
           "x": 30,
-          "y": 24,
+          "y": 18,
           "z": 1,
           "width": 1220,
-          "height": 60,
-          "config": "{\"name\":\"Usabilidad_Titulo\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":24,\"z\":1,\"width\":1220,\"height\":60,\"tabOrder\":1}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Usabilidad\",\"textStyle\":{\"fontSize\":\"26pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 1
+          "height": 54,
+          "config": "{\"name\":\"Usabilidad_Titulo\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":18,\"z\":1,\"width\":1220,\"height\":54,\"tabOrder\":1}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Usabilidad\",\"textStyle\":{\"fontSize\":\"25pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
+          "filters": "[]"
         },
         {
           "x": 30,
-          "y": 92,
+          "y": 78,
           "z": 2,
           "width": 1220,
-          "height": 50,
-          "config": "{\"name\":\"Usabilidad_Desc\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":92,\"z\":2,\"width\":1220,\"height\":50,\"tabOrder\":2}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Uso por usuario, rol, proceso y acciones realizadas.\",\"textStyle\":{\"fontSize\":\"13pt\",\"fontWeight\":\"normal\",\"color\":\"#536271\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 2
+          "height": 42,
+          "config": "{\"name\":\"Usabilidad_Desc\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":78,\"z\":2,\"width\":1220,\"height\":42,\"tabOrder\":2}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Actividad de usuarios y adopci\\u00f3n de la aplicaci\\u00f3n.\",\"textStyle\":{\"fontSize\":\"12pt\",\"fontWeight\":\"normal\",\"color\":\"#536271\"}}]}]}}]}}}",
+          "filters": "[]"
         },
         {
           "x": 30,
-          "y": 165,
+          "y": 145,
           "z": 3,
-          "width": 280,
-          "height": 110,
-          "config": "{\"name\":\"Usabilidad_Kpi1\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":165,\"z\":3,\"width\":280,\"height\":110,\"tabOrder\":3}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"KPI principal\\nActualizar datos\",\"textStyle\":{\"fontSize\":\"16pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 3
-        },
-        {
-          "x": 330,
-          "y": 165,
-          "z": 4,
-          "width": 280,
-          "height": 110,
-          "config": "{\"name\":\"Usabilidad_Kpi2\",\"layouts\":[{\"id\":0,\"position\":{\"x\":330,\"y\":165,\"z\":4,\"width\":280,\"height\":110,\"tabOrder\":4}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Seguimiento\\nVer detalle\",\"textStyle\":{\"fontSize\":\"16pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 4
-        },
-        {
-          "x": 630,
-          "y": 165,
-          "z": 5,
-          "width": 280,
-          "height": 110,
-          "config": "{\"name\":\"Usabilidad_Kpi3\",\"layouts\":[{\"id\":0,\"position\":{\"x\":630,\"y\":165,\"z\":5,\"width\":280,\"height\":110,\"tabOrder\":5}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Riesgo operativo\\nValidar alertas\",\"textStyle\":{\"fontSize\":\"16pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 5
-        },
-        {
-          "x": 930,
-          "y": 165,
-          "z": 6,
-          "width": 300,
-          "height": 110,
-          "config": "{\"name\":\"Usabilidad_Kpi4\",\"layouts\":[{\"id\":0,\"position\":{\"x\":930,\"y\":165,\"z\":6,\"width\":300,\"height\":110,\"tabOrder\":6}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Decision gerencial\\nPriorizar acciones\",\"textStyle\":{\"fontSize\":\"16pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 6
-        },
-        {
-          "x": 30,
-          "y": 315,
-          "z": 7,
           "width": 580,
-          "height": 270,
-          "config": "{\"name\":\"Usabilidad_Grafico1\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":315,\"z\":7,\"width\":580,\"height\":270,\"tabOrder\":7}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Grafico principal\\nUse campos del panel Datos para cruzar esta vista con la informacion actualizada.\",\"textStyle\":{\"fontSize\":\"18pt\",\"fontWeight\":\"bold\",\"color\":\"#263238\"}}]}]}}]}}}",
+          "height": 300,
+          "config": "{\"name\":\"UsoUsuario\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":145,\"z\":3,\"width\":580,\"height\":300,\"tabOrder\":3}}],\"singleVisual\":{\"visualType\":\"barChart\",\"projections\":{\"Category\":[{\"queryRef\":\"FactUsoUsuario.UsuarioNombre\"}],\"Y\":[{\"queryRef\":\"CountNonNull(FactUsoUsuario.EventoUsoId)\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"c\",\"Entity\":\"FactUsoUsuario\",\"Type\":0},{\"Name\":\"f\",\"Entity\":\"FactUsoUsuario\",\"Type\":0}],\"Select\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"UsuarioNombre\"},\"Name\":\"FactUsoUsuario.UsuarioNombre\"},{\"Aggregation\":{\"Expression\":{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"f\"}},\"Property\":\"EventoUsoId\"}},\"Function\":5},\"Name\":\"CountNonNull(FactUsoUsuario.EventoUsoId)\"}]},\"drillFilterOtherVisuals\":true}}",
           "filters": "[]",
-          "tabOrder": 7
+          "query": "{}",
+          "dataTransforms": "{\"queryMetadata\":{\"Select\":[{\"Restatement\":\"Usuario\",\"Name\":\"FactUsoUsuario.UsuarioNombre\",\"Type\":2048},{\"Restatement\":\"Acciones\",\"Name\":\"CountNonNull(FactUsoUsuario.EventoUsoId)\",\"Type\":4}]},\"selects\":[{\"displayName\":\"Usuario\",\"queryName\":\"FactUsoUsuario.UsuarioNombre\",\"roles\":{\"Category\":true}},{\"displayName\":\"Acciones\",\"queryName\":\"CountNonNull(FactUsoUsuario.EventoUsoId)\",\"roles\":{\"Y\":true,\"Values\":true}}],\"projectionOrdering\":{\"Category\":[0],\"Y\":[1]},\"visualElements\":[]}"
         },
         {
           "x": 650,
-          "y": 315,
-          "z": 8,
+          "y": 145,
+          "z": 4,
           "width": 580,
-          "height": 270,
-          "config": "{\"name\":\"Usabilidad_Grafico2\",\"layouts\":[{\"id\":0,\"position\":{\"x\":650,\"y\":315,\"z\":8,\"width\":580,\"height\":270,\"tabOrder\":8}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Detalle y seguimiento\\nEsta zona esta preparada para tabla, barras o matriz segun la pagina.\",\"textStyle\":{\"fontSize\":\"18pt\",\"fontWeight\":\"bold\",\"color\":\"#263238\"}}]}]}}]}}}",
+          "height": 300,
+          "config": "{\"name\":\"UsoProceso\",\"layouts\":[{\"id\":0,\"position\":{\"x\":650,\"y\":145,\"z\":4,\"width\":580,\"height\":300,\"tabOrder\":4}}],\"singleVisual\":{\"visualType\":\"clusteredColumnChart\",\"projections\":{\"Category\":[{\"queryRef\":\"FactUsoUsuario.Proceso\"}],\"Y\":[{\"queryRef\":\"CountNonNull(FactUsoUsuario.EventoUsoId)\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"c\",\"Entity\":\"FactUsoUsuario\",\"Type\":0},{\"Name\":\"f\",\"Entity\":\"FactUsoUsuario\",\"Type\":0}],\"Select\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"Proceso\"},\"Name\":\"FactUsoUsuario.Proceso\"},{\"Aggregation\":{\"Expression\":{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"f\"}},\"Property\":\"EventoUsoId\"}},\"Function\":5},\"Name\":\"CountNonNull(FactUsoUsuario.EventoUsoId)\"}]},\"drillFilterOtherVisuals\":true}}",
           "filters": "[]",
-          "tabOrder": 8
+          "query": "{}",
+          "dataTransforms": "{\"queryMetadata\":{\"Select\":[{\"Restatement\":\"Proceso\",\"Name\":\"FactUsoUsuario.Proceso\",\"Type\":2048},{\"Restatement\":\"Acciones\",\"Name\":\"CountNonNull(FactUsoUsuario.EventoUsoId)\",\"Type\":4}]},\"selects\":[{\"displayName\":\"Proceso\",\"queryName\":\"FactUsoUsuario.Proceso\",\"roles\":{\"Category\":true}},{\"displayName\":\"Acciones\",\"queryName\":\"CountNonNull(FactUsoUsuario.EventoUsoId)\",\"roles\":{\"Y\":true,\"Values\":true}}],\"projectionOrdering\":{\"Category\":[0],\"Y\":[1]},\"visualElements\":[]}"
         },
         {
           "x": 30,
-          "y": 620,
-          "z": 9,
+          "y": 485,
+          "z": 5,
           "width": 1200,
-          "height": 52,
-          "config": "{\"name\":\"Usabilidad_Nota\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":620,\"z\":9,\"width\":1200,\"height\":52,\"tabOrder\":9}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Historia: revise primero los KPI, luego los graficos y finalmente el detalle operativo para tomar decisiones.\",\"textStyle\":{\"fontSize\":\"12pt\",\"fontWeight\":\"normal\",\"color\":\"#536271\"}}]}]}}]}}}",
+          "height": 200,
+          "config": "{\"name\":\"DetalleUso\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":485,\"z\":5,\"width\":1200,\"height\":200,\"tabOrder\":5}}],\"singleVisual\":{\"visualType\":\"tableEx\",\"projections\":{\"Values\":[{\"queryRef\":\"FactUsoUsuario.FechaEvento\"},{\"queryRef\":\"FactUsoUsuario.UsuarioNombre\"},{\"queryRef\":\"FactUsoUsuario.Proceso\"},{\"queryRef\":\"FactUsoUsuario.Accion\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"a\",\"Entity\":\"FactUsoUsuario\",\"Type\":0}],\"Select\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"a\"}},\"Property\":\"FechaEvento\"},\"Name\":\"FactUsoUsuario.FechaEvento\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"a\"}},\"Property\":\"UsuarioNombre\"},\"Name\":\"FactUsoUsuario.UsuarioNombre\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"a\"}},\"Property\":\"Proceso\"},\"Name\":\"FactUsoUsuario.Proceso\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"a\"}},\"Property\":\"Accion\"},\"Name\":\"FactUsoUsuario.Accion\"}]},\"drillFilterOtherVisuals\":true}}",
           "filters": "[]",
-          "tabOrder": 9
+          "query": "{}",
+          "dataTransforms": "{\"queryMetadata\":{\"Select\":[{\"Restatement\":\"Fecha\",\"Name\":\"FactUsoUsuario.FechaEvento\",\"Type\":2048},{\"Restatement\":\"Usuario\",\"Name\":\"FactUsoUsuario.UsuarioNombre\",\"Type\":2048},{\"Restatement\":\"Proceso\",\"Name\":\"FactUsoUsuario.Proceso\",\"Type\":2048},{\"Restatement\":\"Acci\\u00f3n\",\"Name\":\"FactUsoUsuario.Accion\",\"Type\":2048}]},\"selects\":[{\"displayName\":\"Fecha\",\"queryName\":\"FactUsoUsuario.FechaEvento\",\"roles\":{\"Values\":true}},{\"displayName\":\"Usuario\",\"queryName\":\"FactUsoUsuario.UsuarioNombre\",\"roles\":{\"Values\":true}},{\"displayName\":\"Proceso\",\"queryName\":\"FactUsoUsuario.Proceso\",\"roles\":{\"Values\":true}},{\"displayName\":\"Acci\\u00f3n\",\"queryName\":\"FactUsoUsuario.Accion\",\"roles\":{\"Values\":true}}],\"projectionOrdering\":{\"Values\":[0,1,2,3]},\"visualElements\":[]}"
         }
       ]
     },
     {
       "name": "DetalleOperativo",
       "displayName": "Detalle operativo",
+      "displayOption": 1,
       "config": "{\"objects\":{\"background\":[{\"properties\":{\"color\":{\"solid\":{\"color\":\"#FFFFFF\"}},\"transparency\":0}}]},\"visibility\":0}",
       "filters": "[]",
       "ordinal": 8,
@@ -823,93 +608,43 @@
       "visualContainers": [
         {
           "x": 30,
-          "y": 24,
+          "y": 18,
           "z": 1,
           "width": 1220,
-          "height": 60,
-          "config": "{\"name\":\"DetalleOperativo_Titulo\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":24,\"z\":1,\"width\":1220,\"height\":60,\"tabOrder\":1}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Detalle operativo\",\"textStyle\":{\"fontSize\":\"26pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 1
+          "height": 54,
+          "config": "{\"name\":\"DetalleOperativo_Titulo\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":18,\"z\":1,\"width\":1220,\"height\":54,\"tabOrder\":1}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Detalle operativo\",\"textStyle\":{\"fontSize\":\"25pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
+          "filters": "[]"
         },
         {
           "x": 30,
-          "y": 92,
+          "y": 78,
           "z": 2,
           "width": 1220,
-          "height": 50,
-          "config": "{\"name\":\"DetalleOperativo_Desc\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":92,\"z\":2,\"width\":1220,\"height\":50,\"tabOrder\":2}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Tabla auditable de requerimientos, productos, aprobaciones y tracking.\",\"textStyle\":{\"fontSize\":\"13pt\",\"fontWeight\":\"normal\",\"color\":\"#536271\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 2
+          "height": 42,
+          "config": "{\"name\":\"DetalleOperativo_Desc\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":78,\"z\":2,\"width\":1220,\"height\":42,\"tabOrder\":2}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Detalle auditable de requerimientos, productos y tracking.\",\"textStyle\":{\"fontSize\":\"12pt\",\"fontWeight\":\"normal\",\"color\":\"#536271\"}}]}]}}]}}}",
+          "filters": "[]"
         },
         {
           "x": 30,
-          "y": 165,
+          "y": 145,
           "z": 3,
-          "width": 280,
-          "height": 110,
-          "config": "{\"name\":\"DetalleOperativo_Kpi1\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":165,\"z\":3,\"width\":280,\"height\":110,\"tabOrder\":3}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"KPI principal\\nActualizar datos\",\"textStyle\":{\"fontSize\":\"16pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 3
-        },
-        {
-          "x": 330,
-          "y": 165,
-          "z": 4,
-          "width": 280,
-          "height": 110,
-          "config": "{\"name\":\"DetalleOperativo_Kpi2\",\"layouts\":[{\"id\":0,\"position\":{\"x\":330,\"y\":165,\"z\":4,\"width\":280,\"height\":110,\"tabOrder\":4}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Seguimiento\\nVer detalle\",\"textStyle\":{\"fontSize\":\"16pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 4
-        },
-        {
-          "x": 630,
-          "y": 165,
-          "z": 5,
-          "width": 280,
-          "height": 110,
-          "config": "{\"name\":\"DetalleOperativo_Kpi3\",\"layouts\":[{\"id\":0,\"position\":{\"x\":630,\"y\":165,\"z\":5,\"width\":280,\"height\":110,\"tabOrder\":5}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Riesgo operativo\\nValidar alertas\",\"textStyle\":{\"fontSize\":\"16pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 5
-        },
-        {
-          "x": 930,
-          "y": 165,
-          "z": 6,
-          "width": 300,
-          "height": 110,
-          "config": "{\"name\":\"DetalleOperativo_Kpi4\",\"layouts\":[{\"id\":0,\"position\":{\"x\":930,\"y\":165,\"z\":6,\"width\":300,\"height\":110,\"tabOrder\":6}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Decision gerencial\\nPriorizar acciones\",\"textStyle\":{\"fontSize\":\"16pt\",\"fontWeight\":\"bold\",\"color\":\"#3c235f\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 6
-        },
-        {
-          "x": 30,
-          "y": 315,
-          "z": 7,
-          "width": 580,
-          "height": 270,
-          "config": "{\"name\":\"DetalleOperativo_Grafico1\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":315,\"z\":7,\"width\":580,\"height\":270,\"tabOrder\":7}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Grafico principal\\nUse campos del panel Datos para cruzar esta vista con la informacion actualizada.\",\"textStyle\":{\"fontSize\":\"18pt\",\"fontWeight\":\"bold\",\"color\":\"#263238\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 7
-        },
-        {
-          "x": 650,
-          "y": 315,
-          "z": 8,
-          "width": 580,
-          "height": 270,
-          "config": "{\"name\":\"DetalleOperativo_Grafico2\",\"layouts\":[{\"id\":0,\"position\":{\"x\":650,\"y\":315,\"z\":8,\"width\":580,\"height\":270,\"tabOrder\":8}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Detalle y seguimiento\\nEsta zona esta preparada para tabla, barras o matriz segun la pagina.\",\"textStyle\":{\"fontSize\":\"18pt\",\"fontWeight\":\"bold\",\"color\":\"#263238\"}}]}]}}]}}}",
-          "filters": "[]",
-          "tabOrder": 8
-        },
-        {
-          "x": 30,
-          "y": 620,
-          "z": 9,
           "width": 1200,
-          "height": 52,
-          "config": "{\"name\":\"DetalleOperativo_Nota\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":620,\"z\":9,\"width\":1200,\"height\":52,\"tabOrder\":9}}],\"singleVisual\":{\"visualType\":\"textbox\",\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Historia: revise primero los KPI, luego los graficos y finalmente el detalle operativo para tomar decisiones.\",\"textStyle\":{\"fontSize\":\"12pt\",\"fontWeight\":\"normal\",\"color\":\"#536271\"}}]}]}}]}}}",
+          "height": 240,
+          "config": "{\"name\":\"TablaReqProd\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":145,\"z\":3,\"width\":1200,\"height\":240,\"tabOrder\":3}}],\"singleVisual\":{\"visualType\":\"tableEx\",\"projections\":{\"Values\":[{\"queryRef\":\"FactRequerimiento.Codigo\"},{\"queryRef\":\"FactRequerimiento.ActividadEvento\"},{\"queryRef\":\"FactProducto.CodigoProducto\"},{\"queryRef\":\"FactProducto.EstadoProducto\"},{\"queryRef\":\"FactProducto.ResponsableProducto\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"a\",\"Entity\":\"FactRequerimiento\",\"Type\":0},{\"Name\":\"b\",\"Entity\":\"FactProducto\",\"Type\":0}],\"Select\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"a\"}},\"Property\":\"Codigo\"},\"Name\":\"FactRequerimiento.Codigo\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"a\"}},\"Property\":\"ActividadEvento\"},\"Name\":\"FactRequerimiento.ActividadEvento\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"b\"}},\"Property\":\"CodigoProducto\"},\"Name\":\"FactProducto.CodigoProducto\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"b\"}},\"Property\":\"EstadoProducto\"},\"Name\":\"FactProducto.EstadoProducto\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"b\"}},\"Property\":\"ResponsableProducto\"},\"Name\":\"FactProducto.ResponsableProducto\"}]},\"drillFilterOtherVisuals\":true}}",
           "filters": "[]",
-          "tabOrder": 9
+          "query": "{}",
+          "dataTransforms": "{\"queryMetadata\":{\"Select\":[{\"Restatement\":\"Req\",\"Name\":\"FactRequerimiento.Codigo\",\"Type\":2048},{\"Restatement\":\"Actividad\",\"Name\":\"FactRequerimiento.ActividadEvento\",\"Type\":2048},{\"Restatement\":\"Producto\",\"Name\":\"FactProducto.CodigoProducto\",\"Type\":2048},{\"Restatement\":\"Estado producto\",\"Name\":\"FactProducto.EstadoProducto\",\"Type\":2048},{\"Restatement\":\"Responsable\",\"Name\":\"FactProducto.ResponsableProducto\",\"Type\":2048}]},\"selects\":[{\"displayName\":\"Req\",\"queryName\":\"FactRequerimiento.Codigo\",\"roles\":{\"Values\":true}},{\"displayName\":\"Actividad\",\"queryName\":\"FactRequerimiento.ActividadEvento\",\"roles\":{\"Values\":true}},{\"displayName\":\"Producto\",\"queryName\":\"FactProducto.CodigoProducto\",\"roles\":{\"Values\":true}},{\"displayName\":\"Estado producto\",\"queryName\":\"FactProducto.EstadoProducto\",\"roles\":{\"Values\":true}},{\"displayName\":\"Responsable\",\"queryName\":\"FactProducto.ResponsableProducto\",\"roles\":{\"Values\":true}}],\"projectionOrdering\":{\"Values\":[0,1,2,3,4]},\"visualElements\":[]}"
+        },
+        {
+          "x": 30,
+          "y": 425,
+          "z": 4,
+          "width": 1200,
+          "height": 240,
+          "config": "{\"name\":\"TablaAudit\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":425,\"z\":4,\"width\":1200,\"height\":240,\"tabOrder\":4}}],\"singleVisual\":{\"visualType\":\"tableEx\",\"projections\":{\"Values\":[{\"queryRef\":\"FactHistorialEstado.FechaEvento\"},{\"queryRef\":\"FactHistorialEstado.EntidadTipo\"},{\"queryRef\":\"FactHistorialEstado.Proceso\"},{\"queryRef\":\"FactHistorialEstado.Descripcion\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"a\",\"Entity\":\"FactHistorialEstado\",\"Type\":0}],\"Select\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"a\"}},\"Property\":\"FechaEvento\"},\"Name\":\"FactHistorialEstado.FechaEvento\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"a\"}},\"Property\":\"EntidadTipo\"},\"Name\":\"FactHistorialEstado.EntidadTipo\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"a\"}},\"Property\":\"Proceso\"},\"Name\":\"FactHistorialEstado.Proceso\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"a\"}},\"Property\":\"Descripcion\"},\"Name\":\"FactHistorialEstado.Descripcion\"}]},\"drillFilterOtherVisuals\":true}}",
+          "filters": "[]",
+          "query": "{}",
+          "dataTransforms": "{\"queryMetadata\":{\"Select\":[{\"Restatement\":\"Fecha\",\"Name\":\"FactHistorialEstado.FechaEvento\",\"Type\":2048},{\"Restatement\":\"Entidad\",\"Name\":\"FactHistorialEstado.EntidadTipo\",\"Type\":2048},{\"Restatement\":\"Proceso\",\"Name\":\"FactHistorialEstado.Proceso\",\"Type\":2048},{\"Restatement\":\"Descripci\\u00f3n\",\"Name\":\"FactHistorialEstado.Descripcion\",\"Type\":2048}]},\"selects\":[{\"displayName\":\"Fecha\",\"queryName\":\"FactHistorialEstado.FechaEvento\",\"roles\":{\"Values\":true}},{\"displayName\":\"Entidad\",\"queryName\":\"FactHistorialEstado.EntidadTipo\",\"roles\":{\"Values\":true}},{\"displayName\":\"Proceso\",\"queryName\":\"FactHistorialEstado.Proceso\",\"roles\":{\"Values\":true}},{\"displayName\":\"Descripci\\u00f3n\",\"queryName\":\"FactHistorialEstado.Descripcion\",\"roles\":{\"Values\":true}}],\"projectionOrdering\":{\"Values\":[0,1,2,3]},\"visualElements\":[]}"
         }
       ]
     }
