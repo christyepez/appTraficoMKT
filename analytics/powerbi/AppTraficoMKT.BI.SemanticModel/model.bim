@@ -49,7 +49,7 @@
         "partitions": [
           {
             "name": "DimCanalDifusion",
-            "mode": "directQuery",
+            "mode": "import",
             "source": {
               "type": "m",
               "expression": [
@@ -80,7 +80,7 @@
         "partitions": [
           {
             "name": "DimCanalOrigen",
-            "mode": "directQuery",
+            "mode": "import",
             "source": {
               "type": "m",
               "expression": [
@@ -131,7 +131,7 @@
         "partitions": [
           {
             "name": "DimCarrera",
-            "mode": "directQuery",
+            "mode": "import",
             "source": {
               "type": "m",
               "expression": [
@@ -172,7 +172,7 @@
         "partitions": [
           {
             "name": "DimComplejidad",
-            "mode": "directQuery",
+            "mode": "import",
             "source": {
               "type": "m",
               "expression": [
@@ -218,7 +218,7 @@
         "partitions": [
           {
             "name": "DimEstado",
-            "mode": "directQuery",
+            "mode": "import",
             "source": {
               "type": "m",
               "expression": [
@@ -264,7 +264,7 @@
         "partitions": [
           {
             "name": "DimFacultad",
-            "mode": "directQuery",
+            "mode": "import",
             "source": {
               "type": "m",
               "expression": [
@@ -330,7 +330,7 @@
         "partitions": [
           {
             "name": "DimFecha",
-            "mode": "directQuery",
+            "mode": "import",
             "source": {
               "type": "m",
               "expression": [
@@ -371,7 +371,7 @@
         "partitions": [
           {
             "name": "DimKpi",
-            "mode": "directQuery",
+            "mode": "import",
             "source": {
               "type": "m",
               "expression": [
@@ -412,7 +412,7 @@
         "partitions": [
           {
             "name": "DimPublicoObjetivo",
-            "mode": "directQuery",
+            "mode": "import",
             "source": {
               "type": "m",
               "expression": [
@@ -458,7 +458,7 @@
         "partitions": [
           {
             "name": "DimSede",
-            "mode": "directQuery",
+            "mode": "import",
             "source": {
               "type": "m",
               "expression": [
@@ -519,7 +519,7 @@
         "partitions": [
           {
             "name": "DimTipoProducto",
-            "mode": "directQuery",
+            "mode": "import",
             "source": {
               "type": "m",
               "expression": [
@@ -560,7 +560,7 @@
         "partitions": [
           {
             "name": "DimTipoRequerimiento",
-            "mode": "directQuery",
+            "mode": "import",
             "source": {
               "type": "m",
               "expression": [
@@ -636,7 +636,7 @@
         "partitions": [
           {
             "name": "DimUsuario",
-            "mode": "directQuery",
+            "mode": "import",
             "source": {
               "type": "m",
               "expression": [
@@ -712,7 +712,7 @@
         "partitions": [
           {
             "name": "FactAprobacion",
-            "mode": "directQuery",
+            "mode": "import",
             "source": {
               "type": "m",
               "expression": [
@@ -788,7 +788,7 @@
         "partitions": [
           {
             "name": "FactHistorialEstado",
-            "mode": "directQuery",
+            "mode": "import",
             "source": {
               "type": "m",
               "expression": [
@@ -839,7 +839,7 @@
         "partitions": [
           {
             "name": "FactKpiResultado",
-            "mode": "directQuery",
+            "mode": "import",
             "source": {
               "type": "m",
               "expression": [
@@ -1020,7 +1020,7 @@
         "partitions": [
           {
             "name": "FactProducto",
-            "mode": "directQuery",
+            "mode": "import",
             "source": {
               "type": "m",
               "expression": [
@@ -1166,7 +1166,7 @@
         "partitions": [
           {
             "name": "FactRequerimiento",
-            "mode": "directQuery",
+            "mode": "import",
             "source": {
               "type": "m",
               "expression": [
@@ -1237,7 +1237,7 @@
         "partitions": [
           {
             "name": "FactSatisfaccion",
-            "mode": "directQuery",
+            "mode": "import",
             "source": {
               "type": "m",
               "expression": [
@@ -1308,7 +1308,7 @@
         "partitions": [
           {
             "name": "FactUsoUsuario",
-            "mode": "directQuery",
+            "mode": "import",
             "source": {
               "type": "m",
               "expression": [
