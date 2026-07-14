@@ -1,0 +1,13 @@
+{
+  "name": "Aprobaciones",
+  "displayName": "Aprobaciones",
+  "layout": "16:9",
+  "visuals": [
+    "Barras: pendientes por aprobador",
+    "Tarjetas: tiempo promedio de aprobacion, aprobaciones demoradas, rechazos, aprobacion al primer intento",
+    "Tabla: antiguedad de aprobaciones pendientes",
+    "Matriz: reprocesos por producto y aprobador",
+    "Drill-through: detalle de producto y versiones enviadas"
+  ],
+  "filters": ["Aprobador", "Decision", "Fecha decision", "Tipo producto"]
+}

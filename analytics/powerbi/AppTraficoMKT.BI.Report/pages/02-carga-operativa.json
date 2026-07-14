@@ -1,0 +1,13 @@
+{
+  "name": "CargaOperativa",
+  "displayName": "Carga operativa",
+  "layout": "16:9",
+  "visuals": [
+    "Barras: carga por tecnico",
+    "Donut discreto: carga por estado",
+    "Columnas: carga ponderada por tipo de producto",
+    "Tarjetas: horas pendientes, capacidad disponible, porcentaje de ocupacion, capacidad versus demanda",
+    "Tabla: productos proximos al evento"
+  ],
+  "filters": ["Tecnico", "Tipo producto", "Estado", "Fecha entrega"]
+}

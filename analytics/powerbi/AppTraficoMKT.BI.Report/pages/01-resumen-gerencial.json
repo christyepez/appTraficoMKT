@@ -1,0 +1,13 @@
+{
+  "name": "ResumenGerencial",
+  "displayName": "Resumen gerencial",
+  "layout": "16:9",
+  "visuals": [
+    "Tarjetas: Total requerimientos, Requerimientos activos, Requerimientos completados, Productos activos, Satisfaccion promedio",
+    "Linea: tendencia mensual de requerimientos recibidos y completados",
+    "Barras: demanda por sede",
+    "Barras apiladas: demanda por facultad y estado",
+    "Semaforos: porcentaje de cierre y satisfaccion versus meta"
+  ],
+  "filters": ["Fecha", "Estado", "Sede", "Facultad"]
+}

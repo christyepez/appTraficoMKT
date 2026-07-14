@@ -1,0 +1,35 @@
+{
+  "name": "App Trafico MKT - Universidad Indoamerica",
+  "dataColors": ["#3c235f", "#f6b700", "#207044", "#b42318", "#3266a8", "#697386", "#6d4a8d", "#00a3a3"],
+  "background": "#f5f7fb",
+  "foreground": "#101b2d",
+  "tableAccent": "#3c235f",
+  "visualStyles": {
+    "*": {
+      "*": {
+        "title": [
+          {
+            "fontFace": "Segoe UI",
+            "color": { "solid": { "color": "#101b2d" } }
+          }
+        ],
+        "labels": [
+          {
+            "fontFace": "Segoe UI",
+            "color": { "solid": { "color": "#101b2d" } }
+          }
+        ]
+      }
+    },
+    "card": {
+      "*": {
+        "categoryLabels": [
+          { "show": true, "color": { "solid": { "color": "#697386" } } }
+        ],
+        "calloutValue": [
+          { "color": { "solid": { "color": "#3c235f" } } }
+        ]
+      }
+    }
+  }
+}

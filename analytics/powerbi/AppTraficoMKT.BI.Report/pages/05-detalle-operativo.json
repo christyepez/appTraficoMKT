@@ -1,0 +1,12 @@
+{
+  "name": "DetalleOperativo",
+  "displayName": "Detalle operativo",
+  "layout": "16:9",
+  "visuals": [
+    "Tabla principal: requerimiento, producto, estado, responsable, aprobador, fechas, sede, facultad, carrera, tipo requerimiento y tipo producto",
+    "Panel de filtros: fecha, estado, sede, facultad, carrera, tecnico, aprobador, tipo requerimiento, tipo producto",
+    "Drill-through al requerimiento",
+    "Tooltip: historial de estado y ultimas aprobaciones"
+  ],
+  "filters": ["Fecha", "Estado", "Sede", "Facultad", "Carrera", "Tecnico", "Aprobador", "Tipo requerimiento", "Tipo producto"]
+}

@@ -1,0 +1,14 @@
+{
+  "version": "1.0",
+  "settings": {
+    "directLakeBehavior": "DirectQuery"
+  },
+  "database": {
+    "name": "AppTraficoMKT BI",
+    "compatibilityLevel": 1601,
+    "model": {
+      "culture": "es-EC",
+      "defaultPowerBIDataSourceVersion": "powerBI_V3"
+    }
+  }
+}

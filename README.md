@@ -10,6 +10,7 @@ Aplicacion base para recopilar requerimientos, asignar actividades al equipo tec
 - [Especificacion funcional](docs/functional/functional-specification.md)
 - [Manual completo del Administrador](docs/functional/administrator-guide.md)
 - [Guia funcional de usuario](docs/functional/user-guide.md)
+- [Analytics y Power BI](analytics/README.md)
 - [Operaciones y despliegue](docs/operations/deployment.md)
 - [Git Flow y ambientes](docs/operations/git-flow.md)
 
@@ -58,6 +59,7 @@ Bandeja y globo de notificaciones:
 - `backend/tests/Requirements.UnitTests`: pruebas unitarias del workflow.
 - `frontend`: aplicacion Next.js con pantallas independientes por funcion.
 - `deploy/nginx.conf`: reverse proxy para despliegue productivo.
+- `analytics`: modelo BI, scripts SQL, DAX, Power Query, PBIP/PBIR y documentacion del panel Power BI.
 
 Cada microservicio tiene su propia base logica en SQL Server: `RequirementsDb`, `ActivitiesDb`, `EvidenceDb`, `IdentityDb` y `AdministrationDb`.
 
