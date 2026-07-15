@@ -4,57 +4,91 @@ table FactHistorialEstado
 	column EventoId
 		dataType: string
 		lineageTag: a1fdb90e-958f-49f3-9209-1d46e5ee4aa6
+		summarizeBy: none
 		sourceColumn: EventoId
+
+		annotation SummarizationSetBy = Automatic
 
 	column EntidadId
 		dataType: string
 		lineageTag: b19ac0dc-7b49-4a40-a831-8e9de6e6ff36
+		summarizeBy: none
 		sourceColumn: EntidadId
+
+		annotation SummarizationSetBy = Automatic
 
 	column RequerimientoId
 		dataType: string
 		lineageTag: 93d1e59c-19fe-4d4c-adae-b2cdb0ac44ad
+		summarizeBy: none
 		sourceColumn: RequerimientoId
+
+		annotation SummarizationSetBy = Automatic
 
 	column ProductoId
 		dataType: string
 		lineageTag: 14218913-9276-42fa-9455-099ccc32efbc
+		summarizeBy: none
 		sourceColumn: ProductoId
+
+		annotation SummarizationSetBy = Automatic
 
 	column TipoEntidad
 		dataType: string
 		lineageTag: 901ab2ad-7290-490b-b279-18047cdb9c41
+		summarizeBy: none
 		sourceColumn: TipoEntidad
+
+		annotation SummarizationSetBy = Automatic
 
 	column EstadoAnterior
 		dataType: string
 		lineageTag: a2dd6789-3f8e-4845-b758-bccbb1a1f174
+		summarizeBy: none
 		sourceColumn: EstadoAnterior
+
+		annotation SummarizationSetBy = Automatic
 
 	column EstadoNuevo
 		dataType: string
 		lineageTag: 8a4851f9-6b71-4a4c-a872-706b0fd646e6
+		summarizeBy: none
 		sourceColumn: EstadoNuevo
+
+		annotation SummarizationSetBy = Automatic
 
 	column Accion
 		dataType: string
 		lineageTag: 1e0236dc-e45f-46c2-a9af-2660632d36a0
+		summarizeBy: none
 		sourceColumn: Accion
+
+		annotation SummarizationSetBy = Automatic
 
 	column RealizadoPor
 		dataType: string
 		lineageTag: af603037-0757-42e0-ad2f-048c3393dbb3
+		summarizeBy: none
 		sourceColumn: RealizadoPor
+
+		annotation SummarizationSetBy = Automatic
 
 	column PayloadJson
 		dataType: string
 		lineageTag: 972576e1-1597-4a49-80c1-a166c7f817e2
+		summarizeBy: none
 		sourceColumn: PayloadJson
 
+		annotation SummarizationSetBy = Automatic
+
 	column FechaEventoUtc
-		dataType: string
+		dataType: dateTime
+		formatString: General Date
 		lineageTag: 766bd789-f337-41d7-b28e-12f158dcff3f
+		summarizeBy: none
 		sourceColumn: FechaEventoUtc
+
+		annotation SummarizationSetBy = Automatic
 
 	partition FactHistorialEstado = m
 		mode: import

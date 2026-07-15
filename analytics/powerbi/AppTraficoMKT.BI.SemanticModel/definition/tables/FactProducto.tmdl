@@ -4,162 +4,274 @@ table FactProducto
 	column ProductoId
 		dataType: string
 		lineageTag: 6b556c69-b3be-4bd1-8df5-c05439d11a6f
+		summarizeBy: none
 		sourceColumn: ProductoId
+
+		annotation SummarizationSetBy = Automatic
 
 	column RequerimientoId
 		dataType: string
 		lineageTag: 0ee38a7f-1eba-4a0f-94b5-25f00f575648
+		summarizeBy: none
 		sourceColumn: RequerimientoId
+
+		annotation SummarizationSetBy = Automatic
 
 	column CodigoProducto
 		dataType: string
 		lineageTag: 4d29f41c-fac1-491b-bc86-5ea567a3cc97
+		summarizeBy: none
 		sourceColumn: CodigoProducto
+
+		annotation SummarizationSetBy = Automatic
 
 	column TipoRequerimientoId
 		dataType: string
 		lineageTag: dda1d906-3b74-4149-9e7d-48e1056a66a0
+		summarizeBy: none
 		sourceColumn: TipoRequerimientoId
+
+		annotation SummarizationSetBy = Automatic
 
 	column TipoRequerimientoTexto
 		dataType: string
 		lineageTag: 717fb6d5-55d8-4382-9916-bea5817cea2f
+		summarizeBy: none
 		sourceColumn: TipoRequerimientoTexto
+
+		annotation SummarizationSetBy = Automatic
 
 	column PublicoObjetivoId
 		dataType: string
 		lineageTag: b244d711-a94c-42e2-b6e4-f0ba6c2de00d
+		summarizeBy: none
 		sourceColumn: PublicoObjetivoId
+
+		annotation SummarizationSetBy = Automatic
 
 	column PublicoObjetivoTexto
 		dataType: string
 		lineageTag: 0cf20ce6-2760-4d83-a1b9-dcd86cb65df4
+		summarizeBy: none
 		sourceColumn: PublicoObjetivoTexto
+
+		annotation SummarizationSetBy = Automatic
 
 	column TipoProductoId
 		dataType: string
 		lineageTag: 32f91e47-4487-414d-9f00-a84ffa686ffc
+		summarizeBy: none
 		sourceColumn: TipoProductoId
+
+		annotation SummarizationSetBy = Automatic
 
 	column TipoProductoTexto
 		dataType: string
 		lineageTag: 93aa9aa2-f420-4858-841b-a636eb306d5e
+		summarizeBy: none
 		sourceColumn: TipoProductoTexto
+
+		annotation SummarizationSetBy = Automatic
 
 	column CanalDifusionId
 		dataType: string
 		lineageTag: bf55eb1b-e3e1-4afb-ba31-6e0bcea4273e
+		summarizeBy: none
 		sourceColumn: CanalDifusionId
+
+		annotation SummarizationSetBy = Automatic
 
 	column CanalDifusionTexto
 		dataType: string
 		lineageTag: 398bfd11-9a8b-4524-9817-1d818fef7dbb
+		summarizeBy: none
 		sourceColumn: CanalDifusionTexto
+
+		annotation SummarizationSetBy = Automatic
 
 	column KpiId
 		dataType: string
 		lineageTag: 6d0d1a5f-b344-4769-a8b2-45aa31d51ed0
+		summarizeBy: none
 		sourceColumn: KpiId
+
+		annotation SummarizationSetBy = Automatic
 
 	column KpiTexto
 		dataType: string
 		lineageTag: 4fa3621e-2cfe-403e-b198-d766fec11b05
+		summarizeBy: none
 		sourceColumn: KpiTexto
+
+		annotation SummarizationSetBy = Automatic
 
 	column ResponsableProducto
 		dataType: string
 		lineageTag: e5be9474-085b-4825-ad9b-5928b2737d46
+		summarizeBy: none
 		sourceColumn: ResponsableProducto
+
+		annotation SummarizationSetBy = Automatic
 
 	column FechaEntregaProducto
 		dataType: dateTime
+		formatString: Long Date
 		lineageTag: df37b706-7ad6-4184-b6b8-fab17c2934a9
+		summarizeBy: none
 		sourceColumn: FechaEntregaProducto
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = Automatic
 
 	column EstadoId
 		dataType: string
 		lineageTag: 5509f841-ed92-43af-8fb2-fe486c8aa447
+		summarizeBy: none
 		sourceColumn: EstadoId
+
+		annotation SummarizationSetBy = Automatic
 
 	column EstadoCodigo
 		dataType: string
 		lineageTag: 11372282-1941-4979-a649-3d097acfdf0d
+		summarizeBy: none
 		sourceColumn: EstadoCodigo
 
+		annotation SummarizationSetBy = Automatic
+
 	column CreadoUtc
-		dataType: string
+		dataType: dateTime
+		formatString: General Date
 		lineageTag: 6dff5607-df5d-4362-a3c5-0ed544827b88
+		summarizeBy: none
 		sourceColumn: CreadoUtc
 
+		annotation SummarizationSetBy = Automatic
+
 	column ActualizadoUtc
-		dataType: string
+		dataType: dateTime
+		formatString: General Date
 		lineageTag: 1d495993-0d7a-4aca-8f72-42f93690dec8
+		summarizeBy: none
 		sourceColumn: ActualizadoUtc
 
+		annotation SummarizationSetBy = Automatic
+
 	column FechaInicioTecnicoUtc
-		dataType: string
+		dataType: dateTime
+		formatString: General Date
 		lineageTag: e96c6254-10a5-48d1-9c3a-7d0ed6542f4f
+		summarizeBy: none
 		sourceColumn: FechaInicioTecnicoUtc
 
+		annotation SummarizationSetBy = Automatic
+
 	column FechaEnvioAprobacionUtc
-		dataType: string
+		dataType: dateTime
+		formatString: General Date
 		lineageTag: f11c09e8-3922-43c6-a16b-c9106dcad8a0
+		summarizeBy: none
 		sourceColumn: FechaEnvioAprobacionUtc
 
+		annotation SummarizationSetBy = Automatic
+
 	column FechaUltimaDecisionUtc
-		dataType: string
+		dataType: dateTime
+		formatString: General Date
 		lineageTag: 9a46c886-92b6-41d2-b9d4-36b736d84628
+		summarizeBy: none
 		sourceColumn: FechaUltimaDecisionUtc
+
+		annotation SummarizationSetBy = Automatic
 
 	column EsEliminado
 		dataType: boolean
 		lineageTag: e13b1f3a-f235-4831-885d-fb5134edefba
+		summarizeBy: none
 		sourceColumn: EsEliminado
+
+		annotation SummarizationSetBy = Automatic
 
 	column EsAprobado
 		dataType: int64
 		lineageTag: e26f4212-5f20-4579-b53b-fcba8ee8ab0d
+		summarizeBy: sum
 		sourceColumn: EsAprobado
+
+		annotation SummarizationSetBy = Automatic
 
 	column EsEnCorreccion
 		dataType: int64
 		lineageTag: 4b07973c-f482-47b8-b65c-1b733ddcae8c
+		summarizeBy: sum
 		sourceColumn: EsEnCorreccion
+
+		annotation SummarizationSetBy = Automatic
 
 	column EsPendienteAprobacion
 		dataType: int64
 		lineageTag: 425635e2-b078-4fbe-8664-f30012657fd4
+		summarizeBy: sum
 		sourceColumn: EsPendienteAprobacion
+
+		annotation SummarizationSetBy = Automatic
 
 	column EsCargaTecnica
 		dataType: int64
 		lineageTag: 26cfa916-23d2-419e-bf22-b02c3768b332
+		summarizeBy: sum
 		sourceColumn: EsCargaTecnica
 
+		annotation SummarizationSetBy = Automatic
+
 	column HorasEstimadas
-		dataType: decimal
+		dataType: double
 		lineageTag: 6f3603c2-3505-4c0a-9559-67265f11bed6
+		summarizeBy: sum
 		sourceColumn: HorasEstimadas
 
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
 	column PesoOperativo
-		dataType: decimal
+		dataType: double
 		lineageTag: 67fbebbc-a4d7-43bc-8355-7ed8ddce5f43
+		summarizeBy: sum
 		sourceColumn: PesoOperativo
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
 	column Complejidad
 		dataType: string
 		lineageTag: 2b258ebc-7c13-4ff8-9f67-2d6a6f17b6aa
+		summarizeBy: none
 		sourceColumn: Complejidad
 
+		annotation SummarizationSetBy = Automatic
+
 	column HorasTecnicasLaborables
-		dataType: decimal
+		dataType: double
 		lineageTag: 2cf3f9f6-4478-4587-9665-01a468c44c5e
+		summarizeBy: sum
 		sourceColumn: HorasTecnicasLaborables
 
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
 	column HorasAprobacionLaborables
-		dataType: decimal
+		dataType: double
 		lineageTag: 447159ec-40ba-47f2-87a1-a04efd1de86a
+		summarizeBy: sum
 		sourceColumn: HorasAprobacionLaborables
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
 	partition FactProducto = m
 		mode: import

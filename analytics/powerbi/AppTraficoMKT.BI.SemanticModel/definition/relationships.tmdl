@@ -1,0 +1,59 @@
+relationship rel_FactRequerimiento_DimFacultad
+	fromColumn: FactRequerimiento.FacultadId
+	toColumn: DimFacultad.FacultadId
+
+relationship rel_FactRequerimiento_DimSede
+	fromColumn: FactRequerimiento.SedeId
+	toColumn: DimSede.SedeId
+
+relationship rel_FactRequerimiento_DimEstadoRequerimiento
+	fromColumn: FactRequerimiento.EstadoId
+	toColumn: DimEstadoRequerimiento.EstadoId
+
+relationship rel_FactProducto_FactRequerimiento
+	fromColumn: FactProducto.RequerimientoId
+	toColumn: FactRequerimiento.RequerimientoId
+
+relationship rel_FactProducto_DimTipoRequerimiento
+	fromColumn: FactProducto.TipoRequerimientoId
+	toColumn: DimTipoRequerimiento.TipoRequerimientoId
+
+relationship rel_FactProducto_DimPublicoObjetivo
+	fromColumn: FactProducto.PublicoObjetivoId
+	toColumn: DimPublicoObjetivo.PublicoObjetivoId
+
+relationship rel_FactProducto_DimTipoProducto
+	fromColumn: FactProducto.TipoProductoId
+	toColumn: DimTipoProducto.TipoProductoId
+
+relationship rel_FactProducto_DimCanalDifusion
+	fromColumn: FactProducto.CanalDifusionId
+	toColumn: DimCanalDifusion.CanalDifusionId
+
+relationship rel_FactProducto_DimKpi
+	fromColumn: FactProducto.KpiId
+	toColumn: DimKpi.KpiId
+
+relationship rel_FactProducto_DimEstadoProducto
+	fromColumn: FactProducto.EstadoId
+	toColumn: DimEstadoProducto.EstadoId
+
+relationship rel_FactAprobacion_FactProducto
+	fromColumn: FactAprobacion.ProductoId
+	toColumn: FactProducto.ProductoId
+
+relationship rel_FactHistorialEstado_FactProducto
+	fromColumn: FactHistorialEstado.ProductoId
+	toColumn: FactProducto.ProductoId
+
+relationship rel_FactSatisfaccion_FactRequerimiento
+	fromColumn: FactSatisfaccion.RequerimientoId
+	toColumn: FactRequerimiento.RequerimientoId
+
+relationship rel_FactKpiResultado_DimKpi
+	fromColumn: FactKpiResultado.KpiId
+	toColumn: DimKpi.KpiId
+
+relationship rel_FactUsoUsuario_DimUsuario
+	fromColumn: FactUsoUsuario.UsuarioId
+	toColumn: DimUsuario.UsuarioId

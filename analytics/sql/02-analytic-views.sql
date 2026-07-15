@@ -73,6 +73,18 @@ FROM ActivitiesDb.dbo.CatalogReferences
 WHERE Type = 'EstadoProducto';
 GO
 
+CREATE OR ALTER VIEW bi.DimEstadoRequerimiento AS
+SELECT EstadoId, Codigo, Estado, EsActivo
+FROM bi.DimEstado
+WHERE TipoEstado = 'EstadoRequerimiento';
+GO
+
+CREATE OR ALTER VIEW bi.DimEstadoProducto AS
+SELECT EstadoId, Codigo, Estado, EsActivo
+FROM bi.DimEstado
+WHERE TipoEstado = 'EstadoProducto';
+GO
+
 CREATE OR ALTER VIEW bi.DimTipoRequerimiento AS
 SELECT CatalogoId AS TipoRequerimientoId, Codigo, Nombre AS TipoRequerimiento, EsActivo
 FROM bi.DimCatalogo

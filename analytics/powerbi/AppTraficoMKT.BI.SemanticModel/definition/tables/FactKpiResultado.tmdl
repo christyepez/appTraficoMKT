@@ -27,9 +27,14 @@ table FactKpiResultado
 		sourceColumn: ProductosPendientesAprobacion
 
 	column CargaPonderada
-		dataType: decimal
+		dataType: double
 		lineageTag: ccbb9b1d-423e-4529-8c4b-caaeb5b7233f
+		summarizeBy: sum
 		sourceColumn: CargaPonderada
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
 	partition FactKpiResultado = m
 		mode: import

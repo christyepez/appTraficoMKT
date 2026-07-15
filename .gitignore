@@ -23,3 +23,7 @@ analytics/**/*.cache
 *.pbix
 *.pbix.bak
 *.pbiBackup
+analytics/powerbi/**/*.pbi/
+analytics/powerbi/**/.pbi/
+analytics/powerbi/**/.platform
+analytics/powerbi/**/*.codex-backup

@@ -1,0 +1,31 @@
+table DimEstadoProducto
+	lineageTag: 23d8379d-7320-4f48-a529-79a4d4b11f50
+
+	column EstadoId
+		dataType: string
+		lineageTag: e8719167-f39b-4e2e-ac5a-7856fdaeb8da
+		sourceColumn: EstadoId
+
+	column Codigo
+		dataType: string
+		lineageTag: c911f75f-2c0b-47f9-b93c-08b4b6eb73a2
+		sourceColumn: Codigo
+
+	column Estado
+		dataType: string
+		lineageTag: ec6dfb9d-5a8b-43d4-ac0a-1fe4210c6f93
+		sourceColumn: Estado
+
+	column EsActivo
+		dataType: boolean
+		lineageTag: cc6c0ec0-d372-48e3-88a6-73ff4e716a7c
+		sourceColumn: EsActivo
+
+	partition DimEstadoProducto = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(ServerName, DatabaseName, [CreateNavigationProperties=false]),
+				    View = Source{[Schema="bi", Item="DimEstadoProducto"]}[Data]
+				in
+				    View

@@ -94,7 +94,6 @@ table _Medidas
 		formatString: 0.0
 		lineageTag: 22222222-2222-4222-8222-222222222213
 
-
 	measure 'Total usuarios' = COUNTROWS ( FactUsoUsuario )
 		formatString: 0
 		lineageTag: 22222222-2222-4222-8222-222222222220

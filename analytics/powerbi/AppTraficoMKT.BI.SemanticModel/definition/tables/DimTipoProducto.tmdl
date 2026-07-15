@@ -22,14 +22,24 @@ table DimTipoProducto
 		sourceColumn: Complejidad
 
 	column HorasEstimadas
-		dataType: decimal
+		dataType: double
 		lineageTag: b1ad11a4-3db9-440f-95a3-1691c31034e0
+		summarizeBy: sum
 		sourceColumn: HorasEstimadas
 
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
 	column PesoOperativo
-		dataType: decimal
+		dataType: double
 		lineageTag: 549f77b3-b784-493f-91b4-627f6a749dcd
+		summarizeBy: sum
 		sourceColumn: PesoOperativo
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
 	column EsPesoDemo
 		dataType: int64

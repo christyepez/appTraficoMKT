@@ -4,52 +4,83 @@ table FactUsoUsuario
 	column UsuarioId
 		dataType: string
 		lineageTag: 71b8ab8b-feee-4d19-ad7d-a4c7377d93b2
+		summarizeBy: none
 		sourceColumn: UsuarioId
+
+		annotation SummarizationSetBy = Automatic
 
 	column Correo
 		dataType: string
 		lineageTag: ffbe754b-77f9-48f6-804b-ddf303bcdf0e
+		summarizeBy: none
 		sourceColumn: Correo
+
+		annotation SummarizationSetBy = Automatic
 
 	column Nombre
 		dataType: string
 		lineageTag: b0a6102d-2574-4daa-a7c4-cdb54c56dea2
+		summarizeBy: none
 		sourceColumn: Nombre
+
+		annotation SummarizationSetBy = Automatic
 
 	column Roles
 		dataType: string
 		lineageTag: dcff0478-029d-4507-836d-691fb29f96b1
+		summarizeBy: none
 		sourceColumn: Roles
+
+		annotation SummarizationSetBy = Automatic
 
 	column EsActivo
 		dataType: boolean
 		lineageTag: a3b8e761-f926-419e-ab74-b562318f306f
+		summarizeBy: none
 		sourceColumn: EsActivo
 
+		annotation SummarizationSetBy = Automatic
+
 	column UltimoIngresoUtc
-		dataType: string
+		dataType: dateTime
+		formatString: General Date
 		lineageTag: 13838d31-77b9-49ae-8b97-4a4e311b337e
+		summarizeBy: none
 		sourceColumn: UltimoIngresoUtc
+
+		annotation SummarizationSetBy = Automatic
 
 	column IngresoUltimos7Dias
 		dataType: int64
 		lineageTag: b3cfb5d1-5fab-4284-a7ae-e3f6acceeff5
+		summarizeBy: sum
 		sourceColumn: IngresoUltimos7Dias
+
+		annotation SummarizationSetBy = Automatic
 
 	column HorasDesdeUltimoIngreso
 		dataType: int64
 		lineageTag: f1781c41-4318-4636-b0d9-c94dcde372cc
+		summarizeBy: sum
 		sourceColumn: HorasDesdeUltimoIngreso
+
+		annotation SummarizationSetBy = Automatic
 
 	column NotificacionesRecibidas
 		dataType: int64
 		lineageTag: 51e3bb37-47e1-40b6-8cb2-dc34d246dcbe
+		summarizeBy: sum
 		sourceColumn: NotificacionesRecibidas
+
+		annotation SummarizationSetBy = Automatic
 
 	column NotificacionesLeidas
 		dataType: int64
 		lineageTag: be973ac7-d9ab-425b-91ff-5d108ae59455
+		summarizeBy: sum
 		sourceColumn: NotificacionesLeidas
+
+		annotation SummarizationSetBy = Automatic
 
 	partition FactUsoUsuario = m
 		mode: import

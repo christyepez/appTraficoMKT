@@ -3,48 +3,78 @@ table DimFecha
 
 	column FechaKey
 		dataType: dateTime
+		formatString: Long Date
 		lineageTag: b0e8c315-2b78-48e0-a355-9626f1a3d44b
+		summarizeBy: none
 		sourceColumn: FechaKey
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = Automatic
 
 	column Anio
 		dataType: int64
 		lineageTag: 822745e2-a2a4-4023-bd26-716dda377058
+		summarizeBy: sum
 		sourceColumn: Anio
+
+		annotation SummarizationSetBy = Automatic
 
 	column MesNumero
 		dataType: int64
 		lineageTag: 16dd0f2c-6b7d-47f4-9cac-59adc0023b8c
+		summarizeBy: sum
 		sourceColumn: MesNumero
+
+		annotation SummarizationSetBy = Automatic
 
 	column Mes
 		dataType: string
 		lineageTag: b73b7896-ddc5-47b9-956c-d97e7625cfba
+		summarizeBy: none
 		sourceColumn: Mes
+
+		annotation SummarizationSetBy = Automatic
 
 	column Dia
 		dataType: int64
 		lineageTag: 82ea8d41-53ca-4175-9778-c18e453a41d8
+		summarizeBy: sum
 		sourceColumn: Dia
+
+		annotation SummarizationSetBy = Automatic
 
 	column Trimestre
 		dataType: int64
 		lineageTag: 1666772e-45d6-4a76-bbd2-8312b90f524b
+		summarizeBy: sum
 		sourceColumn: Trimestre
+
+		annotation SummarizationSetBy = Automatic
 
 	column AnioMes
 		dataType: string
 		lineageTag: 82ad49b0-2cfc-464b-8d7c-4d6810e47af6
+		summarizeBy: none
 		sourceColumn: AnioMes
+
+		annotation SummarizationSetBy = Automatic
 
 	column EsFinDeSemana
 		dataType: int64
 		lineageTag: 1a206f82-4fc5-427c-90db-6ddba1da3d64
+		summarizeBy: sum
 		sourceColumn: EsFinDeSemana
+
+		annotation SummarizationSetBy = Automatic
 
 	column EsFeriado
 		dataType: int64
 		lineageTag: f7da7c4d-6489-4276-838e-37577b21389d
+		summarizeBy: sum
 		sourceColumn: EsFeriado
+
+		annotation SummarizationSetBy = Automatic
 
 	partition DimFecha = m
 		mode: import

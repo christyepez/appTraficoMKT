@@ -4,27 +4,43 @@ table DimFacultad
 	column FacultadId
 		dataType: string
 		lineageTag: 739012b7-0865-4819-807a-df62ca1cc836
+		summarizeBy: none
 		sourceColumn: FacultadId
+
+		annotation SummarizationSetBy = Automatic
 
 	column Codigo
 		dataType: string
 		lineageTag: ee68bf93-bd3c-4f69-82a9-4817307a932f
+		summarizeBy: none
 		sourceColumn: Codigo
+
+		annotation SummarizationSetBy = Automatic
 
 	column Facultad
 		dataType: string
 		lineageTag: 03effb7d-070a-4b0f-a6d3-9eb4f14faf3c
+		summarizeBy: none
 		sourceColumn: Facultad
+
+		annotation SummarizationSetBy = Automatic
 
 	column EsActivo
 		dataType: boolean
 		lineageTag: 70109e8a-d526-4225-8600-5b2f474c0476
+		summarizeBy: none
 		sourceColumn: EsActivo
 
+		annotation SummarizationSetBy = Automatic
+
 	column CreatedAt
-		dataType: string
+		dataType: dateTime
+		formatString: General Date
 		lineageTag: 16b06584-3f86-4010-8afc-5ca3cd42156c
+		summarizeBy: none
 		sourceColumn: CreatedAt
+
+		annotation SummarizationSetBy = Automatic
 
 	partition DimFacultad = m
 		mode: import

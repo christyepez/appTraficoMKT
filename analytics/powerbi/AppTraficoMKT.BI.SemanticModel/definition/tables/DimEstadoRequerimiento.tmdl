@@ -1,0 +1,31 @@
+table DimEstadoRequerimiento
+	lineageTag: c98cb713-80fd-4f03-b46a-2d41d0d8a7c1
+
+	column EstadoId
+		dataType: string
+		lineageTag: 3e8f2e71-bcdb-4ce3-a589-7f6c0c35e1b1
+		sourceColumn: EstadoId
+
+	column Codigo
+		dataType: string
+		lineageTag: edb917d3-d8c1-43f2-b2ce-bf3cf13251c1
+		sourceColumn: Codigo
+
+	column Estado
+		dataType: string
+		lineageTag: 44b746c1-81c2-47ca-8e40-7cb632df04a1
+		sourceColumn: Estado
+
+	column EsActivo
+		dataType: boolean
+		lineageTag: 9b61c7db-384b-4826-bfa0-d05192c711dd
+		sourceColumn: EsActivo
+
+	partition DimEstadoRequerimiento = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(ServerName, DatabaseName, [CreateNavigationProperties=false]),
+				    View = Source{[Schema="bi", Item="DimEstadoRequerimiento"]}[Data]
+				in
+				    View

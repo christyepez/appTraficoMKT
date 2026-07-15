@@ -4,27 +4,43 @@ table DimSede
 	column SedeId
 		dataType: string
 		lineageTag: 3975e349-a7f5-42d5-8bec-9c0a5febd351
+		summarizeBy: none
 		sourceColumn: SedeId
+
+		annotation SummarizationSetBy = Automatic
 
 	column Codigo
 		dataType: string
 		lineageTag: 79f14d30-2393-4de9-b1b7-3ea00cb87b39
+		summarizeBy: none
 		sourceColumn: Codigo
+
+		annotation SummarizationSetBy = Automatic
 
 	column Sede
 		dataType: string
 		lineageTag: 5f5ec376-ec2c-4bbf-adbc-c4d34a399563
+		summarizeBy: none
 		sourceColumn: Sede
+
+		annotation SummarizationSetBy = Automatic
 
 	column EsActivo
 		dataType: boolean
 		lineageTag: e2d37aa3-d4ec-4e83-9e68-afc2a9a02fba
+		summarizeBy: none
 		sourceColumn: EsActivo
 
+		annotation SummarizationSetBy = Automatic
+
 	column CreatedAt
-		dataType: string
+		dataType: dateTime
+		formatString: General Date
 		lineageTag: b51092d0-451b-4d66-8e27-d3853aa082bf
+		summarizeBy: none
 		sourceColumn: CreatedAt
+
+		annotation SummarizationSetBy = Automatic
 
 	partition DimSede = m
 		mode: import

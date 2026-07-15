@@ -2,8 +2,16 @@ model Model
 	culture: es-EC
 	defaultPowerBIDataSourceVersion: powerBI_V3
 	discourageImplicitMeasures
+	sourceQueryCulture: en-US
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
 
 annotation PBI_ProTooling = ["DevMode"]
+
+annotation PBI_QueryOrder = ["DimCanalDifusion","DimCanalOrigen","DimCarrera","DimComplejidad","DimEstado","DimFacultad","DimFecha","DimKpi","DimPublicoObjetivo","DimSede","DimTipoProducto","DimTipoRequerimiento","DimUsuario","FactAprobacion","FactHistorialEstado","FactKpiResultado","FactProducto","FactRequerimiento","FactSatisfaccion","FactUsoUsuario","_Medidas","ServerName","DatabaseName","EnvironmentName","DimEstadoRequerimiento","DimEstadoProducto"]
+
+annotation __PBI_TimeIntelligenceEnabled = 1
 
 ref table DimCanalDifusion
 ref table DimCanalOrigen
@@ -26,3 +34,5 @@ ref table FactRequerimiento
 ref table FactSatisfaccion
 ref table FactUsoUsuario
 ref table _Medidas
+ref table DimEstadoRequerimiento
+ref table DimEstadoProducto

@@ -7,14 +7,24 @@ table DimComplejidad
 		sourceColumn: Complejidad
 
 	column HorasEstimadas
-		dataType: decimal
+		dataType: double
 		lineageTag: 76695489-c41a-4cf6-8e6d-43cb80f34d26
+		summarizeBy: sum
 		sourceColumn: HorasEstimadas
 
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
 	column PesoOperativo
-		dataType: decimal
+		dataType: double
 		lineageTag: 2a72da1c-c98d-4be1-9ce4-2d76aeedb001
+		summarizeBy: sum
 		sourceColumn: PesoOperativo
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
 	column EsDemo
 		dataType: boolean
