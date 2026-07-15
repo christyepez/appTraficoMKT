@@ -10,7 +10,7 @@ table _Medidas
 		formatString: 0
 		lineageTag: eb304825-fb9c-4199-8c5f-aa2c6382dfa0
 
-	measure 'Productos aprobados' = CALCULATE ( [Total productos], FactProducto[EsAprobado] = TRUE () )
+	measure 'Productos aprobados' = COALESCE ( SUM ( FactProducto[EsAprobado] ), 0 )
 		formatString: 0
 		lineageTag: 1d3f3442-88f1-4dbf-b350-d8de2e71beea
 
@@ -46,27 +46,27 @@ table _Medidas
 		formatString: 0
 		lineageTag: 22222222-2222-4222-8222-222222222201
 
-	measure 'Requerimientos abiertos' = CALCULATE ( [Total requerimientos], FactRequerimiento[EsFinalizado] = FALSE () )
+	measure 'Requerimientos abiertos' = [Total requerimientos] - COALESCE ( SUM ( FactRequerimiento[EsFinalizado] ), 0 )
 		formatString: 0
 		lineageTag: 22222222-2222-4222-8222-222222222202
 
-	measure 'Requerimientos completados' = CALCULATE ( [Total requerimientos], FactRequerimiento[EsCompletado] = TRUE () )
+	measure 'Requerimientos completados' = COALESCE ( SUM ( FactRequerimiento[EsCompletado] ), 0 )
 		formatString: 0
 		lineageTag: 22222222-2222-4222-8222-222222222203
 
-	measure 'Requerimientos rechazados' = CALCULATE ( [Total requerimientos], FactRequerimiento[EsRechazado] = TRUE () )
+	measure 'Requerimientos rechazados' = COALESCE ( SUM ( FactRequerimiento[EsRechazado] ), 0 )
 		formatString: 0
 		lineageTag: 22222222-2222-4222-8222-222222222204
 
-	measure 'Productos pendientes aprobacion' = CALCULATE ( [Total productos], FactProducto[EsPendienteAprobacion] = TRUE () )
+	measure 'Productos pendientes aprobacion' = COALESCE ( SUM ( FactProducto[EsPendienteAprobacion] ), 0 )
 		formatString: 0
 		lineageTag: 22222222-2222-4222-8222-222222222205
 
-	measure 'Productos en correccion' = CALCULATE ( [Total productos], FactProducto[EsEnCorreccion] = TRUE () )
+	measure 'Productos en correccion' = COALESCE ( SUM ( FactProducto[EsEnCorreccion] ), 0 )
 		formatString: 0
 		lineageTag: 22222222-2222-4222-8222-222222222206
 
-	measure 'Productos en carga tecnica' = CALCULATE ( [Total productos], FactProducto[EsCargaTecnica] = TRUE () )
+	measure 'Productos en carga tecnica' = COALESCE ( SUM ( FactProducto[EsCargaTecnica] ), 0 )
 		formatString: 0
 		lineageTag: 22222222-2222-4222-8222-222222222207
 
