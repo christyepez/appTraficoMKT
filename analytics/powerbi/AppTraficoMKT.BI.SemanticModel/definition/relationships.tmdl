@@ -57,3 +57,11 @@ relationship rel_FactKpiResultado_DimKpi
 relationship rel_FactUsoUsuario_DimUsuario
 	fromColumn: FactUsoUsuario.UsuarioId
 	toColumn: DimUsuario.UsuarioId
+
+relationship rel_DimUsuario_DimFacultad
+	fromColumn: DimUsuario.FacultyId
+	toColumn: DimFacultad.FacultadId
+
+relationship rel_DimUsuario_DimSede
+	fromColumn: DimUsuario.CampusId
+	toColumn: DimSede.SedeId

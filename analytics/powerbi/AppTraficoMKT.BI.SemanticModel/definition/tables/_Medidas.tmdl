@@ -122,6 +122,22 @@ table _Medidas
 		formatString: 0.0
 		lineageTag: 22222222-2222-4222-8222-222222222219
 
+	measure 'Usuarios sin ingreso ultimos 7 dias' = [Usuarios activos] - [Usuarios ingreso ultimos 7 dias]
+		formatString: 0
+		lineageTag: 22222222-2222-4222-8222-222222222221
+
+	measure 'Notificaciones recibidas total' = SUM ( FactUsoUsuario[NotificacionesRecibidas] )
+		formatString: 0
+		lineageTag: 22222222-2222-4222-8222-222222222222
+
+	measure 'Notificaciones leidas total' = SUM ( FactUsoUsuario[NotificacionesLeidas] )
+		formatString: 0
+		lineageTag: 22222222-2222-4222-8222-222222222223
+
+	measure 'Usuarios con notificaciones pendientes' = CALCULATE ( COUNTROWS ( FactUsoUsuario ), FactUsoUsuario[NotificacionesRecibidas] > FactUsoUsuario[NotificacionesLeidas] )
+		formatString: 0
+		lineageTag: 22222222-2222-4222-8222-222222222224
+
 	column Key
 		dataType: string
 		isHidden
