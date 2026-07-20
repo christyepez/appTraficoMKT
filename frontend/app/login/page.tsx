@@ -19,6 +19,9 @@ export default function LoginPage() {
   const [careers, setCareers] = useState<any[]>([]);
   const [publicFacultyId, setPublicFacultyId] = useState("");
   const [catalogDefaults, setCatalogDefaults] = useState<{ faculty?: any; campus?: any; format?: any; career?: any }>({});
+  const showPublicPopup = isPublicFeatureActive(brand.showPublicRequirementForm, brand.publicRequirementFormActiveFrom, brand.publicRequirementFormActiveUntil);
+  const showPublicFullPage = isPublicFeatureActive(brand.showPublicRequirementFullPage, brand.publicRequirementFullPageActiveFrom, brand.publicRequirementFullPageActiveUntil);
+  const showChatbot = isPublicFeatureActive(brand.showLoginChatbot, brand.loginChatbotActiveFrom, brand.loginChatbotActiveUntil);
 
   useEffect(() => {
     api<BrandSettings>("/api/identity/brand-settings").then((data) => setBrand({ ...defaultBrandSettings, ...data })).catch(() => undefined);
@@ -136,7 +139,9 @@ export default function LoginPage() {
           campus: catalogDefaults.campus?.name ?? "No definida",
           place: form.get("place") || "Por definir",
           startDate,
+          startTime: form.get("startTime") || null,
           endDate: form.get("endDate") || startDate,
+          endTime: form.get("endTime") || null,
           eventObjective: form.get("eventObjective"),
           eventFormatId: catalogDefaults.format?.id,
           eventFormat: catalogDefaults.format?.name ?? "Presencial",
@@ -173,7 +178,9 @@ export default function LoginPage() {
         campus: campus?.name ?? "",
         place: form.get("place"),
         startDate: form.get("startDate"),
+        startTime: form.get("startTime") || null,
         endDate: form.get("endDate"),
+        endTime: form.get("endTime") || null,
         eventObjective: form.get("eventObjective"),
         eventFormatId,
         eventFormat: eventFormat?.name ?? "",
@@ -213,14 +220,14 @@ export default function LoginPage() {
         <Link className="button secondary full" href="/forgot-password" title="Recuperar contraseña con clave temporal">
           <KeyRound size={16} /> Recuperar contraseña
         </Link>
-        {(brand.showPublicRequirementForm || brand.showPublicRequirementFullPage) && (
+        {(showPublicPopup || showPublicFullPage) && (
           <div className="login-actions-grid">
-            {brand.showPublicRequirementForm && (
+            {showPublicPopup && (
               <button className="button secondary full" type="button" title="Abrir formulario público de requerimientos" onClick={() => setIsPublicFormOpen(true)}>
                 <ClipboardList size={16} /> Crear requerimiento sin login
               </button>
             )}
-            {brand.showPublicRequirementFullPage && (
+            {showPublicFullPage && (
               <Link className="button secondary full" href="/public-requirement" title="Abrir formulario público en página completa">
                 <ClipboardList size={16} /> Abrir formulario completo
               </Link>
@@ -247,7 +254,9 @@ export default function LoginPage() {
               <label className="field"><span>Sede</span><select name="campusId" required><option value="">Seleccione...</option>{campuses.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
               <label className="field"><span>Lugar</span><input name="place" required /></label>
               <label className="field"><span>Fecha inicio</span><input name="startDate" type="date" required /></label>
+              <label className="field"><span>Hora inicio</span><input name="startTime" type="time" /></label>
               <label className="field"><span>Fecha fin</span><input name="endDate" type="date" required /></label>
+              <label className="field"><span>Hora fin</span><input name="endTime" type="time" /></label>
               <label className="field"><span>Formato</span><select name="eventFormatId" required><option value="">Seleccione...</option>{formats.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
               <label className="field field-wide"><span>Objetivo del evento</span><textarea name="eventObjective" required /></label>
               <div className="form-actions">
@@ -258,12 +267,12 @@ export default function LoginPage() {
           </section>
         </div>
       )}
-      {brand.showLoginChatbot && (
+      {showChatbot && (
         <button className="chatbot-launcher" type="button" title="Asistente Puma para crear requerimientos" onClick={() => setIsChatOpen(true)}>
           {brand.chatbotIcon ? <img src={brand.chatbotIcon} alt="Puma" /> : <PawPrint size={24} />}
         </button>
       )}
-      {brand.showLoginChatbot && isChatOpen && (
+      {showChatbot && isChatOpen && (
         <section className="chatbot-panel">
           <div className="card-head">
             <div>
@@ -277,7 +286,9 @@ export default function LoginPage() {
             <label className="field"><span>Correo del solicitante</span><input name="requestedBy" type="email" required placeholder="correo@uti.edu.ec" /></label>
             <label className="field"><span>Lugar</span><input name="place" /></label>
             <label className="field"><span>Fecha inicio</span><input name="startDate" type="date" /></label>
+            <label className="field"><span>Hora inicio</span><input name="startTime" type="time" /></label>
             <label className="field"><span>Fecha fin</span><input name="endDate" type="date" /></label>
+            <label className="field"><span>Hora fin</span><input name="endTime" type="time" /></label>
             <label className="field field-wide"><span>Objetivo</span><textarea name="eventObjective" required /></label>
             <button className="button"><Send size={16} /> Crear requerimiento</button>
           </form>
@@ -307,4 +318,12 @@ function safeLoginMessage(value: string) {
   }
   if (value.length > 180) return `${value.slice(0, 177)}...`;
   return value;
+}
+
+function isPublicFeatureActive(enabled: boolean, from?: string | null, until?: string | null) {
+  if (!enabled) return false;
+  const now = Date.now();
+  const fromTime = from ? new Date(from).getTime() : Number.NEGATIVE_INFINITY;
+  const untilTime = until ? new Date(until).getTime() : Number.POSITIVE_INFINITY;
+  return now >= fromTime && now <= untilTime;
 }

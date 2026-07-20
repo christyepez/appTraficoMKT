@@ -67,6 +67,12 @@ export type BrandSettings = {
   showPublicRequirementForm: boolean;
   showPublicRequirementFullPage: boolean;
   showLoginChatbot: boolean;
+  publicRequirementFormActiveFrom?: string | null;
+  publicRequirementFormActiveUntil?: string | null;
+  publicRequirementFullPageActiveFrom?: string | null;
+  publicRequirementFullPageActiveUntil?: string | null;
+  loginChatbotActiveFrom?: string | null;
+  loginChatbotActiveUntil?: string | null;
   showDemoCredentials: boolean;
   showOffice365Login: boolean;
   showProductIdField: boolean;
@@ -105,7 +111,7 @@ export const defaultBrandSettings: BrandSettings = {
   menuMode: "horizontal",
   menuCollapsed: false,
   mobileMenuCollapsed: true,
-  menuOrder: "dashboard,activities,evidence,approvals,metrics,audit,admin,users,storage,initial-import,branding,notifications,my-notifications,notification-log",
+  menuOrder: "dashboard,activities,agenda,evidence,approvals,metrics,audit,admin,users,storage,initial-import,branding,notifications,my-notifications,notification-log",
   headerTextAlign: "center",
   headerTextPosition: "middle",
   showHeaderTitle: true,
@@ -126,6 +132,12 @@ export const defaultBrandSettings: BrandSettings = {
   showPublicRequirementForm: true,
   showPublicRequirementFullPage: true,
   showLoginChatbot: true,
+  publicRequirementFormActiveFrom: null,
+  publicRequirementFormActiveUntil: null,
+  publicRequirementFullPageActiveFrom: null,
+  publicRequirementFullPageActiveUntil: null,
+  loginChatbotActiveFrom: null,
+  loginChatbotActiveUntil: null,
   showDemoCredentials: true,
   showOffice365Login: true,
   showProductIdField: false,
@@ -244,6 +256,7 @@ export const translations: Record<string, Record<string, string>> = {
   en: {
     "Requerimientos": "Requirements",
     "Productos": "Products",
+    "Agenda técnica": "Technical agenda",
     "Adjuntos": "Attachments",
     "Aprobaciones": "Approvals",
     "Métricas": "Metrics",
@@ -286,11 +299,12 @@ export function t(text: string) {
 }
 
 function defaultScreensForRoles(roles: string[]) {
-  if (roles.includes("Administrador")) return ["dashboard", "activities", "evidence", "approvals", "metrics", "audit", "admin", "users", "storage", "initial-import", "branding", "notifications", "my-notifications", "notification-log"];
-  if (roles.includes("Coordinador")) return ["dashboard", "activities", "evidence", "approvals", "metrics", "audit", "my-notifications"];
+  if (roles.includes("Administrador")) return ["dashboard", "activities", "agenda", "evidence", "approvals", "metrics", "audit", "admin", "users", "storage", "initial-import", "branding", "notifications", "my-notifications", "notification-log"];
+  if (roles.includes("Coordinador")) return ["dashboard", "activities", "agenda", "evidence", "approvals", "metrics", "audit", "my-notifications"];
   const screens = new Set(["dashboard"]);
   if (roles.includes("Tecnico")) {
     screens.add("activities");
+    screens.add("agenda");
     screens.add("evidence");
     screens.add("my-notifications");
   }
@@ -347,7 +361,9 @@ export type Requirement = {
   campus: string;
   place: string;
   startDate: string;
+  startTime?: string | null;
   endDate: string;
+  endTime?: string | null;
   eventObjective: string;
   eventFormatId: string;
   eventFormat: string;

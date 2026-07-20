@@ -416,6 +416,12 @@ public sealed record UpsertBrandSettingsRequest(
     bool ShowPublicRequirementForm,
     bool ShowPublicRequirementFullPage,
     bool ShowLoginChatbot,
+    DateTimeOffset? PublicRequirementFormActiveFrom,
+    DateTimeOffset? PublicRequirementFormActiveUntil,
+    DateTimeOffset? PublicRequirementFullPageActiveFrom,
+    DateTimeOffset? PublicRequirementFullPageActiveUntil,
+    DateTimeOffset? LoginChatbotActiveFrom,
+    DateTimeOffset? LoginChatbotActiveUntil,
     bool ShowDemoCredentials,
     bool ShowOffice365Login,
     bool ShowProductIdField,
@@ -554,6 +560,12 @@ public sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> option
             entity.Property(x => x.ShowPublicRequirementForm).HasDefaultValue(true);
             entity.Property(x => x.ShowPublicRequirementFullPage).HasDefaultValue(true);
             entity.Property(x => x.ShowLoginChatbot).HasDefaultValue(true);
+            entity.Property(x => x.PublicRequirementFormActiveFrom);
+            entity.Property(x => x.PublicRequirementFormActiveUntil);
+            entity.Property(x => x.PublicRequirementFullPageActiveFrom);
+            entity.Property(x => x.PublicRequirementFullPageActiveUntil);
+            entity.Property(x => x.LoginChatbotActiveFrom);
+            entity.Property(x => x.LoginChatbotActiveUntil);
             entity.Property(x => x.ShowDemoCredentials).HasDefaultValue(true);
             entity.Property(x => x.ShowOffice365Login).HasDefaultValue(true);
             entity.Property(x => x.ShowProductIdField).HasDefaultValue(false);
@@ -617,6 +629,12 @@ public sealed class BrandSettings
     public bool ShowPublicRequirementForm { get; set; } = true;
     public bool ShowPublicRequirementFullPage { get; set; } = true;
     public bool ShowLoginChatbot { get; set; } = true;
+    public DateTimeOffset? PublicRequirementFormActiveFrom { get; set; }
+    public DateTimeOffset? PublicRequirementFormActiveUntil { get; set; }
+    public DateTimeOffset? PublicRequirementFullPageActiveFrom { get; set; }
+    public DateTimeOffset? PublicRequirementFullPageActiveUntil { get; set; }
+    public DateTimeOffset? LoginChatbotActiveFrom { get; set; }
+    public DateTimeOffset? LoginChatbotActiveUntil { get; set; }
     public bool ShowDemoCredentials { get; set; } = true;
     public bool ShowOffice365Login { get; set; } = true;
     public bool ShowProductIdField { get; set; }
@@ -690,6 +708,12 @@ public sealed class BrandSettings
         ShowPublicRequirementForm = request.ShowPublicRequirementForm;
         ShowPublicRequirementFullPage = request.ShowPublicRequirementFullPage;
         ShowLoginChatbot = request.ShowLoginChatbot;
+        PublicRequirementFormActiveFrom = request.PublicRequirementFormActiveFrom;
+        PublicRequirementFormActiveUntil = request.PublicRequirementFormActiveUntil;
+        PublicRequirementFullPageActiveFrom = request.PublicRequirementFullPageActiveFrom;
+        PublicRequirementFullPageActiveUntil = request.PublicRequirementFullPageActiveUntil;
+        LoginChatbotActiveFrom = request.LoginChatbotActiveFrom;
+        LoginChatbotActiveUntil = request.LoginChatbotActiveUntil;
         ShowDemoCredentials = request.ShowDemoCredentials;
         ShowOffice365Login = request.ShowOffice365Login;
         ShowProductIdField = request.ShowProductIdField;
@@ -704,17 +728,17 @@ public sealed class BrandSettings
 
 public static class ScreenAccess
 {
-    public static readonly string[] All = ["dashboard", "activities", "evidence", "approvals", "metrics", "audit", "admin", "users", "storage", "initial-import", "branding", "notifications", "my-notifications", "notification-log"];
+    public static readonly string[] All = ["dashboard", "activities", "agenda", "evidence", "approvals", "metrics", "audit", "admin", "users", "storage", "initial-import", "branding", "notifications", "my-notifications", "notification-log"];
 
     public static string[] DefaultForRoles(IEnumerable<string> roles)
     {
         var roleSet = roles.Select(x => x.Trim()).ToHashSet(StringComparer.OrdinalIgnoreCase);
         if (roleSet.Contains("Administrador")) return All;
         var screens = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "dashboard" };
-        if (roleSet.Contains("Tecnico")) screens.UnionWith(["activities", "evidence", "my-notifications"]);
+        if (roleSet.Contains("Tecnico")) screens.UnionWith(["activities", "agenda", "evidence", "my-notifications"]);
         if (roleSet.Contains("Aprobador")) screens.UnionWith(["approvals", "my-notifications"]);
-        if (roleSet.Contains("Coordinador")) screens.UnionWith(["activities", "evidence", "approvals", "metrics", "audit", "my-notifications"]);
-        if (roleSet.Contains("Auditor")) screens.UnionWith(["dashboard", "activities", "evidence", "approvals", "metrics", "audit"]);
+        if (roleSet.Contains("Coordinador")) screens.UnionWith(["activities", "agenda", "evidence", "approvals", "metrics", "audit", "my-notifications"]);
+        if (roleSet.Contains("Auditor")) screens.UnionWith(["dashboard", "activities", "agenda", "evidence", "approvals", "metrics", "audit"]);
         return screens.ToArray();
     }
 }
@@ -887,6 +911,10 @@ public static class IdentitySchema
             BEGIN
                 ALTER TABLE [Users] ADD [MenuCollapsed] bit NOT NULL DEFAULT(0)
             END
+            UPDATE [Users]
+            SET [ScreenPermissions] = REPLACE([ScreenPermissions], 'dashboard,activities,evidence', 'dashboard,activities,agenda,evidence')
+            WHERE [ScreenPermissions] LIKE '%activities%'
+              AND [ScreenPermissions] NOT LIKE '%agenda%'
             EXEC('UPDATE [Users] SET [AllowMicrosoftLogin] = 1 WHERE [AuthProvider] = ''Microsoft''')
             IF OBJECT_ID('BrandSettings', 'U') IS NULL
             BEGIN
@@ -1041,6 +1069,30 @@ public static class IdentitySchema
             BEGIN
                 ALTER TABLE [BrandSettings] ADD [ShowLoginChatbot] bit NOT NULL DEFAULT(1)
             END
+            IF COL_LENGTH('BrandSettings', 'PublicRequirementFormActiveFrom') IS NULL
+            BEGIN
+                ALTER TABLE [BrandSettings] ADD [PublicRequirementFormActiveFrom] datetimeoffset NULL
+            END
+            IF COL_LENGTH('BrandSettings', 'PublicRequirementFormActiveUntil') IS NULL
+            BEGIN
+                ALTER TABLE [BrandSettings] ADD [PublicRequirementFormActiveUntil] datetimeoffset NULL
+            END
+            IF COL_LENGTH('BrandSettings', 'PublicRequirementFullPageActiveFrom') IS NULL
+            BEGIN
+                ALTER TABLE [BrandSettings] ADD [PublicRequirementFullPageActiveFrom] datetimeoffset NULL
+            END
+            IF COL_LENGTH('BrandSettings', 'PublicRequirementFullPageActiveUntil') IS NULL
+            BEGIN
+                ALTER TABLE [BrandSettings] ADD [PublicRequirementFullPageActiveUntil] datetimeoffset NULL
+            END
+            IF COL_LENGTH('BrandSettings', 'LoginChatbotActiveFrom') IS NULL
+            BEGIN
+                ALTER TABLE [BrandSettings] ADD [LoginChatbotActiveFrom] datetimeoffset NULL
+            END
+            IF COL_LENGTH('BrandSettings', 'LoginChatbotActiveUntil') IS NULL
+            BEGIN
+                ALTER TABLE [BrandSettings] ADD [LoginChatbotActiveUntil] datetimeoffset NULL
+            END
             IF COL_LENGTH('BrandSettings', 'ShowDemoCredentials') IS NULL
             BEGIN
                 ALTER TABLE [BrandSettings] ADD [ShowDemoCredentials] bit NOT NULL DEFAULT(1)
@@ -1071,8 +1123,11 @@ public static class IdentitySchema
             END
             IF COL_LENGTH('BrandSettings', 'MenuOrder') IS NULL
             BEGIN
-                ALTER TABLE [BrandSettings] ADD [MenuOrder] nvarchar(1000) NOT NULL DEFAULT('dashboard,activities,evidence,approvals,metrics,audit,admin,users,storage,initial-import,branding,notifications,my-notifications,notification-log')
+                ALTER TABLE [BrandSettings] ADD [MenuOrder] nvarchar(1000) NOT NULL DEFAULT('dashboard,activities,agenda,evidence,approvals,metrics,audit,admin,users,storage,initial-import,branding,notifications,my-notifications,notification-log')
             END
+            UPDATE [BrandSettings]
+            SET [MenuOrder] = REPLACE([MenuOrder], 'dashboard,activities,evidence', 'dashboard,activities,agenda,evidence')
+            WHERE [MenuOrder] NOT LIKE '%agenda%'
             IF COL_LENGTH('BrandSettings', 'HeaderColor') IS NULL
             BEGIN
                 ALTER TABLE [BrandSettings] ADD [HeaderColor] nvarchar(20) NOT NULL DEFAULT('#3c235f')

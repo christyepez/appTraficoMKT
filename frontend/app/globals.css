@@ -1056,6 +1056,28 @@ mark {
   gap: 10px;
 }
 
+.agenda-summary {
+  display: grid;
+  grid-template-columns: minmax(260px, 1.4fr) repeat(3, minmax(130px, 1fr));
+  gap: 10px;
+  align-items: stretch;
+}
+
+.agenda-summary .field {
+  margin: 0;
+}
+
+.input-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.input-with-icon input {
+  flex: 1;
+}
+
 .compact-detail-grid {
   grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
   gap: 6px 10px;
@@ -1615,6 +1637,7 @@ mark {
 
   .detail-grid,
   .compact-detail-grid,
+  .agenda-summary,
   .brand-settings-grid {
     grid-template-columns: 1fr;
   }

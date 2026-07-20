@@ -126,7 +126,9 @@ app.MapPost("/requirements", async (CreateRequirementRequest request, Requiremen
         request.Campus,
         request.Place,
         request.StartDate,
+        request.StartTime,
         request.EndDate,
+        request.EndTime,
         request.EventObjective,
         request.EventFormatId,
         request.EventFormat,
@@ -166,7 +168,9 @@ app.MapPut("/requirements/{id:guid}", async (Guid id, CreateRequirementRequest r
         request.Campus,
         request.Place,
         request.StartDate,
+        request.StartTime,
         request.EndDate,
+        request.EndTime,
         request.EventObjective,
         request.EventFormatId,
         request.EventFormat,
@@ -257,7 +261,9 @@ public sealed record CreateRequirementRequest(
     string Campus,
     string Place,
     DateOnly StartDate,
+    TimeOnly? StartTime,
     DateOnly EndDate,
+    TimeOnly? EndTime,
     string EventObjective,
     Guid EventFormatId,
     string EventFormat,
@@ -312,6 +318,8 @@ public sealed class RequirementsDbContext(DbContextOptions<RequirementsDbContext
             entity.Property(x => x.Place).HasMaxLength(180).IsRequired();
             entity.Property(x => x.EventObjective).HasMaxLength(4000).IsRequired();
             entity.Property(x => x.EventFormat).HasMaxLength(80).IsRequired();
+            entity.Property(x => x.StartTime).HasColumnType("time");
+            entity.Property(x => x.EndTime).HasColumnType("time");
             entity.Property(x => x.Status).HasConversion<string>().HasMaxLength(32);
             entity.Property(x => x.DeletedBy).HasMaxLength(160);
             entity.HasIndex(x => x.Code).IsUnique();
@@ -619,7 +627,9 @@ public static class RequirementsSchema
             ["Campus"] = "nvarchar(120) NOT NULL DEFAULT('No definida')",
             ["Place"] = "nvarchar(180) NOT NULL DEFAULT('No definido')",
             ["StartDate"] = "date NOT NULL DEFAULT(CONVERT(date, GETUTCDATE()))",
+            ["StartTime"] = "time NULL",
             ["EndDate"] = "date NOT NULL DEFAULT(CONVERT(date, GETUTCDATE()))",
+            ["EndTime"] = "time NULL",
             ["EventObjective"] = "nvarchar(4000) NOT NULL DEFAULT('No definido')",
             ["EventFormatId"] = "uniqueidentifier NULL",
             ["EventFormat"] = "nvarchar(80) NOT NULL DEFAULT('Presencial')",

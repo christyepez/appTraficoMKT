@@ -1,6 +1,6 @@
 "use client";
 
-import { api, showToast } from "../lib";
+import { api, defaultBrandSettings, showToast, type BrandSettings } from "../lib";
 import { ClipboardList, Save } from "lucide-react";
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
@@ -14,14 +14,18 @@ export default function PublicRequirementPage() {
   const [formats, setFormats] = useState<NamedCatalog[]>([]);
   const [facultyId, setFacultyId] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [isActive, setIsActive] = useState(true);
 
   async function load() {
-    const [facultyData, careerData, campusData, formatData] = await Promise.all([
+    const [brand, facultyData, careerData, campusData, formatData] = await Promise.all([
+      api<BrandSettings>("/api/identity/brand-settings").catch(() => defaultBrandSettings),
       api<NamedCatalog[]>("/api/admin/faculties").catch(() => []),
       api<NamedCatalog[]>("/api/admin/careers").catch(() => []),
       api<NamedCatalog[]>("/api/admin/campuses").catch(() => []),
       api<NamedCatalog[]>("/api/admin/catalogs/by-type/FormatoEvento").catch(() => [])
     ]);
+    const currentBrand = { ...defaultBrandSettings, ...brand };
+    setIsActive(isPublicFeatureActive(currentBrand.showPublicRequirementFullPage, currentBrand.publicRequirementFullPageActiveFrom, currentBrand.publicRequirementFullPageActiveUntil));
     setFaculties(facultyData.filter((item) => item.isActive));
     setCareers(careerData.filter((item) => item.isActive));
     setCampuses(campusData.filter((item) => item.isActive));
@@ -57,7 +61,9 @@ export default function PublicRequirementPage() {
           campus: campus?.name ?? "",
           place: form.get("place"),
           startDate: form.get("startDate"),
+          startTime: form.get("startTime") || null,
           endDate: form.get("endDate"),
+          endTime: form.get("endTime") || null,
           eventObjective: form.get("eventObjective"),
           eventFormatId,
           eventFormat: eventFormat?.name ?? "",
@@ -79,6 +85,12 @@ export default function PublicRequirementPage() {
           <strong>Crear requerimiento</strong>
           <span>Formulario público para usuarios funcionales</span>
         </div>
+        {!isActive && (
+          <div className="empty">
+            El formulario público no está activo en este momento.
+          </div>
+        )}
+        {isActive && (
         <form className="form" onSubmit={save}>
           <label className="field"><span>Actividad o evento</span><input name="activityOrEvent" required /></label>
           <label className="field"><span>Correo del solicitante</span><input name="requestedBy" type="email" required placeholder="correo@uti.edu.ec" /></label>
@@ -99,13 +111,24 @@ export default function PublicRequirementPage() {
           <label className="field"><span>Sede</span><select name="campusId" required><option value="">Seleccione...</option>{campuses.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
           <label className="field"><span>Lugar</span><input name="place" required /></label>
           <label className="field"><span>Fecha inicio</span><input name="startDate" type="date" required /></label>
+          <label className="field"><span>Hora inicio</span><input name="startTime" type="time" /></label>
           <label className="field"><span>Fecha fin</span><input name="endDate" type="date" required /></label>
+          <label className="field"><span>Hora fin</span><input name="endTime" type="time" /></label>
           <label className="field"><span>Formato</span><select name="eventFormatId" required><option value="">Seleccione...</option>{formats.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
           <label className="field field-wide"><span>Objetivo del evento</span><textarea name="eventObjective" required /></label>
           <button className="button" disabled={isSaving}><Save size={16} /> {isSaving ? "Enviando" : "Enviar requerimiento"}</button>
         </form>
+        )}
         <Link className="button secondary full" href="/login"><ClipboardList size={16} /> Volver al login</Link>
       </section>
     </main>
   );
+}
+
+function isPublicFeatureActive(enabled: boolean, from?: string | null, until?: string | null) {
+  if (!enabled) return false;
+  const now = Date.now();
+  const fromTime = from ? new Date(from).getTime() : Number.NEGATIVE_INFINITY;
+  const untilTime = until ? new Date(until).getTime() : Number.POSITIVE_INFINITY;
+  return now >= fromTime && now <= untilTime;
 }

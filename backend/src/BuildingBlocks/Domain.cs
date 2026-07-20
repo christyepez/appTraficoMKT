@@ -111,7 +111,9 @@ public sealed class Requirement : Entity
         string campus,
         string place,
         DateOnly startDate,
+        TimeOnly? startTime,
         DateOnly endDate,
+        TimeOnly? endTime,
         string eventObjective,
         Guid eventFormatId,
         string eventFormat,
@@ -134,7 +136,9 @@ public sealed class Requirement : Entity
         Campus = campus.Trim();
         Place = place.Trim();
         StartDate = startDate;
+        StartTime = startTime;
         EndDate = endDate;
+        EndTime = endTime;
         EventObjective = eventObjective.Trim();
         EventFormatId = eventFormatId;
         EventFormat = eventFormat.Trim();
@@ -153,7 +157,9 @@ public sealed class Requirement : Entity
     public string Campus { get; private set; }
     public string Place { get; private set; }
     public DateOnly StartDate { get; private set; }
+    public TimeOnly? StartTime { get; private set; }
     public DateOnly EndDate { get; private set; }
+    public TimeOnly? EndTime { get; private set; }
     public string EventObjective { get; private set; }
     public Guid EventFormatId { get; private set; }
     public string EventFormat { get; private set; }
@@ -171,7 +177,9 @@ public sealed class Requirement : Entity
         string campus,
         string place,
         DateOnly startDate,
+        TimeOnly? startTime,
         DateOnly endDate,
+        TimeOnly? endTime,
         string eventObjective,
         Guid eventFormatId,
         string eventFormat,
@@ -193,7 +201,9 @@ public sealed class Requirement : Entity
         Campus = campus.Trim();
         Place = place.Trim();
         StartDate = startDate;
+        StartTime = startTime;
         EndDate = endDate;
+        EndTime = endTime;
         EventObjective = eventObjective.Trim();
         EventFormatId = eventFormatId;
         EventFormat = eventFormat.Trim();

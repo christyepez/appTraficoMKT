@@ -86,7 +86,9 @@ export default function DashboardPage() {
           campus: campus?.name ?? "",
           place: form.get("place"),
           startDate: form.get("startDate"),
+          startTime: form.get("startTime") || null,
           endDate: form.get("endDate"),
+          endTime: form.get("endTime") || null,
           eventObjective: form.get("eventObjective"),
           eventFormatId,
           eventFormat: eventFormat?.name ?? "",
@@ -154,7 +156,9 @@ export default function DashboardPage() {
             </label>
             <label className="field"><span>Lugar</span><input name="place" required defaultValue={editing?.place ?? ""} /></label>
             <label className="field"><span>Fecha de inicio</span><input name="startDate" type="date" required defaultValue={editing?.startDate ?? ""} /></label>
+            <label className="field"><span>Hora de inicio</span><input name="startTime" type="time" defaultValue={editing?.startTime ?? ""} /></label>
             <label className="field"><span>Fecha de fin</span><input name="endDate" type="date" required defaultValue={editing?.endDate ?? ""} /></label>
+            <label className="field"><span>Hora de fin</span><input name="endTime" type="time" defaultValue={editing?.endTime ?? ""} /></label>
             <label className="field field-wide"><span>Objetivo del evento</span><textarea name="eventObjective" required defaultValue={editing?.eventObjective ?? ""} /></label>
             <label className="field">
               <span>Formato del evento</span>

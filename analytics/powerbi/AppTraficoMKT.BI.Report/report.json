@@ -12,21 +12,30 @@
       "name": "0440798c28c7f40d052c",
       "visualContainers": [
         {
-          "config": "{\"name\":\"68019828c3852e1ba6d5\",\"layouts\":[{\"id\":0,\"position\":{\"x\":148.78327526132404,\"y\":537.3324041811846,\"z\":4,\"width\":94.19372822299653,\"height\":43.885714285714286,\"tabOrder\":3}}],\"singleVisual\":{\"visualType\":\"shape\",\"drillFilterOtherVisuals\":true,\"objects\":{\"shape\":[{\"properties\":{\"tileShape\":{\"expr\":{\"Literal\":{\"Value\":\"'arrow'\"}}}}}],\"rotation\":[{\"properties\":{\"shapeAngle\":{\"expr\":{\"Literal\":{\"Value\":\"0L\"}}}}}],\"fill\":[{\"properties\":{\"fillColor\":{\"solid\":{\"color\":{\"expr\":{\"Literal\":{\"Value\":\"'#3C235F'\"}}}}}},\"selector\":{\"id\":\"default\"}}]}},\"howCreated\":\"InsertVisualButton\"}",
+          "config": "{\"name\":\"50dd1cdfaaefab4e626a\",\"layouts\":[{\"id\":0,\"position\":{\"x\":935.3846153846154,\"y\":168.7912087912088,\"z\":7,\"width\":311.79487179487177,\"height\":444.24908424908426,\"tabOrder\":6}}],\"singleVisual\":{\"visualType\":\"pageNavigator\",\"display\":{\"mode\":\"hidden\"},\"drillFilterOtherVisuals\":true,\"objects\":{\"pages\":[{\"properties\":{\"showPage\":{\"expr\":{\"Literal\":{\"Value\":\"false\"}}}},\"selector\":{\"id\":\"d3ae68bb825a705dad98\"}},{\"properties\":{\"showHiddenPages\":{\"expr\":{\"Literal\":{\"Value\":\"false\"}}}}}],\"text\":[{\"properties\":{\"fontSize\":{\"expr\":{\"Literal\":{\"Value\":\"12D\"}}},\"fontColor\":{\"solid\":{\"color\":{\"expr\":{\"ThemeDataColor\":{\"ColorId\":0,\"Percent\":0}}}}},\"fontFamily\":{\"expr\":{\"Literal\":{\"Value\":\"'''Lucida Sans Unicode'''\"}}}},\"selector\":{\"id\":\"default\"}}],\"shape\":[{\"properties\":{\"roundEdge\":{\"expr\":{\"Literal\":{\"Value\":\"25L\"}}}},\"selector\":{\"id\":\"default\"}}],\"fill\":[{\"properties\":{\"fillColor\":{\"solid\":{\"color\":{\"expr\":{\"Literal\":{\"Value\":\"'#3C235F'\"}}}}}},\"selector\":{\"id\":\"default\"}}],\"layout\":[{\"properties\":{\"orientation\":{\"expr\":{\"Literal\":{\"Value\":\"1D\"}}}}}]}},\"howCreated\":\"InsertVisualButton\"}",
           "filters": "[]",
-          "height": 43.89,
-          "width": 94.19,
-          "x": 148.78,
-          "y": 537.33,
+          "height": 444.25,
+          "width": 311.79,
+          "x": 935.38,
+          "y": 168.79,
+          "z": 7.00
+        },
+        {
+          "config": "{\"name\":\"68019828c3852e1ba6d5\",\"layouts\":[{\"id\":0,\"position\":{\"x\":120.73260073260073,\"y\":465.34798534798534,\"z\":4,\"width\":78.53479853479853,\"height\":100.8058608058608,\"tabOrder\":3}}],\"singleVisual\":{\"visualType\":\"shape\",\"drillFilterOtherVisuals\":true,\"objects\":{\"shape\":[{\"properties\":{\"tileShape\":{\"expr\":{\"Literal\":{\"Value\":\"'arrow'\"}}}}}],\"rotation\":[{\"properties\":{\"shapeAngle\":{\"expr\":{\"Literal\":{\"Value\":\"0L\"}}},\"angle\":{\"expr\":{\"Literal\":{\"Value\":\"90D\"}}}}}],\"fill\":[{\"properties\":{\"fillColor\":{\"solid\":{\"color\":{\"expr\":{\"Literal\":{\"Value\":\"'#3C235F'\"}}}}}},\"selector\":{\"id\":\"default\"}}]},\"vcObjects\":{\"title\":[{\"properties\":{\"show\":{\"expr\":{\"Literal\":{\"Value\":\"true\"}}},\"text\":{\"expr\":{\"Literal\":{\"Value\":\"'Click Aqui'\"}}},\"fontColor\":{\"solid\":{\"color\":{\"expr\":{\"Literal\":{\"Value\":\"'#400D8B'\"}}}}},\"fontSize\":{\"expr\":{\"Literal\":{\"Value\":\"12D\"}}},\"bold\":{\"expr\":{\"Literal\":{\"Value\":\"true\"}}}}}]}},\"howCreated\":\"InsertVisualButton\"}",
+          "filters": "[]",
+          "height": 100.81,
+          "width": 78.53,
+          "x": 120.73,
+          "y": 465.35,
           "z": 4.00
         },
         {
-          "config": "{\"name\":\"96c88610b95746b26fe0\",\"layouts\":[{\"id\":0,\"position\":{\"x\":289.0034843205575,\"y\":20.337282229965158,\"z\":2,\"width\":888.418118466899,\"height\":516.9951219512195,\"tabOrder\":1}}],\"singleVisual\":{\"visualType\":\"image\",\"drillFilterOtherVisuals\":true,\"objects\":{\"image\":[{\"properties\":{\"sourceType\":{\"expr\":{\"Literal\":{\"Value\":\"'imageUrl'\"}}},\"sourceUrl\":{\"expr\":{\"Literal\":{\"Value\":\"'https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/Bnr_Marketing-Digitala26.png'\"}}}}}]}}}",
+          "config": "{\"name\":\"96c88610b95746b26fe0\",\"layouts\":[{\"id\":0,\"position\":{\"x\":343.4432234432234,\"y\":41.02564102564102,\"z\":2,\"width\":887.3260073260074,\"height\":516.9230769230769,\"tabOrder\":1}}],\"singleVisual\":{\"visualType\":\"image\",\"drillFilterOtherVisuals\":true,\"objects\":{\"image\":[{\"properties\":{\"sourceType\":{\"expr\":{\"Literal\":{\"Value\":\"'imageUrl'\"}}},\"sourceUrl\":{\"expr\":{\"Literal\":{\"Value\":\"'https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/Bnr_Marketing-Digitala26.png'\"}}}}}]}}}",
           "filters": "[]",
-          "height": 517.00,
-          "width": 888.42,
-          "x": 289.00,
-          "y": 20.34,
+          "height": 516.92,
+          "width": 887.33,
+          "x": 343.44,
+          "y": 41.03,
           "z": 2.00
         },
         {
@@ -39,21 +48,12 @@
           "z": 3.00
         },
         {
-          "config": "{\"name\":\"a5d3cad4f7f5f9164289\",\"layouts\":[{\"id\":0,\"position\":{\"x\":24.618815331010452,\"y\":537.3324041811846,\"z\":5,\"width\":124.1644599303136,\"height\":35.3226480836237,\"tabOrder\":4}}],\"singleVisual\":{\"visualType\":\"textbox\",\"drillFilterOtherVisuals\":true,\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"Click Aqui\",\"textStyle\":{\"fontWeight\":\"bold\",\"fontFamily\":\"Lucida Sans Unicode\",\"fontSize\":\"14pt\",\"color\":\"#3c235f\"}}]}]}}]}}}",
+          "config": "{\"name\":\"c40b57411b24e5c5880f\",\"layouts\":[{\"id\":0,\"position\":{\"x\":0,\"y\":67.98534798534799,\"z\":6,\"width\":351.64835164835165,\"height\":427.83882783882785,\"tabOrder\":5}}],\"singleVisual\":{\"visualType\":\"image\",\"drillFilterOtherVisuals\":true,\"objects\":{\"image\":[{\"properties\":{\"sourceType\":{\"expr\":{\"Literal\":{\"Value\":\"'imageUrl'\"}}},\"sourceUrl\":{\"expr\":{\"Literal\":{\"Value\":\"'https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/logo-gen-cuad.jpg'\"}}}}}]}}}",
           "filters": "[]",
-          "height": 35.32,
-          "width": 124.16,
-          "x": 24.62,
-          "y": 537.33,
-          "z": 5.00
-        },
-        {
-          "config": "{\"name\":\"c40b57411b24e5c5880f\",\"layouts\":[{\"id\":0,\"position\":{\"x\":8.563066202090592,\"y\":129.5163763066202,\"z\":6,\"width\":280.44041811846694,\"height\":280.44041811846694,\"tabOrder\":5}}],\"singleVisual\":{\"visualType\":\"image\",\"drillFilterOtherVisuals\":true,\"objects\":{\"image\":[{\"properties\":{\"sourceType\":{\"expr\":{\"Literal\":{\"Value\":\"'imageUrl'\"}}},\"sourceUrl\":{\"expr\":{\"Literal\":{\"Value\":\"'https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/logo-gen-cuad.jpg'\"}}}}}]}}}",
-          "filters": "[]",
-          "height": 280.44,
-          "width": 280.44,
-          "x": 8.56,
-          "y": 129.52,
+          "height": 427.84,
+          "width": 351.65,
+          "x": 0.00,
+          "y": 67.99,
           "z": 6.00
         }
       ],
@@ -238,6 +238,15 @@
           "x": 930.00,
           "y": 142.00,
           "z": 13000.00
+        },
+        {
+          "config": "{\"name\":\"f7f80cd57f5b61ba7b69\",\"layouts\":[{\"id\":0,\"position\":{\"x\":1132.465505226481,\"y\":0,\"z\":18001,\"width\":55.050406504065045,\"height\":45.61319396051103,\"tabOrder\":18001}}],\"singleVisual\":{\"visualType\":\"actionButton\",\"objects\":{\"icon\":[{\"properties\":{\"shapeType\":{\"expr\":{\"Literal\":{\"Value\":\"'back'\"}}}},\"selector\":{\"id\":\"default\"}}]},\"vcObjects\":{\"visualLink\":[{\"properties\":{\"show\":{\"expr\":{\"Literal\":{\"Value\":\"true\"}}},\"type\":{\"expr\":{\"Literal\":{\"Value\":\"'PageNavigation'\"}}},\"navigationSection\":{\"expr\":{\"Literal\":{\"Value\":\"'0440798c28c7f40d052c'\"}}}}}]}},\"howCreated\":\"InsertVisualButton\"}",
+          "filters": "[]",
+          "height": 45.61,
+          "width": 55.05,
+          "x": 1132.47,
+          "y": 0.00,
+          "z": 18001.00
         }
       ],
       "width": 1280.00
@@ -251,6 +260,15 @@
       "name": "AtencionYTiempos",
       "ordinal": 5,
       "visualContainers": [
+        {
+          "config": "{\"name\":\"900ded80bcf1268d2178\",\"layouts\":[{\"id\":0,\"position\":{\"x\":1132.465505226481,\"y\":0,\"z\":18001,\"width\":55.050406504065045,\"height\":45.61319396051103,\"tabOrder\":18001}}],\"singleVisual\":{\"visualType\":\"actionButton\",\"objects\":{\"icon\":[{\"properties\":{\"shapeType\":{\"expr\":{\"Literal\":{\"Value\":\"'back'\"}}}},\"selector\":{\"id\":\"default\"}}]},\"vcObjects\":{\"visualLink\":[{\"properties\":{\"show\":{\"expr\":{\"Literal\":{\"Value\":\"true\"}}},\"type\":{\"expr\":{\"Literal\":{\"Value\":\"'PageNavigation'\"}}},\"navigationSection\":{\"expr\":{\"Literal\":{\"Value\":\"'0440798c28c7f40d052c'\"}}}}}]}},\"howCreated\":\"InsertVisualButton\"}",
+          "filters": "[]",
+          "height": 45.61,
+          "width": 55.05,
+          "x": 1132.47,
+          "y": 0.00,
+          "z": 18001.00
+        },
         {
           "config": "{\"name\":\"Acciones\",\"layouts\":[{\"id\":0,\"position\":{\"x\":30,\"y\":688,\"z\":7000,\"width\":585,\"height\":250,\"tabOrder\":9000}}],\"singleVisual\":{\"visualType\":\"barChart\",\"projections\":{\"Category\":[{\"queryRef\":\"FactHistorialEstado.Accion\",\"active\":true}],\"Y\":[{\"queryRef\":\"CountNonNull(FactHistorialEstado.EventoId)\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"t\",\"Entity\":\"FactHistorialEstado\",\"Type\":0}],\"Select\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"t\"}},\"Property\":\"Accion\"},\"Name\":\"FactHistorialEstado.Accion\"},{\"Aggregation\":{\"Expression\":{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"t\"}},\"Property\":\"EventoId\"}},\"Function\":5},\"Name\":\"CountNonNull(FactHistorialEstado.EventoId)\"}],\"OrderBy\":[{\"Direction\":2,\"Expression\":{\"Aggregation\":{\"Expression\":{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"t\"}},\"Property\":\"EventoId\"}},\"Function\":5}}}]},\"drillFilterOtherVisuals\":true,\"hasDefaultSort\":true,\"objects\":{\"dataPoint\":[{\"properties\":{\"defaultColor\":{\"solid\":{\"color\":{\"expr\":{\"Literal\":{\"Value\":\"'#3c235f'\"}}}}}}},{\"properties\":{\"fill\":{\"solid\":{\"color\":{\"expr\":{\"Literal\":{\"Value\":\"'#051773'\"}}}}}},\"selector\":{\"data\":[{\"dataViewWildcard\":{\"matchingOption\":1}}]}},{\"properties\":{\"fill\":{\"solid\":{\"color\":{\"expr\":{\"Literal\":{\"Value\":\"'#D08101'\"}}}}}},\"selector\":{\"data\":[{\"dataViewWildcard\":{\"matchingOption\":2}}]}},{\"properties\":{\"fill\":{\"solid\":{\"color\":{\"expr\":{\"Literal\":{\"Value\":\"'#3c235f'\"}}}}}},\"selector\":{\"data\":[{\"dataViewWildcard\":{\"matchingOption\":3}}]}},{\"properties\":{\"fill\":{\"solid\":{\"color\":{\"expr\":{\"Literal\":{\"Value\":\"'#051773'\"}}}}}},\"selector\":{\"data\":[{\"dataViewWildcard\":{\"matchingOption\":4}}]}},{\"properties\":{\"fill\":{\"solid\":{\"color\":{\"expr\":{\"Literal\":{\"Value\":\"'#D08101'\"}}}}}},\"selector\":{\"data\":[{\"dataViewWildcard\":{\"matchingOption\":5}}]}}],\"labels\":[{\"properties\":{\"show\":{\"expr\":{\"Literal\":{\"Value\":\"true\"}}},\"color\":{\"solid\":{\"color\":{\"expr\":{\"Literal\":{\"Value\":\"'#3c235f'\"}}}}},\"fontSize\":{\"expr\":{\"Literal\":{\"Value\":\"8D\"}}},\"bold\":{\"expr\":{\"Literal\":{\"Value\":\"true\"}}}}}],\"categoryAxis\":[{\"properties\":{\"show\":{\"expr\":{\"Literal\":{\"Value\":\"true\"}}}}}]},\"vcObjects\":{\"title\":[{\"properties\":{\"show\":{\"expr\":{\"Literal\":{\"Value\":\"true\"}}},\"text\":{\"expr\":{\"Literal\":{\"Value\":\"'Eventos por acción registrada'\"}}},\"fontColor\":{\"solid\":{\"color\":{\"expr\":{\"Literal\":{\"Value\":\"'#3c235f'\"}}}}},\"fontSize\":{\"expr\":{\"Literal\":{\"Value\":\"11D\"}}},\"bold\":{\"expr\":{\"Literal\":{\"Value\":\"true\"}}}}}],\"background\":[{\"properties\":{\"show\":{\"expr\":{\"Literal\":{\"Value\":\"true\"}}},\"color\":{\"solid\":{\"color\":{\"expr\":{\"Literal\":{\"Value\":\"'#FFFFFF'\"}}}}},\"transparency\":{\"expr\":{\"Literal\":{\"Value\":\"0D\"}}}}}],\"border\":[{\"properties\":{\"show\":{\"expr\":{\"Literal\":{\"Value\":\"true\"}}},\"color\":{\"solid\":{\"color\":{\"expr\":{\"Literal\":{\"Value\":\"'#DED6E8'\"}}}}},\"radius\":{\"expr\":{\"Literal\":{\"Value\":\"6D\"}}}}}]}}}",
           "filters": "[]",
@@ -613,6 +631,15 @@
           "x": 30.00,
           "y": 680.00,
           "z": 7000.00
+        },
+        {
+          "config": "{\"name\":\"ce91570a610726f669c7\",\"layouts\":[{\"id\":0,\"position\":{\"x\":1132.465505226481,\"y\":0,\"z\":19001,\"width\":55.050406504065045,\"height\":45.61319396051103,\"tabOrder\":19001}}],\"singleVisual\":{\"visualType\":\"actionButton\",\"objects\":{\"icon\":[{\"properties\":{\"shapeType\":{\"expr\":{\"Literal\":{\"Value\":\"'back'\"}}}},\"selector\":{\"id\":\"default\"}}]},\"vcObjects\":{\"visualLink\":[{\"properties\":{\"show\":{\"expr\":{\"Literal\":{\"Value\":\"true\"}}},\"type\":{\"expr\":{\"Literal\":{\"Value\":\"'PageNavigation'\"}}},\"navigationSection\":{\"expr\":{\"Literal\":{\"Value\":\"'0440798c28c7f40d052c'\"}}}}}]}},\"howCreated\":\"InsertVisualButton\"}",
+          "filters": "[]",
+          "height": 45.61,
+          "width": 55.05,
+          "x": 1132.47,
+          "y": 0.00,
+          "z": 19001.00
         }
       ],
       "width": 1280.00
@@ -626,6 +653,15 @@
       "name": "CargaOperativa",
       "ordinal": 4,
       "visualContainers": [
+        {
+          "config": "{\"name\":\"67e743200f5fca67e7e0\",\"layouts\":[{\"id\":0,\"position\":{\"x\":1132.465505226481,\"y\":0,\"z\":18001,\"width\":55.050406504065045,\"height\":45.61319396051103,\"tabOrder\":18001}}],\"singleVisual\":{\"visualType\":\"actionButton\",\"objects\":{\"icon\":[{\"properties\":{\"shapeType\":{\"expr\":{\"Literal\":{\"Value\":\"'back'\"}}}},\"selector\":{\"id\":\"default\"}}]},\"vcObjects\":{\"visualLink\":[{\"properties\":{\"show\":{\"expr\":{\"Literal\":{\"Value\":\"true\"}}},\"type\":{\"expr\":{\"Literal\":{\"Value\":\"'PageNavigation'\"}}},\"navigationSection\":{\"expr\":{\"Literal\":{\"Value\":\"'0440798c28c7f40d052c'\"}}}}}]}},\"howCreated\":\"InsertVisualButton\"}",
+          "filters": "[]",
+          "height": 45.61,
+          "width": 55.05,
+          "x": 1132.47,
+          "y": 0.00,
+          "z": 18001.00
+        },
         {
           "config": "{\"name\":\"CardCargaDias\",\"layouts\":[{\"id\":0,\"position\":{\"x\":990,\"y\":256,\"z\":6000,\"width\":210,\"height\":116,\"tabOrder\":7000}}],\"singleVisual\":{\"visualType\":\"card\",\"projections\":{\"Values\":[{\"queryRef\":\"_Medidas.Dias promedio ejecucion tecnica\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"m\",\"Entity\":\"_Medidas\",\"Type\":0}],\"Select\":[{\"Measure\":{\"Expression\":{\"SourceRef\":{\"Source\":\"m\"}},\"Property\":\"Dias promedio ejecucion tecnica\"},\"Name\":\"_Medidas.Dias promedio ejecucion tecnica\"}]},\"drillFilterOtherVisuals\":true,\"objects\":{\"labels\":[{\"properties\":{\"color\":{\"solid\":{\"color\":{\"expr\":{\"Literal\":{\"Value\":\"'#051773'\"}}}}},\"fontSize\":{\"expr\":{\"Literal\":{\"Value\":\"25D\"}}},\"bold\":{\"expr\":{\"Literal\":{\"Value\":\"true\"}}}}}],\"categoryLabels\":[{\"properties\":{\"show\":{\"expr\":{\"Literal\":{\"Value\":\"true\"}}},\"color\":{\"solid\":{\"color\":{\"expr\":{\"Literal\":{\"Value\":\"'#5F6B7A'\"}}}}},\"fontSize\":{\"expr\":{\"Literal\":{\"Value\":\"8D\"}}}}}]},\"vcObjects\":{\"title\":[{\"properties\":{\"show\":{\"expr\":{\"Literal\":{\"Value\":\"true\"}}},\"text\":{\"expr\":{\"Literal\":{\"Value\":\"'Días promedio ejecución técnica'\"}}},\"fontColor\":{\"solid\":{\"color\":{\"expr\":{\"Literal\":{\"Value\":\"'#3c235f'\"}}}}},\"fontSize\":{\"expr\":{\"Literal\":{\"Value\":\"11D\"}}},\"bold\":{\"expr\":{\"Literal\":{\"Value\":\"true\"}}}}}],\"background\":[{\"properties\":{\"show\":{\"expr\":{\"Literal\":{\"Value\":\"true\"}}},\"color\":{\"solid\":{\"color\":{\"expr\":{\"Literal\":{\"Value\":\"'#FFFFFF'\"}}}}},\"transparency\":{\"expr\":{\"Literal\":{\"Value\":\"0D\"}}}}}],\"border\":[{\"properties\":{\"show\":{\"expr\":{\"Literal\":{\"Value\":\"true\"}}},\"color\":{\"solid\":{\"color\":{\"expr\":{\"Literal\":{\"Value\":\"'#051773'\"}}}}},\"radius\":{\"expr\":{\"Literal\":{\"Value\":\"8D\"}}}}}]}}}",
           "filters": "[]",
@@ -809,6 +845,15 @@
       "name": "DetalleOperativo",
       "ordinal": 3,
       "visualContainers": [
+        {
+          "config": "{\"name\":\"9912d28c2aad6b156cce\",\"layouts\":[{\"id\":0,\"position\":{\"x\":1132.465505226481,\"y\":0,\"z\":17001,\"width\":55.050406504065045,\"height\":45.61319396051103,\"tabOrder\":17001}}],\"singleVisual\":{\"visualType\":\"actionButton\",\"objects\":{\"icon\":[{\"properties\":{\"shapeType\":{\"expr\":{\"Literal\":{\"Value\":\"'back'\"}}}},\"selector\":{\"id\":\"default\"}}]},\"vcObjects\":{\"visualLink\":[{\"properties\":{\"show\":{\"expr\":{\"Literal\":{\"Value\":\"true\"}}},\"type\":{\"expr\":{\"Literal\":{\"Value\":\"'PageNavigation'\"}}},\"navigationSection\":{\"expr\":{\"Literal\":{\"Value\":\"'0440798c28c7f40d052c'\"}}}}}]}},\"howCreated\":\"InsertVisualButton\"}",
+          "filters": "[]",
+          "height": 45.61,
+          "width": 55.05,
+          "x": 1132.47,
+          "y": 0.00,
+          "z": 17001.00
+        },
         {
           "config": "{\"name\":\"CardDetAprob\",\"layouts\":[{\"id\":0,\"position\":{\"x\":990,\"y\":256,\"z\":6000,\"width\":210,\"height\":116,\"tabOrder\":7000}}],\"singleVisual\":{\"visualType\":\"card\",\"projections\":{\"Values\":[{\"queryRef\":\"_Medidas.Dias promedio aprobacion\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"m\",\"Entity\":\"_Medidas\",\"Type\":0}],\"Select\":[{\"Measure\":{\"Expression\":{\"SourceRef\":{\"Source\":\"m\"}},\"Property\":\"Dias promedio aprobacion\"},\"Name\":\"_Medidas.Dias promedio aprobacion\"}]},\"drillFilterOtherVisuals\":true,\"objects\":{\"labels\":[{\"properties\":{\"color\":{\"solid\":{\"color\":{\"expr\":{\"Literal\":{\"Value\":\"'#051773'\"}}}}},\"fontSize\":{\"expr\":{\"Literal\":{\"Value\":\"25D\"}}},\"bold\":{\"expr\":{\"Literal\":{\"Value\":\"true\"}}}}}],\"categoryLabels\":[{\"properties\":{\"show\":{\"expr\":{\"Literal\":{\"Value\":\"true\"}}},\"color\":{\"solid\":{\"color\":{\"expr\":{\"Literal\":{\"Value\":\"'#5F6B7A'\"}}}}},\"fontSize\":{\"expr\":{\"Literal\":{\"Value\":\"8D\"}}}}}]},\"vcObjects\":{\"title\":[{\"properties\":{\"show\":{\"expr\":{\"Literal\":{\"Value\":\"true\"}}},\"text\":{\"expr\":{\"Literal\":{\"Value\":\"'Días aprobación'\"}}},\"fontColor\":{\"solid\":{\"color\":{\"expr\":{\"Literal\":{\"Value\":\"'#3c235f'\"}}}}},\"fontSize\":{\"expr\":{\"Literal\":{\"Value\":\"11D\"}}},\"bold\":{\"expr\":{\"Literal\":{\"Value\":\"true\"}}}}}],\"background\":[{\"properties\":{\"show\":{\"expr\":{\"Literal\":{\"Value\":\"true\"}}},\"color\":{\"solid\":{\"color\":{\"expr\":{\"Literal\":{\"Value\":\"'#FFFFFF'\"}}}}},\"transparency\":{\"expr\":{\"Literal\":{\"Value\":\"0D\"}}}}}],\"border\":[{\"properties\":{\"show\":{\"expr\":{\"Literal\":{\"Value\":\"true\"}}},\"color\":{\"solid\":{\"color\":{\"expr\":{\"Literal\":{\"Value\":\"'#051773'\"}}}}},\"radius\":{\"expr\":{\"Literal\":{\"Value\":\"8D\"}}}}}]}}}",
           "filters": "[]",
@@ -1336,6 +1381,15 @@
           "x": 30.00,
           "y": 918.00,
           "z": 8000.00
+        },
+        {
+          "config": "{\"name\":\"ba28a79440ace4a14de0\",\"layouts\":[{\"id\":0,\"position\":{\"x\":1132.465505226481,\"y\":0,\"z\":17001,\"width\":55.050406504065045,\"height\":45.61319396051103,\"tabOrder\":17001}}],\"singleVisual\":{\"visualType\":\"actionButton\",\"objects\":{\"icon\":[{\"properties\":{\"shapeType\":{\"expr\":{\"Literal\":{\"Value\":\"'back'\"}}}},\"selector\":{\"id\":\"default\"}}]},\"vcObjects\":{\"visualLink\":[{\"properties\":{\"show\":{\"expr\":{\"Literal\":{\"Value\":\"true\"}}},\"type\":{\"expr\":{\"Literal\":{\"Value\":\"'PageNavigation'\"}}},\"navigationSection\":{\"expr\":{\"Literal\":{\"Value\":\"'0440798c28c7f40d052c'\"}}}}}]}},\"howCreated\":\"InsertVisualButton\"}",
+          "filters": "[]",
+          "height": 45.61,
+          "width": 55.05,
+          "x": 1132.47,
+          "y": 0.00,
+          "z": 17001.00
         }
       ],
       "width": 1280.00
@@ -1519,6 +1573,15 @@
           "x": 30.00,
           "y": 16.00,
           "z": 0.00
+        },
+        {
+          "config": "{\"name\":\"f186ba659dca3f7842d7\",\"layouts\":[{\"id\":0,\"position\":{\"x\":1132.465505226481,\"y\":0,\"z\":18001,\"width\":55.050406504065045,\"height\":45.61319396051103,\"tabOrder\":18001}}],\"singleVisual\":{\"visualType\":\"actionButton\",\"objects\":{\"icon\":[{\"properties\":{\"shapeType\":{\"expr\":{\"Literal\":{\"Value\":\"'back'\"}}}},\"selector\":{\"id\":\"default\"}}]},\"vcObjects\":{\"visualLink\":[{\"properties\":{\"show\":{\"expr\":{\"Literal\":{\"Value\":\"true\"}}},\"type\":{\"expr\":{\"Literal\":{\"Value\":\"'PageNavigation'\"}}},\"navigationSection\":{\"expr\":{\"Literal\":{\"Value\":\"'0440798c28c7f40d052c'\"}}}}}]}},\"howCreated\":\"InsertVisualButton\"}",
+          "filters": "[]",
+          "height": 45.61,
+          "width": 55.05,
+          "x": 1132.47,
+          "y": 0.00,
+          "z": 18001.00
         }
       ],
       "width": 1280.00
@@ -1702,6 +1765,15 @@
           "x": 30.00,
           "y": 16.00,
           "z": 0.00
+        },
+        {
+          "config": "{\"name\":\"c0d9c8a968021da7bfa6\",\"layouts\":[{\"id\":0,\"position\":{\"x\":1132.465505226481,\"y\":0,\"z\":18001,\"width\":55.050406504065045,\"height\":45.61319396051103,\"tabOrder\":18001}}],\"singleVisual\":{\"visualType\":\"actionButton\",\"objects\":{\"icon\":[{\"properties\":{\"shapeType\":{\"expr\":{\"Literal\":{\"Value\":\"'back'\"}}}},\"selector\":{\"id\":\"default\"}}]},\"vcObjects\":{\"visualLink\":[{\"properties\":{\"show\":{\"expr\":{\"Literal\":{\"Value\":\"true\"}}},\"type\":{\"expr\":{\"Literal\":{\"Value\":\"'PageNavigation'\"}}},\"navigationSection\":{\"expr\":{\"Literal\":{\"Value\":\"'0440798c28c7f40d052c'\"}}}}}]}},\"howCreated\":\"InsertVisualButton\"}",
+          "filters": "[]",
+          "height": 45.61,
+          "width": 55.05,
+          "x": 1132.47,
+          "y": 0.00,
+          "z": 18001.00
         }
       ],
       "width": 1280.00

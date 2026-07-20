@@ -95,6 +95,54 @@ app.MapGet("/activities/metrics", async (ActivitiesDbContext db) =>
 app.MapGet("/activities/audit", async (ActivitiesDbContext db) =>
     await db.AuditEvents.OrderByDescending(x => x.OccurredAt).ToListAsync());
 
+app.MapGet("/agenda", async (string? technician, ActivitiesDbContext db) =>
+{
+    var query = db.AgendaItems.Where(x => !x.IsDeleted);
+    if (!string.IsNullOrWhiteSpace(technician))
+    {
+        var key = technician.Trim().ToLowerInvariant();
+        query = query.Where(x => x.TechnicianEmail.ToLower() == key || x.TechnicianName.ToLower() == key);
+    }
+
+    return await query.OrderBy(x => x.StartAt).ToListAsync();
+});
+
+app.MapPost("/agenda", async (CreateAgendaItemRequest request, ActivitiesDbContext db) =>
+{
+    if (request.EndAt <= request.StartAt) return Results.BadRequest("La fecha y hora de fin debe ser mayor al inicio.");
+    var activity = await db.Activities.FindAsync(request.ActivityId);
+    if (activity is null || activity.IsDeleted) return Results.BadRequest("Seleccione un producto válido.");
+
+    var item = TechnicalAgendaItem.Create(request, activity.RequirementId, activity.ProductId, activity.ProductType);
+    db.AgendaItems.Add(item);
+    db.AuditEvents.Add(ActivityAuditEvent.Changed(activity.Id, activity.RequirementId, activity.Status.ToString(), activity.Status.ToString(), "Bloque de agenda creado", request.CreatedBy, AuditJson.Build("Agenda técnica", "Crear bloque", request.CreatedBy, request)));
+    await db.SaveChangesAsync();
+    return Results.Created($"/agenda/{item.Id}", item);
+});
+
+app.MapPut("/agenda/{id:guid}", async (Guid id, CreateAgendaItemRequest request, ActivitiesDbContext db) =>
+{
+    if (request.EndAt <= request.StartAt) return Results.BadRequest("La fecha y hora de fin debe ser mayor al inicio.");
+    var item = await db.AgendaItems.FindAsync(id);
+    if (item is null || item.IsDeleted) return Results.NotFound();
+    var activity = await db.Activities.FindAsync(request.ActivityId);
+    if (activity is null || activity.IsDeleted) return Results.BadRequest("Seleccione un producto válido.");
+
+    item.Update(request, activity.RequirementId, activity.ProductId, activity.ProductType);
+    db.AuditEvents.Add(ActivityAuditEvent.Changed(activity.Id, activity.RequirementId, activity.Status.ToString(), activity.Status.ToString(), "Bloque de agenda actualizado", request.CreatedBy, AuditJson.Build("Agenda técnica", "Editar bloque", request.CreatedBy, request)));
+    await db.SaveChangesAsync();
+    return Results.Ok(item);
+});
+
+app.MapDelete("/agenda/{id:guid}", async (Guid id, ActivitiesDbContext db) =>
+{
+    var item = await db.AgendaItems.FindAsync(id);
+    if (item is null || item.IsDeleted) return Results.NotFound();
+    item.Delete("Sistema");
+    await db.SaveChangesAsync();
+    return Results.NoContent();
+});
+
 app.MapGet("/activities/{id:guid}/audit", async (Guid id, ActivitiesDbContext db) =>
     await db.AuditEvents.Where(x => x.ActivityId == id).OrderBy(x => x.OccurredAt).ToListAsync());
 
@@ -387,10 +435,11 @@ public sealed record CreateActivityRequest(
     string DiffusionChannel,
     Guid MainKpiId,
     string MainKpi,
-    string ProductResponsible,
-    DateOnly? ProductDeliveryDate,
-    string Observations,
-    Guid? StatusId = null);
+      string ProductResponsible,
+      DateOnly? ProductDeliveryDate,
+      string Observations,
+      Guid? StatusId = null);
+public sealed record CreateAgendaItemRequest(Guid ActivityId, string TechnicianName, string TechnicianEmail, DateTimeOffset StartAt, DateTimeOffset EndAt, string Title, string Notes, string CreatedBy);
 public sealed record NextProductIdResponse(string ProductId);
 public sealed record ApproveActivityRequest(ApprovalDecision Decision, string ApprovedBy, string Comments);
 public sealed record CreateApprovalRequest(Guid ActivityId, ApprovalDecision Decision, string ApprovedBy, string Comments);
@@ -425,6 +474,48 @@ public sealed record NotificationCountResponse(int Count);
 public sealed record AcknowledgeNotificationRequest(string AcknowledgedBy);
 public sealed record EvidenceItemDto(Guid Id, Guid ActivityId, string FileName, string StorageUrl, string UploadedBy);
 public sealed record NotificationUserDto(string Name, string Email, bool IsActive);
+
+public sealed class TechnicalAgendaItem : Entity
+{
+    public Guid ActivityId { get; private set; }
+    public Guid RequirementId { get; private set; }
+    public string ProductId { get; private set; } = string.Empty;
+    public string ProductType { get; private set; } = string.Empty;
+    public string TechnicianName { get; private set; } = string.Empty;
+    public string TechnicianEmail { get; private set; } = string.Empty;
+    public DateTimeOffset StartAt { get; private set; }
+    public DateTimeOffset EndAt { get; private set; }
+    public string Title { get; private set; } = string.Empty;
+    public string Notes { get; private set; } = string.Empty;
+
+    public static TechnicalAgendaItem Create(CreateAgendaItemRequest request, Guid requirementId, string productId, string productType)
+    {
+        var item = new TechnicalAgendaItem();
+        item.Update(request, requirementId, productId, productType);
+        return item;
+    }
+
+    public void Update(CreateAgendaItemRequest request, Guid requirementId, string productId, string productType)
+    {
+        if (request.ActivityId == Guid.Empty) throw new ArgumentException("Producto requerido.", nameof(request.ActivityId));
+        if (string.IsNullOrWhiteSpace(request.TechnicianEmail)) throw new ArgumentException("Técnico requerido.", nameof(request.TechnicianEmail));
+        if (request.EndAt <= request.StartAt) throw new ArgumentException("La fecha y hora de fin debe ser mayor al inicio.", nameof(request.EndAt));
+
+        ActivityId = request.ActivityId;
+        RequirementId = requirementId;
+        ProductId = productId.Trim();
+        ProductType = productType.Trim();
+        TechnicianName = request.TechnicianName.Trim();
+        TechnicianEmail = request.TechnicianEmail.Trim().ToLowerInvariant();
+        StartAt = request.StartAt;
+        EndAt = request.EndAt;
+        Title = string.IsNullOrWhiteSpace(request.Title) ? ProductType : request.Title.Trim();
+        Notes = (request.Notes ?? string.Empty).Trim();
+        Touch();
+    }
+
+    public void Delete(string deletedBy) => DeleteLogically(deletedBy);
+}
 
 public static class NotificationRecipientResolver
 {
@@ -533,6 +624,7 @@ public static class RequirementWorkflowSync
 public sealed class ActivitiesDbContext(DbContextOptions<ActivitiesDbContext> options) : DbContext(options)
 {
     public DbSet<TechnicalActivity> Activities => Set<TechnicalActivity>();
+    public DbSet<TechnicalAgendaItem> AgendaItems => Set<TechnicalAgendaItem>();
     public DbSet<CatalogReference> CatalogReferences => Set<CatalogReference>();
     public DbSet<NotificationSettings> NotificationSettings => Set<NotificationSettings>();
     public DbSet<NotificationRecord> NotificationRecords => Set<NotificationRecord>();
@@ -572,6 +664,22 @@ public sealed class ActivitiesDbContext(DbContextOptions<ActivitiesDbContext> op
             entity.HasOne<CatalogReference>().WithMany().HasForeignKey(x => x.DiffusionChannelId).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne<CatalogReference>().WithMany().HasForeignKey(x => x.MainKpiId).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne<CatalogReference>().WithMany().HasForeignKey(x => x.StatusId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<TechnicalAgendaItem>(entity =>
+        {
+            entity.ToTable("TechnicalAgendaItems");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.ProductId).HasMaxLength(80).IsRequired();
+            entity.Property(x => x.ProductType).HasMaxLength(120).IsRequired();
+            entity.Property(x => x.TechnicianName).HasMaxLength(160).IsRequired();
+            entity.Property(x => x.TechnicianEmail).HasMaxLength(180).IsRequired();
+            entity.Property(x => x.Title).HasMaxLength(240).IsRequired();
+            entity.Property(x => x.Notes).HasMaxLength(2000);
+            entity.Property(x => x.DeletedBy).HasMaxLength(160);
+            entity.HasIndex(x => x.ActivityId);
+            entity.HasIndex(x => x.TechnicianEmail);
+            entity.HasIndex(x => x.StartAt);
         });
 
         modelBuilder.Entity<ActivityAuditEvent>(entity =>
@@ -1107,6 +1215,37 @@ public static class ActivitiesSchema
                 CREATE INDEX [IX_ActivityAuditEvents_OccurredAt] ON [ActivityAuditEvents] ([OccurredAt])
             END
             IF COL_LENGTH('ActivityAuditEvents', 'Comments') IS NOT NULL ALTER TABLE [ActivityAuditEvents] ALTER COLUMN [Comments] nvarchar(max) NOT NULL;
+            """);
+
+        await db.Database.ExecuteSqlRawAsync("""
+            IF OBJECT_ID('TechnicalAgendaItems', 'U') IS NULL
+            BEGIN
+                CREATE TABLE [TechnicalAgendaItems] (
+                    [Id] uniqueidentifier NOT NULL,
+                    [ActivityId] uniqueidentifier NOT NULL,
+                    [RequirementId] uniqueidentifier NOT NULL,
+                    [ProductId] nvarchar(80) NOT NULL,
+                    [ProductType] nvarchar(120) NOT NULL,
+                    [TechnicianName] nvarchar(160) NOT NULL,
+                    [TechnicianEmail] nvarchar(180) NOT NULL,
+                    [StartAt] datetimeoffset NOT NULL,
+                    [EndAt] datetimeoffset NOT NULL,
+                    [Title] nvarchar(240) NOT NULL,
+                    [Notes] nvarchar(2000) NOT NULL DEFAULT(''),
+                    [CreatedAt] datetimeoffset NOT NULL,
+                    [UpdatedAt] datetimeoffset NULL,
+                    [IsDeleted] bit NOT NULL DEFAULT(0),
+                    [DeletedAt] datetimeoffset NULL,
+                    [DeletedBy] nvarchar(160) NOT NULL DEFAULT(''),
+                    CONSTRAINT [PK_TechnicalAgendaItems] PRIMARY KEY ([Id])
+                )
+            END
+            IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_TechnicalAgendaItems_ActivityId' AND object_id = OBJECT_ID('TechnicalAgendaItems'))
+                CREATE INDEX [IX_TechnicalAgendaItems_ActivityId] ON [TechnicalAgendaItems] ([ActivityId])
+            IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_TechnicalAgendaItems_TechnicianEmail' AND object_id = OBJECT_ID('TechnicalAgendaItems'))
+                CREATE INDEX [IX_TechnicalAgendaItems_TechnicianEmail] ON [TechnicalAgendaItems] ([TechnicianEmail])
+            IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_TechnicalAgendaItems_StartAt' AND object_id = OBJECT_ID('TechnicalAgendaItems'))
+                CREATE INDEX [IX_TechnicalAgendaItems_StartAt] ON [TechnicalAgendaItems] ([StartAt])
             """);
     }
 

@@ -11,6 +11,10 @@ const nextConfig = {
         destination: `${process.env.ACTIVITIES_API_URL ?? "http://localhost:5102"}/activities/:path*`
       },
       {
+        source: "/api/agenda/:path*",
+        destination: `${process.env.ACTIVITIES_API_URL ?? "http://localhost:5102"}/agenda/:path*`
+      },
+      {
         source: "/api/notification-settings/:path*",
         destination: `${process.env.ACTIVITIES_API_URL ?? "http://localhost:5102"}/notification-settings/:path*`
       },

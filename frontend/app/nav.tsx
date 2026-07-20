@@ -1,7 +1,7 @@
 "use client";
 
 import { api, applyBrandVariables, defaultBrandSettings, getSession, logoutSession, t, type BrandSettings } from "./lib";
-import { BarChart3, Bell, CheckCircle2, ChevronsDown, ChevronsLeft, ChevronsRight, ChevronsUp, ClipboardList, FileCheck2, History, Inbox, Landmark, ListChecks, LogOut, Palette, Settings, ShieldCheck, UploadCloud, Users } from "lucide-react";
+import { BarChart3, Bell, CalendarDays, CheckCircle2, ChevronsDown, ChevronsLeft, ChevronsRight, ChevronsUp, ClipboardList, FileCheck2, History, Inbox, Landmark, ListChecks, LogOut, Palette, Settings, ShieldCheck, UploadCloud, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 const items = [
   { href: "/dashboard", label: "Requerimientos", icon: ClipboardList },
   { href: "/activities", label: "Productos", icon: ListChecks },
+  { href: "/agenda", label: "Agenda técnica", icon: CalendarDays },
   { href: "/evidence", label: "Adjuntos", icon: FileCheck2 },
   { href: "/approvals", label: "Aprobaciones", icon: CheckCircle2 },
   { href: "/metrics", label: "Métricas", icon: BarChart3 },
