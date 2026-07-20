@@ -1,7 +1,7 @@
 "use client";
 
 import { AppNav } from "../nav";
-import { Activity, api, getSession, showToast } from "../lib";
+import { Activity, api, getSession, Requirement, showToast } from "../lib";
 import { CalendarDays, Edit3, Plus, RefreshCw, Save, Search, Trash2, X } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 
@@ -22,6 +22,7 @@ type AgendaItem = {
 
 export default function AgendaPage() {
   const [activities, setActivities] = useState<Activity[]>([]);
+  const [requirements, setRequirements] = useState<Requirement[]>([]);
   const [technicians, setTechnicians] = useState<User[]>([]);
   const [items, setItems] = useState<AgendaItem[]>([]);
   const [selectedTechnician, setSelectedTechnician] = useState("");
@@ -32,8 +33,9 @@ export default function AgendaPage() {
 
   async function load() {
     const session = getSession();
-    const [activityData, userData, agendaData] = await Promise.all([
+    const [activityData, requirementData, userData, agendaData] = await Promise.all([
       api<Activity[]>("/api/activities"),
+      api<Requirement[]>("/api/requirements"),
       api<User[]>("/api/identity/users/technicians").catch(() => []),
       api<AgendaItem[]>("/api/agenda").catch(() => [])
     ]);
@@ -45,6 +47,7 @@ export default function AgendaPage() {
     setTechnicians(techs);
     setSelectedTechnician((current) => current || techs[0]?.email || "");
     setActivities(filterActivities(activityData, session));
+    setRequirements(requirementData);
     setItems(agendaData);
   }
 
@@ -56,9 +59,11 @@ export default function AgendaPage() {
   }, []);
 
   const technician = technicians.find((item) => item.email === selectedTechnician);
-  const visibleItems = useMemo(() => items
+  const requirementById = useMemo(() => new Map(requirements.map((item) => [item.id, item])), [requirements]);
+  const agendaItems = useMemo(() => mergeManualAndActivityReservations(items, activities, requirementById, technicians), [items, activities, requirementById, technicians]);
+  const visibleItems = useMemo(() => agendaItems
     .filter((item) => !selectedTechnician || item.technicianEmail.toLowerCase() === selectedTechnician.toLowerCase())
-    .filter((item) => matchesAgenda(item, search)), [items, selectedTechnician, search]);
+    .filter((item) => matchesAgenda(item, search)), [agendaItems, selectedTechnician, search]);
   const assignedProducts = activities.filter((item) => !selectedTechnician || item.productResponsible.toLowerCase() === selectedTechnician.toLowerCase());
   const agendaHours = visibleItems.reduce((total, item) => total + Math.max(0, (new Date(item.endAt).getTime() - new Date(item.startAt).getTime()) / 3600000), 0);
 
@@ -149,8 +154,9 @@ export default function AgendaPage() {
                     <p>{item.productId} | {item.productType}</p>
                   </div>
                   <div className="actions">
-                    <button className="icon-button" type="button" title="Editar bloque de agenda" onClick={() => { setEditing(item); setIsEditorOpen(true); }}><Edit3 size={16} /></button>
-                    <button className="icon-button danger" type="button" title="Eliminar bloque de agenda" onClick={() => remove(item.id)}><Trash2 size={16} /></button>
+                    {item.id.startsWith("auto-") && <span className="badge">Reserva automática</span>}
+                    {!item.id.startsWith("auto-") && <button className="icon-button" type="button" title="Editar bloque de agenda" onClick={() => { setEditing(item); setIsEditorOpen(true); }}><Edit3 size={16} /></button>}
+                    {!item.id.startsWith("auto-") && <button className="icon-button danger" type="button" title="Eliminar bloque de agenda" onClick={() => remove(item.id)}><Trash2 size={16} /></button>}
                   </div>
                 </div>
                 <div className="detail-grid compact-detail-grid">
@@ -218,6 +224,71 @@ function matchesAgenda(item: AgendaItem, term: string) {
   const query = term.trim().toLowerCase();
   if (!query) return true;
   return [item.title, item.notes, item.productId, item.productType, item.technicianName, item.technicianEmail].some((value) => value.toLowerCase().includes(query));
+}
+
+function mergeManualAndActivityReservations(manualItems: AgendaItem[], activities: Activity[], requirements: Map<string, Requirement>, technicians: User[]) {
+  const manualActivityIds = new Set(manualItems.map((item) => item.activityId));
+  const generated = activities
+    .filter((activity) => !manualActivityIds.has(activity.id) && !isClosed(activity.status))
+    .flatMap((activity) => buildActivityReservations(activity, requirements.get(activity.requirementId), technicians));
+  return [...manualItems, ...generated].sort((left, right) => new Date(left.startAt).getTime() - new Date(right.startAt).getTime());
+}
+
+function buildActivityReservations(activity: Activity, requirement: Requirement | undefined, technicians: User[]) {
+  const start = parseDate(requirement?.startDate);
+  const end = parseDate(requirement?.endDate || activity.productDeliveryDate || requirement?.startDate);
+  if (!start || !end) return [];
+  const responsible = resolveTechnician(activity.productResponsible, technicians);
+  return daysBetween(start, end).map((day) => ({
+    id: `auto-${activity.id}-${day.toISOString().slice(0, 10)}`,
+    activityId: activity.id,
+    requirementId: activity.requirementId,
+    productId: activity.productId,
+    productType: activity.productType,
+    technicianName: responsible.name,
+    technicianEmail: responsible.email,
+    startAt: withTime(day, 8, 0).toISOString(),
+    endAt: withTime(day, 17, 0).toISOString(),
+    title: `${activity.productId} - ${activity.productType}`,
+    notes: "Reserva automática por fechas del requerimiento."
+  }));
+}
+
+function parseDate(value?: string | null) {
+  if (!value) return null;
+  const date = new Date(`${value.slice(0, 10)}T08:00`);
+  if (Number.isNaN(date.getTime())) return null;
+  date.setHours(0, 0, 0, 0);
+  return date;
+}
+
+function resolveTechnician(value: string, technicians: User[]) {
+  const key = value.toLowerCase();
+  const technician = technicians.find((item) => item.email.toLowerCase() === key || item.name.toLowerCase() === key);
+  return { name: technician?.name ?? value, email: technician?.email ?? value };
+}
+
+function daysBetween(start: Date, end: Date) {
+  const days: Date[] = [];
+  for (let day = new Date(start); day.getTime() <= end.getTime(); day = addDays(day, 1)) days.push(new Date(day));
+  return days;
+}
+
+function addDays(value: Date, amount: number) {
+  const date = new Date(value);
+  date.setDate(date.getDate() + amount);
+  date.setHours(0, 0, 0, 0);
+  return date;
+}
+
+function withTime(value: Date, hour: number, minute: number) {
+  const date = new Date(value);
+  date.setHours(hour, minute, 0, 0);
+  return date;
+}
+
+function isClosed(status: string) {
+  return ["Approved", "Completed"].includes(status);
 }
 
 function formatDateTime(value: string) {

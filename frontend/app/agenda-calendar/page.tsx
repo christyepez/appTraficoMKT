@@ -1,13 +1,14 @@
 "use client";
 
 import { AppNav } from "../nav";
-import { Activity, api, getSession, showToast } from "../lib";
-import { CalendarDays, ChevronLeft, ChevronRight, Clock, Edit3, ExternalLink, ListFilter, Search, UserRound, X } from "lucide-react";
+import { Activity, api, getSession, Requirement, showToast } from "../lib";
+import { CalendarDays, ChevronLeft, ChevronRight, Clock, Edit3, ExternalLink, ListFilter, RefreshCw, Search, UserRound, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 type User = { id: string; name: string; email: string; roles: string[]; isActive: boolean };
-type CalendarMode = "day" | "week" | "month";
+type CalendarMode = "day" | "week" | "month" | "list";
+type WeekScope = "workdays" | "full";
 type AgendaItem = {
   id: string;
   activityId: string;
@@ -22,22 +23,27 @@ type AgendaItem = {
   notes: string;
 };
 
-const dayHours = Array.from({ length: 14 }, (_, index) => index + 7);
+const dayHours = Array.from({ length: 11 }, (_, index) => index + 8);
 
 export default function AgendaCalendarPage() {
   const [activities, setActivities] = useState<Activity[]>([]);
+  const [requirements, setRequirements] = useState<Requirement[]>([]);
   const [technicians, setTechnicians] = useState<User[]>([]);
   const [items, setItems] = useState<AgendaItem[]>([]);
   const [mode, setMode] = useState<CalendarMode>("week");
+  const [weekScope, setWeekScope] = useState<WeekScope>("workdays");
   const [cursorDate, setCursorDate] = useState(startOfDay(new Date()));
   const [selectedTechnician, setSelectedTechnician] = useState("");
+  const [selectedCampus, setSelectedCampus] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("");
   const [search, setSearch] = useState("");
   const [selectedItem, setSelectedItem] = useState<AgendaItem | null>(null);
 
   async function load() {
     const session = getSession();
-    const [activityData, userData, agendaData] = await Promise.all([
+    const [activityData, requirementData, userData, agendaData] = await Promise.all([
       api<Activity[]>("/api/activities"),
+      api<Requirement[]>("/api/requirements"),
       api<User[]>("/api/identity/users/technicians").catch(() => []),
       api<AgendaItem[]>("/api/agenda").catch(() => [])
     ]);
@@ -47,8 +53,10 @@ export default function AgendaCalendarPage() {
     const fallback = session ? [{ id: session.user.id, name: session.user.name, email: session.user.email, roles: session.user.roles, isActive: true }] : [];
     const techs = visibleTechnicians.length ? visibleTechnicians : fallback;
     setTechnicians(techs);
-    setSelectedTechnician((current) => current || techs[0]?.email || "");
+    const canSeeAll = session?.user.roles.includes("Administrador") || session?.user.roles.includes("Coordinador");
+    setSelectedTechnician((current) => current || (canSeeAll ? "" : techs[0]?.email || ""));
     setActivities(filterActivities(activityData, session));
+    setRequirements(requirementData);
     setItems(agendaData);
   }
 
@@ -59,19 +67,29 @@ export default function AgendaCalendarPage() {
     });
   }, []);
 
-  const visibleItems = useMemo(() => items
+  const activityById = useMemo(() => new Map(activities.map((item) => [item.id, item])), [activities]);
+  const requirementById = useMemo(() => new Map(requirements.map((item) => [item.id, item])), [requirements]);
+  const campusOptions = useMemo(() => uniqueOptions(requirements.map((item) => item.campus).filter(Boolean)), [requirements]);
+  const statusOptions = useMemo(() => uniqueOptions(activities.map((item) => item.status).filter(Boolean)), [activities]);
+  const agendaItems = useMemo(() => mergeManualAndActivityReservations(items, activities, requirementById, technicians), [items, activities, requirementById, technicians]);
+  const visibleItems = useMemo(() => agendaItems
     .filter((item) => !selectedTechnician || item.technicianEmail.toLowerCase() === selectedTechnician.toLowerCase())
-    .filter((item) => matchesAgenda(item, search)), [items, selectedTechnician, search]);
-  const selectedTechnicianName = technicians.find((item) => item.email === selectedTechnician)?.name ?? "Equipo técnico";
-  const periodDays = mode === "month" ? monthGrid(cursorDate) : mode === "week" ? weekDays(cursorDate) : [startOfDay(cursorDate)];
+    .filter((item) => {
+      const activity = activityById.get(item.activityId);
+      const requirement = requirementById.get(item.requirementId);
+      const campusMatches = !selectedCampus || requirement?.campus === selectedCampus;
+      const statusMatches = !selectedStatus || activity?.status === selectedStatus;
+      return campusMatches && statusMatches;
+    })
+    .filter((item) => matchesAgenda(item, search, activityById.get(item.activityId), requirementById.get(item.requirementId))), [agendaItems, selectedTechnician, selectedCampus, selectedStatus, search, activityById, requirementById]);
+  const includeWeekend = weekScope === "full";
+  const periodDays = mode === "month" ? monthGrid(cursorDate) : mode === "week" || mode === "list" ? weekDays(cursorDate, includeWeekend) : [startOfDay(cursorDate)];
   const periodItems = visibleItems.filter((item) => isInPeriod(item, periodDays));
-  const assignedProducts = activities.filter((item) => !selectedTechnician || item.productResponsible.toLowerCase() === selectedTechnician.toLowerCase());
-  const plannedHours = periodItems.reduce((total, item) => total + duration(item), 0);
 
   function movePeriod(direction: number) {
     setCursorDate((current) => {
       if (mode === "day") return addDays(current, direction);
-      if (mode === "week") return addDays(current, direction * 7);
+      if (mode === "week" || mode === "list") return addDays(current, direction * 7);
       return addMonths(current, direction);
     });
   }
@@ -80,60 +98,96 @@ export default function AgendaCalendarPage() {
     <main className="app-shell">
       <AppNav />
       <section className="content-shell calendar-shell">
-        <section className="panel">
-          <div className="card-head calendar-page-head">
+        <section className="calendar-hero">
+          <div className="calendar-page-head">
             <div>
+              <span className="eyebrow">Operación de marketing</span>
               <h2>Calendario técnico</h2>
-              <p>Vista de planificación por día, semana y mes para revisar carga, disponibilidad y entregables.</p>
-            </div>
-            <div className="actions">
-              <Link className="button secondary" href="/agenda" title="Ir al maestro detalle de agenda"><Edit3 size={16} /> Gestionar agenda</Link>
+              <p>Planifica requerimientos, compromisos y capacidad disponible del equipo técnico.</p>
             </div>
           </div>
+        </section>
 
-          <div className="calendar-controls top-space">
+        <section className="panel calendar-command-panel">
+          <div className="calendar-actions-left">
+            <button className="button secondary compact" type="button" title="Volver a hoy" onClick={() => setCursorDate(startOfDay(new Date()))}>Hoy</button>
+            <button className="button secondary compact" type="button" title="Actualizar calendario" onClick={() => load()}><RefreshCw size={16} /> Actualizar</button>
+            <Link className="button compact" href="/agenda" title="Ir al maestro detalle de agenda"><Edit3 size={16} /> Gestionar agenda</Link>
+          </div>
+
+          <label className="field calendar-search top-space">
+            <span>Buscar</span>
+            <div className="input-with-icon"><Search size={16} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Producto, título, técnico, notas..." /></div>
+          </label>
+
+          <div className="calendar-filter-strip top-space">
+            <label className="field">
+              <span>Técnico</span>
+              <select value={selectedTechnician} onChange={(event) => setSelectedTechnician(event.target.value)}>
+                {technicians.length > 1 && <option value="">Todos los técnicos</option>}
+                {technicians.map((item) => <option key={item.id} value={item.email}>{item.name} - {item.email}</option>)}
+              </select>
+            </label>
+            <label className="field">
+              <span>Sede</span>
+              <select value={selectedCampus} onChange={(event) => setSelectedCampus(event.target.value)}>
+                <option value="">Todas las sedes</option>
+                {campusOptions.map((item) => <option key={item} value={item}>{item}</option>)}
+              </select>
+            </label>
+            <label className="field">
+              <span>Estado</span>
+              <select value={selectedStatus} onChange={(event) => setSelectedStatus(event.target.value)}>
+                <option value="">Todos los estados</option>
+                {statusOptions.map((item) => <option key={item} value={item}>{activityStatusLabel(item)}</option>)}
+              </select>
+            </label>
+            <label className="field">
+              <span>Vista</span>
+              <select value={mode} onChange={(event) => setMode(event.target.value as CalendarMode)}>
+                <option value="day">Día</option>
+                <option value="week">Semana</option>
+                <option value="month">Mes</option>
+                <option value="list">Lista</option>
+              </select>
+            </label>
+            <label className="field">
+              <span>Días</span>
+              <select value={weekScope} onChange={(event) => setWeekScope(event.target.value as WeekScope)} disabled={mode === "day" || mode === "month"}>
+                <option value="workdays">Días laborales</option>
+                <option value="full">Semana completa</option>
+              </select>
+            </label>
+          </div>
+
+          <div className="calendar-options top-space">
             <div className="segmented-control" aria-label="Modo de calendario">
               <button className={mode === "day" ? "active" : ""} type="button" onClick={() => setMode("day")}>Día</button>
               <button className={mode === "week" ? "active" : ""} type="button" onClick={() => setMode("week")}>Semana</button>
               <button className={mode === "month" ? "active" : ""} type="button" onClick={() => setMode("month")}>Mes</button>
+              <button className={mode === "list" ? "active" : ""} type="button" onClick={() => setMode("list")}>Lista</button>
             </div>
             <div className="period-navigation">
               <button className="icon-button" type="button" title="Periodo anterior" onClick={() => movePeriod(-1)}><ChevronLeft size={16} /></button>
-              <strong>{periodLabel(cursorDate, mode)}</strong>
+              <strong>{periodLabel(cursorDate, mode, includeWeekend)}</strong>
               <button className="icon-button" type="button" title="Periodo siguiente" onClick={() => movePeriod(1)}><ChevronRight size={16} /></button>
-              <button className="button secondary compact" type="button" title="Volver a hoy" onClick={() => setCursorDate(startOfDay(new Date()))}>Hoy</button>
             </div>
           </div>
 
-          <div className="agenda-summary top-space">
-            <label className="field">
-              <span>Técnico</span>
-              <select value={selectedTechnician} onChange={(event) => setSelectedTechnician(event.target.value)}>
-                {technicians.map((item) => <option key={item.id} value={item.email}>{item.name} - {item.email}</option>)}
-              </select>
-            </label>
-            <div className="detail-item"><span>Productos asignados</span><strong>{assignedProducts.length}</strong></div>
-            <div className="detail-item"><span>Bloques del periodo</span><strong>{periodItems.length}</strong></div>
-            <div className="detail-item"><span>Horas planificadas</span><strong>{plannedHours.toFixed(1)}</strong></div>
-          </div>
-
-          <label className="field top-space">
-            <span>Buscar en calendario</span>
-            <div className="input-with-icon"><Search size={16} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Producto, titulo, tecnico, notas..." /></div>
-          </label>
         </section>
 
         <section className="panel calendar-panel top-space">
-          <div className="card-head">
+          <div className="card-head calendar-visual-head">
             <div>
-              <h2>{selectedTechnicianName}</h2>
+              <h2>{mode === "list" ? "Próximos compromisos" : "Visual de agenda"}</h2>
               <p>{calendarSummary(periodItems, mode)}</p>
             </div>
-            <span className="badge"><ListFilter size={14} /> {mode === "day" ? "Vista día" : mode === "week" ? "Vista semana" : "Vista mes"}</span>
+            <span className="badge"><ListFilter size={14} /> {mode === "day" ? "Vista día" : mode === "week" ? "Vista semana" : mode === "month" ? "Vista mes" : "Vista lista"}</span>
           </div>
           {mode === "day" && <DayView date={cursorDate} items={periodItems} onOpen={setSelectedItem} />}
           {mode === "week" && <WeekView days={periodDays} items={periodItems} onOpen={setSelectedItem} />}
           {mode === "month" && <MonthView cursorDate={cursorDate} days={periodDays} items={periodItems} onOpen={setSelectedItem} />}
+          {mode === "list" && <ListView items={periodItems} onOpen={setSelectedItem} />}
         </section>
 
         {selectedItem && (
@@ -151,6 +205,8 @@ export default function AgendaCalendarPage() {
                 <div className="detail-item"><span>Fin</span><strong>{formatDateTime(selectedItem.endAt)}</strong></div>
                 <div className="detail-item"><span>Duración</span><strong>{duration(selectedItem).toFixed(1)} h</strong></div>
                 <div className="detail-item"><span>Técnico</span><strong>{selectedItem.technicianName}</strong></div>
+                <div className="detail-item"><span>Sede</span><strong>{requirementById.get(selectedItem.requirementId)?.campus ?? "Sin sede"}</strong></div>
+                <div className="detail-item"><span>Estado producto</span><strong>{activityStatusLabel(activityById.get(selectedItem.activityId)?.status ?? "")}</strong></div>
                 <div className="detail-item"><span>Requerimiento</span><strong>{selectedItem.requirementId}</strong></div>
                 <div className="detail-item"><span>Producto</span><strong>{selectedItem.productId}</strong></div>
               </div>
@@ -192,19 +248,39 @@ function DayView({ date, items, onOpen }: { date: Date; items: AgendaItem[]; onO
 
 function WeekView({ days, items, onOpen }: { days: Date[]; items: AgendaItem[]; onOpen: (item: AgendaItem) => void }) {
   return (
-    <div className="week-calendar top-space">
-      {days.map((day) => (
-        <section className="week-day" key={day.toISOString()}>
-          <div className="week-day-head">
-            <strong>{weekday(day)}</strong>
-            <span>{shortDate(day)}</span>
-          </div>
-          <div className="week-day-events">
-            {itemsForDay(items, day).map((item) => <CalendarEvent key={item.id} item={item} onOpen={onOpen} />)}
-            {itemsForDay(items, day).length === 0 && <span className="calendar-empty">Libre</span>}
-          </div>
-        </section>
+    <div className={`week-calendar top-space ${days.length === 5 ? "workweek" : ""}`}>
+      <div className="week-grid-head empty-cell">Hora</div>
+      {days.map((day) => <div className="week-grid-head" key={day.toISOString()}><strong>{weekday(day)}</strong><span>{shortDate(day)}</span></div>)}
+      {dayHours.map((hour) => (
+        <div className="week-grid-row" key={hour}>
+          <div className="week-time-cell">{String(hour).padStart(2, "0")}:00</div>
+          {days.map((day) => {
+            const hourItems = itemsForDay(items, day).filter((item) => new Date(item.startAt).getHours() === hour);
+            return (
+              <div className="week-slot-cell" key={`${day.toISOString()}-${hour}`}>
+                {hourItems.map((item) => <CalendarEvent key={item.id} item={item} onOpen={onOpen} />)}
+              </div>
+            );
+          })}
+        </div>
       ))}
+    </div>
+  );
+}
+
+function ListView({ items, onOpen }: { items: AgendaItem[]; onOpen: (item: AgendaItem) => void }) {
+  const ordered = [...items].sort((a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime());
+  return (
+    <div className="booking-list top-space">
+      {ordered.map((item) => (
+        <button className="booking-list-row" type="button" key={item.id} onClick={() => onOpen(item)}>
+          <span>{shortWeekdayDate(new Date(item.startAt))}</span>
+          <strong>{item.title}</strong>
+          <em>{duration(item).toFixed(1)} h · {item.productType}</em>
+          <b>Confirmado</b>
+        </button>
+      ))}
+      {ordered.length === 0 && <div className="calendar-empty">No hay compromisos para el periodo seleccionado.</div>}
     </div>
   );
 }
@@ -231,13 +307,76 @@ function MonthView({ cursorDate, days, items, onOpen }: { cursorDate: Date; days
 
 function CalendarEvent({ item, compact = false, onOpen }: { item: AgendaItem; compact?: boolean; onOpen: (item: AgendaItem) => void }) {
   return (
-    <button className={`calendar-event ${compact ? "compact" : ""}`} type="button" title="Ver detalle de agenda" onClick={() => onOpen(item)}>
+    <button className={`calendar-event ${compact ? "compact" : ""} ${item.id.startsWith("auto-") ? "auto-reserved" : ""}`} type="button" title="Ver detalle de agenda" onClick={() => onOpen(item)}>
       <strong>{compact ? item.productId : item.title}</strong>
       {!compact && <span>{item.productId} | {item.productType}</span>}
       <small><Clock size={12} /> {timeRange(item)}</small>
+      {item.id.startsWith("auto-") && <small>Jornada completa</small>}
       {!compact && <em><UserRound size={12} /> {item.technicianName}</em>}
     </button>
   );
+}
+
+function mergeManualAndActivityReservations(manualItems: AgendaItem[], activities: Activity[], requirements: Map<string, Requirement>, technicians: User[]) {
+  const manualActivityIds = new Set(manualItems.map((item) => item.activityId));
+  const generated = activities
+    .filter((activity) => !manualActivityIds.has(activity.id) && !isClosed(activity.status))
+    .flatMap((activity) => buildActivityReservations(activity, requirements.get(activity.requirementId), technicians));
+  return [...manualItems, ...generated];
+}
+
+function buildActivityReservations(activity: Activity, requirement: Requirement | undefined, technicians: User[]) {
+  const start = parseRequirementDate(requirement?.startDate, requirement?.startTime);
+  const end = parseRequirementDate(requirement?.endDate || activity.productDeliveryDate || requirement?.startDate, requirement?.endTime);
+  if (!start || !end) return [];
+  const responsible = resolveTechnician(activity.productResponsible, technicians);
+  const days = daysBetween(start, end);
+  return days.map((day) => {
+    const startAt = withTime(day, 8, 0);
+    const endAt = withTime(day, 17, 0);
+    return {
+      id: `auto-${activity.id}-${day.toISOString().slice(0, 10)}`,
+      activityId: activity.id,
+      requirementId: activity.requirementId,
+      productId: activity.productId,
+      productType: activity.productType,
+      technicianName: responsible.name,
+      technicianEmail: responsible.email,
+      startAt: startAt.toISOString(),
+      endAt: endAt.toISOString(),
+      title: `${activity.productId} - ${activity.productType}`,
+      notes: "Reserva automática por fechas del requerimiento."
+    };
+  });
+}
+
+function parseRequirementDate(date?: string | null, time?: string | null) {
+  if (!date) return null;
+  const value = new Date(`${date.slice(0, 10)}T${time || "08:00"}`);
+  return Number.isNaN(value.getTime()) ? null : startOfDay(value);
+}
+
+function resolveTechnician(value: string, technicians: User[]) {
+  const key = value.toLowerCase();
+  const technician = technicians.find((item) => item.email.toLowerCase() === key || item.name.toLowerCase() === key);
+  return {
+    name: technician?.name ?? value,
+    email: technician?.email ?? value
+  };
+}
+
+function daysBetween(start: Date, end: Date) {
+  const first = startOfDay(start);
+  const last = startOfDay(end);
+  const days: Date[] = [];
+  for (let day = first; day.getTime() <= last.getTime(); day = addDays(day, 1)) days.push(day);
+  return days;
+}
+
+function withTime(value: Date, hour: number, minute: number) {
+  const date = new Date(value);
+  date.setHours(hour, minute, 0, 0);
+  return date;
 }
 
 function filterActivities(activities: Activity[], session: ReturnType<typeof getSession>) {
@@ -247,10 +386,10 @@ function filterActivities(activities: Activity[], session: ReturnType<typeof get
   return activities.filter((item) => keys.includes(item.productResponsible.toLowerCase()));
 }
 
-function matchesAgenda(item: AgendaItem, term: string) {
+function matchesAgenda(item: AgendaItem, term: string, activity?: Activity, requirement?: Requirement) {
   const query = term.trim().toLowerCase();
   if (!query) return true;
-  return [item.title, item.notes, item.productId, item.productType, item.technicianName, item.technicianEmail].some((value) => value.toLowerCase().includes(query));
+  return [item.title, item.notes, item.productId, item.productType, item.technicianName, item.technicianEmail, activity?.status ?? "", requirement?.campus ?? ""].some((value) => value.toLowerCase().includes(query));
 }
 
 function isInPeriod(item: AgendaItem, days: Date[]) {
@@ -279,17 +418,17 @@ function formatFullDate(value: Date) {
   return value.toLocaleDateString("es-EC", { weekday: "long", day: "2-digit", month: "long", year: "numeric" });
 }
 
-function periodLabel(value: Date, mode: CalendarMode) {
+function periodLabel(value: Date, mode: CalendarMode, includeWeekend = true) {
   if (mode === "day") return formatFullDate(value);
-  if (mode === "week") {
-    const days = weekDays(value);
-    return `${shortDate(days[0])} - ${shortDate(days[6])}`;
+  if (mode === "week" || mode === "list") {
+    const days = weekDays(value, includeWeekend);
+    return `${shortDate(days[0])} - ${shortDate(days[days.length - 1])}`;
   }
   return value.toLocaleDateString("es-EC", { month: "long", year: "numeric" });
 }
 
 function calendarSummary(items: AgendaItem[], mode: CalendarMode) {
-  const label = mode === "day" ? "del día" : mode === "week" ? "de la semana" : "del mes";
+  const label = mode === "day" ? "del día" : mode === "week" || mode === "list" ? "de la semana" : "del mes";
   const hours = items.reduce((total, item) => total + duration(item), 0);
   return `${items.length} bloques ${label}, ${hours.toFixed(1)} horas planificadas.`;
 }
@@ -312,11 +451,11 @@ function addMonths(value: Date, amount: number) {
   return startOfDay(date);
 }
 
-function weekDays(value: Date) {
+function weekDays(value: Date, includeWeekend = true) {
   const day = startOfDay(value);
   const mondayOffset = (day.getDay() + 6) % 7;
   const monday = addDays(day, -mondayOffset);
-  return Array.from({ length: 7 }, (_, index) => addDays(monday, index));
+  return Array.from({ length: includeWeekend ? 7 : 5 }, (_, index) => addDays(monday, index));
 }
 
 function monthGrid(value: Date) {
@@ -336,4 +475,28 @@ function shortDate(value: Date) {
 
 function weekday(value: Date) {
   return value.toLocaleDateString("es-EC", { weekday: "short" });
+}
+
+function shortWeekdayDate(value: Date) {
+  return value.toLocaleDateString("es-EC", { weekday: "short", day: "numeric" }) + ` · ${value.toLocaleTimeString("es-EC", { hour: "2-digit", minute: "2-digit" })}`;
+}
+
+function uniqueOptions(values: string[]) {
+  return Array.from(new Set(values)).sort((left, right) => left.localeCompare(right));
+}
+
+function isClosed(status: string) {
+  return ["Approved", "Completed"].includes(status);
+}
+
+function activityStatusLabel(status: string) {
+  const labels: Record<string, string> = {
+    Draft: "Borrador",
+    InProgress: "En proceso",
+    PendingApproval: "Pendiente aprobación",
+    Approved: "Aprobado",
+    Rejected: "Rechazado",
+    Completed: "Completado"
+  };
+  return labels[status] ?? (status || "Sin estado");
 }

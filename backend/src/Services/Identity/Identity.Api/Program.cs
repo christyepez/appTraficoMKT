@@ -728,17 +728,17 @@ public sealed class BrandSettings
 
 public static class ScreenAccess
 {
-    public static readonly string[] All = ["dashboard", "activities", "agenda", "agenda-calendar", "evidence", "approvals", "metrics", "audit", "admin", "users", "storage", "initial-import", "branding", "notifications", "my-notifications", "notification-log"];
+    public static readonly string[] All = ["dashboard", "activities", "agenda", "agenda-calendar", "agenda-metrics", "evidence", "approvals", "metrics", "audit", "admin", "users", "storage", "initial-import", "branding", "notifications", "my-notifications", "notification-log"];
 
     public static string[] DefaultForRoles(IEnumerable<string> roles)
     {
         var roleSet = roles.Select(x => x.Trim()).ToHashSet(StringComparer.OrdinalIgnoreCase);
         if (roleSet.Contains("Administrador")) return All;
         var screens = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "dashboard" };
-        if (roleSet.Contains("Tecnico")) screens.UnionWith(["activities", "agenda", "agenda-calendar", "evidence", "my-notifications"]);
+        if (roleSet.Contains("Tecnico")) screens.UnionWith(["activities", "agenda", "agenda-calendar", "agenda-metrics", "evidence", "my-notifications"]);
         if (roleSet.Contains("Aprobador")) screens.UnionWith(["approvals", "my-notifications"]);
-        if (roleSet.Contains("Coordinador")) screens.UnionWith(["activities", "agenda", "agenda-calendar", "evidence", "approvals", "metrics", "audit", "my-notifications"]);
-        if (roleSet.Contains("Auditor")) screens.UnionWith(["dashboard", "activities", "agenda", "agenda-calendar", "evidence", "approvals", "metrics", "audit"]);
+        if (roleSet.Contains("Coordinador")) screens.UnionWith(["activities", "agenda", "agenda-calendar", "agenda-metrics", "evidence", "approvals", "metrics", "audit", "my-notifications"]);
+        if (roleSet.Contains("Auditor")) screens.UnionWith(["dashboard", "activities", "agenda", "agenda-calendar", "agenda-metrics", "evidence", "approvals", "metrics", "audit"]);
         return screens.ToArray();
     }
 }
@@ -919,6 +919,10 @@ public static class IdentitySchema
             SET [ScreenPermissions] = REPLACE([ScreenPermissions], 'agenda,evidence', 'agenda,agenda-calendar,evidence')
             WHERE [ScreenPermissions] LIKE '%agenda%'
               AND [ScreenPermissions] NOT LIKE '%agenda-calendar%'
+            UPDATE [Users]
+            SET [ScreenPermissions] = REPLACE([ScreenPermissions], 'agenda-calendar,evidence', 'agenda-calendar,agenda-metrics,evidence')
+            WHERE [ScreenPermissions] LIKE '%agenda-calendar%'
+              AND [ScreenPermissions] NOT LIKE '%agenda-metrics%'
             EXEC('UPDATE [Users] SET [AllowMicrosoftLogin] = 1 WHERE [AuthProvider] = ''Microsoft''')
             IF OBJECT_ID('BrandSettings', 'U') IS NULL
             BEGIN
@@ -954,7 +958,7 @@ public static class IdentitySchema
                     [MenuMode] nvarchar(20) NOT NULL,
                     [MenuCollapsed] bit NOT NULL,
                     [MobileMenuCollapsed] bit NOT NULL DEFAULT(1),
-                    [MenuOrder] nvarchar(1000) NOT NULL DEFAULT('dashboard,activities,agenda,agenda-calendar,evidence,approvals,metrics,audit,admin,users,storage,initial-import,branding,notifications,my-notifications,notification-log'),
+                    [MenuOrder] nvarchar(1000) NOT NULL DEFAULT('dashboard,activities,agenda,agenda-calendar,agenda-metrics,evidence,approvals,metrics,audit,admin,users,storage,initial-import,branding,notifications,my-notifications,notification-log'),
                     [HeaderTextAlign] nvarchar(20) NOT NULL DEFAULT('center'),
                     [HeaderTextPosition] nvarchar(20) NOT NULL DEFAULT('middle'),
                     [ShowHeaderTitle] bit NOT NULL DEFAULT(1),
@@ -1127,7 +1131,7 @@ public static class IdentitySchema
             END
             IF COL_LENGTH('BrandSettings', 'MenuOrder') IS NULL
             BEGIN
-                ALTER TABLE [BrandSettings] ADD [MenuOrder] nvarchar(1000) NOT NULL DEFAULT('dashboard,activities,agenda,agenda-calendar,evidence,approvals,metrics,audit,admin,users,storage,initial-import,branding,notifications,my-notifications,notification-log')
+                ALTER TABLE [BrandSettings] ADD [MenuOrder] nvarchar(1000) NOT NULL DEFAULT('dashboard,activities,agenda,agenda-calendar,agenda-metrics,evidence,approvals,metrics,audit,admin,users,storage,initial-import,branding,notifications,my-notifications,notification-log')
             END
             UPDATE [BrandSettings]
             SET [MenuOrder] = REPLACE([MenuOrder], 'dashboard,activities,evidence', 'dashboard,activities,agenda,evidence')
@@ -1136,6 +1140,10 @@ public static class IdentitySchema
             SET [MenuOrder] = REPLACE([MenuOrder], 'agenda,evidence', 'agenda,agenda-calendar,evidence')
             WHERE [MenuOrder] LIKE '%agenda%'
               AND [MenuOrder] NOT LIKE '%agenda-calendar%'
+            UPDATE [BrandSettings]
+            SET [MenuOrder] = REPLACE([MenuOrder], 'agenda-calendar,evidence', 'agenda-calendar,agenda-metrics,evidence')
+            WHERE [MenuOrder] LIKE '%agenda-calendar%'
+              AND [MenuOrder] NOT LIKE '%agenda-metrics%'
             IF COL_LENGTH('BrandSettings', 'HeaderColor') IS NULL
             BEGIN
                 ALTER TABLE [BrandSettings] ADD [HeaderColor] nvarchar(20) NOT NULL DEFAULT('#3c235f')
