@@ -258,17 +258,17 @@ export default function BrandingPage() {
                 {activeCategory === "login" && (
                   <>
                     <h3 className="field-wide settings-group-title">Crear requerimiento sin login</h3>
-                    <label className="check-field"><input type="checkbox" checked={settings.showPublicRequirementForm} onChange={(event) => setSettings({ ...settings, showPublicRequirementForm: event.target.checked })} /> Mostrar botón Crear requerimiento sin login</label>
                     <DateTimeField label="Activo desde" value={settings.publicRequirementFormActiveFrom} onChange={(publicRequirementFormActiveFrom) => setSettings({ ...settings, publicRequirementFormActiveFrom })} />
                     <DateTimeField label="Activo hasta" value={settings.publicRequirementFormActiveUntil} onChange={(publicRequirementFormActiveUntil) => setSettings({ ...settings, publicRequirementFormActiveUntil })} />
+                    <label className="check-field field-wide"><input type="checkbox" checked={settings.showPublicRequirementForm} onChange={(event) => setSettings({ ...settings, showPublicRequirementForm: event.target.checked })} /> Mostrar botón Crear requerimiento sin login</label>
                     <h3 className="field-wide settings-group-title">Formulario completo sin login</h3>
-                    <label className="check-field"><input type="checkbox" checked={settings.showPublicRequirementFullPage} onChange={(event) => setSettings({ ...settings, showPublicRequirementFullPage: event.target.checked })} /> Mostrar botón Abrir formulario completo</label>
                     <DateTimeField label="Activo desde" value={settings.publicRequirementFullPageActiveFrom} onChange={(publicRequirementFullPageActiveFrom) => setSettings({ ...settings, publicRequirementFullPageActiveFrom })} />
                     <DateTimeField label="Activo hasta" value={settings.publicRequirementFullPageActiveUntil} onChange={(publicRequirementFullPageActiveUntil) => setSettings({ ...settings, publicRequirementFullPageActiveUntil })} />
+                    <label className="check-field field-wide"><input type="checkbox" checked={settings.showPublicRequirementFullPage} onChange={(event) => setSettings({ ...settings, showPublicRequirementFullPage: event.target.checked })} /> Mostrar botón Abrir formulario completo</label>
                     <h3 className="field-wide settings-group-title">Robot Puma</h3>
-                    <label className="check-field"><input type="checkbox" checked={settings.showLoginChatbot} onChange={(event) => setSettings({ ...settings, showLoginChatbot: event.target.checked })} /> Mostrar robot Puma en login</label>
                     <DateTimeField label="Activo desde" value={settings.loginChatbotActiveFrom} onChange={(loginChatbotActiveFrom) => setSettings({ ...settings, loginChatbotActiveFrom })} />
                     <DateTimeField label="Activo hasta" value={settings.loginChatbotActiveUntil} onChange={(loginChatbotActiveUntil) => setSettings({ ...settings, loginChatbotActiveUntil })} />
+                    <label className="check-field field-wide"><input type="checkbox" checked={settings.showLoginChatbot} onChange={(event) => setSettings({ ...settings, showLoginChatbot: event.target.checked })} /> Mostrar robot Puma en login</label>
                     <label className="check-field"><input type="checkbox" checked={settings.showDemoCredentials} onChange={(event) => setSettings({ ...settings, showDemoCredentials: event.target.checked })} /> Mostrar credenciales de prueba en login</label>
                     <label className="check-field"><input type="checkbox" checked={settings.showOffice365Login} onChange={(event) => setSettings({ ...settings, showOffice365Login: event.target.checked })} /> Mostrar ingreso con Office 365</label>
                   </>
