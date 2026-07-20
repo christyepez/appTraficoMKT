@@ -1178,22 +1178,39 @@ mark {
 }
 
 .calendar-filter-strip,
-.calendar-options,
 .period-navigation,
-.calendar-actions-left {
+.calendar-actions-left,
+.calendar-actions-right {
   display: flex;
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
 }
 
+.calendar-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--secondary) 70%, #ffffff);
+}
+
 .calendar-actions-left {
   justify-content: flex-start;
 }
 
+.calendar-actions-right {
+  justify-content: flex-end;
+  margin-left: auto;
+}
+
 .calendar-filter-strip {
   display: grid;
-  grid-template-columns: minmax(240px, 1.2fr) repeat(4, minmax(150px, 0.7fr));
+  grid-template-columns: minmax(240px, 1.2fr) repeat(2, minmax(170px, 0.7fr));
   padding: 12px;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -1213,6 +1230,51 @@ mark {
   color: var(--primary);
   text-align: center;
   text-transform: capitalize;
+}
+
+.calendar-date-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.calendar-date-field span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.calendar-date-field input {
+  width: 140px;
+  border: 0;
+  padding: 0;
+  color: var(--foreground);
+  background: transparent;
+}
+
+.calendar-date-field input:focus {
+  outline: none;
+}
+
+.calendar-visual-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.calendar-week-toggle {
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  font-size: 13px;
 }
 
 .segmented-control {
@@ -2168,7 +2230,9 @@ mark {
 
   .calendar-page-head,
   .calendar-visual-head,
-  .calendar-options,
+  .calendar-toolbar,
+  .calendar-actions-left,
+  .calendar-actions-right,
   .period-navigation {
     align-items: stretch;
     flex-direction: column;
@@ -2185,7 +2249,14 @@ mark {
   }
 
   .period-navigation .icon-button,
-  .period-navigation .button {
+  .period-navigation .button,
+  .calendar-actions-left .button,
+  .calendar-actions-right .button,
+  .calendar-date-field {
+    width: 100%;
+  }
+
+  .calendar-date-field input {
     width: 100%;
   }
 

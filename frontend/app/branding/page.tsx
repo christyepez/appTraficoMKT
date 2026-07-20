@@ -5,7 +5,7 @@ import { api, applyBrandVariables, defaultBrandSettings, showToast, t, type Bran
 import { Bold, ClipboardList, Image as ImageIcon, ImageUp, Italic, ListOrdered, LogIn, Menu, MousePointer2, Palette, RotateCcw, Save, Type, Underline, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
-type BrandCategory = "textos" | "colores" | "botones" | "tipografia" | "cabecera" | "menu" | "formularios" | "logo" | "login";
+type BrandCategory = "textos" | "colores" | "botones" | "tipografia" | "cabecera" | "menu" | "agenda" | "formularios" | "logo" | "login";
 
 const categoryMeta: Array<{ id: BrandCategory; title: string; description: string; icon: typeof Type }> = [
   { id: "textos", title: "Textos", description: "Título y subtítulo institucional.", icon: Type },
@@ -14,6 +14,7 @@ const categoryMeta: Array<{ id: BrandCategory; title: string; description: strin
   { id: "tipografia", title: "Tipografía", description: "Fuente principal del sistema.", icon: Type },
   { id: "cabecera", title: "Cabecera", description: "Alineación y ubicación del texto.", icon: Menu },
   { id: "menu", title: "Administrar menú", description: "Presentación y orden de las opciones.", icon: ListOrdered },
+  { id: "agenda", title: "Agenda", description: "Jornada laboral y ventana de replanificación.", icon: ClipboardList },
   { id: "formularios", title: "Formularios", description: "Visibilidad de campos administrados por el sistema.", icon: ClipboardList },
   { id: "logo", title: "Logo e imágenes", description: "Logo principal e icono del robot.", icon: ImageIcon },
   { id: "login", title: "Login público", description: "Formulario externo y robot Puma.", icon: LogIn }
@@ -244,6 +245,14 @@ export default function BrandingPage() {
                     </div>
                   </>
                 )}
+                {activeCategory === "agenda" && (
+                  <>
+                    <label className="field"><span>Inicio jornada laboral</span><input type="time" value={settings.workdayStartTime} onChange={(event) => setSettings({ ...settings, workdayStartTime: event.target.value })} /></label>
+                    <label className="field"><span>Fin jornada laboral</span><input type="time" value={settings.workdayEndTime} onChange={(event) => setSettings({ ...settings, workdayEndTime: event.target.value })} /></label>
+                    <label className="field"><span>Días permitidos para replanificar</span><input type="number" min={0} max={365} value={settings.replanningWindowDays} onChange={(event) => setSettings({ ...settings, replanningWindowDays: Number(event.target.value) })} /></label>
+                    <p className="hint field-wide">Estos valores controlan la reserva automática de jornada completa en agenda y el margen operativo para replanificar.</p>
+                  </>
+                )}
                 {activeCategory === "formularios" && (
                   <label className="check-field"><input type="checkbox" checked={settings.showProductIdField} onChange={(event) => setSettings({ ...settings, showProductIdField: event.target.checked })} /> Mostrar Id producto al crear o editar productos</label>
                 )}
@@ -302,6 +311,7 @@ function categorySummary(category: BrandCategory, settings: BrandSettings) {
     tipografia: settings.fontFamily.split(",")[0],
     cabecera: `${settings.headerTextAlign} | ${settings.headerTextPosition}`,
     menu: `${settings.menuMode} | ${menuOptions.length} opciones ordenadas`,
+    agenda: `${settings.workdayStartTime}-${settings.workdayEndTime} | Replanificar ${settings.replanningWindowDays} días`,
     formularios: settings.showProductIdField ? "Id producto visible" : "Id producto oculto",
     logo: settings.logo.startsWith("data:") ? "Logo cargado" : "URL configurada",
     login: [

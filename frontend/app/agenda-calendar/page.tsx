@@ -1,7 +1,7 @@
 "use client";
 
 import { AppNav } from "../nav";
-import { Activity, api, getSession, Requirement, showToast } from "../lib";
+import { Activity, api, getSession, Requirement, showToast, type BrandSettings, defaultBrandSettings } from "../lib";
 import { CalendarDays, ChevronLeft, ChevronRight, Clock, Edit3, ExternalLink, ListFilter, RefreshCw, Search, UserRound, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -23,8 +23,6 @@ type AgendaItem = {
   notes: string;
 };
 
-const dayHours = Array.from({ length: 11 }, (_, index) => index + 8);
-
 export default function AgendaCalendarPage() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [requirements, setRequirements] = useState<Requirement[]>([]);
@@ -38,14 +36,18 @@ export default function AgendaCalendarPage() {
   const [selectedStatus, setSelectedStatus] = useState("");
   const [search, setSearch] = useState("");
   const [selectedItem, setSelectedItem] = useState<AgendaItem | null>(null);
+  const [workdayStartTime, setWorkdayStartTime] = useState(defaultBrandSettings.workdayStartTime);
+  const [workdayEndTime, setWorkdayEndTime] = useState(defaultBrandSettings.workdayEndTime);
+  const [replanningWindowDays, setReplanningWindowDays] = useState(defaultBrandSettings.replanningWindowDays);
 
   async function load() {
     const session = getSession();
-    const [activityData, requirementData, userData, agendaData] = await Promise.all([
+    const [activityData, requirementData, userData, agendaData, brandData] = await Promise.all([
       api<Activity[]>("/api/activities"),
       api<Requirement[]>("/api/requirements"),
       api<User[]>("/api/identity/users/technicians").catch(() => []),
-      api<AgendaItem[]>("/api/agenda").catch(() => [])
+      api<AgendaItem[]>("/api/agenda").catch(() => []),
+      api<Partial<BrandSettings>>("/api/identity/brand-settings").catch(() => defaultBrandSettings)
     ]);
     const visibleTechnicians = session?.user.roles.includes("Administrador") || session?.user.roles.includes("Coordinador")
       ? userData
@@ -58,6 +60,9 @@ export default function AgendaCalendarPage() {
     setActivities(filterActivities(activityData, session));
     setRequirements(requirementData);
     setItems(agendaData);
+    setWorkdayStartTime(normalizeTime(brandData.workdayStartTime, defaultBrandSettings.workdayStartTime));
+    setWorkdayEndTime(normalizeTime(brandData.workdayEndTime, defaultBrandSettings.workdayEndTime));
+    setReplanningWindowDays(Number.isFinite(brandData.replanningWindowDays) ? Number(brandData.replanningWindowDays) : defaultBrandSettings.replanningWindowDays);
   }
 
   useEffect(() => {
@@ -71,7 +76,9 @@ export default function AgendaCalendarPage() {
   const requirementById = useMemo(() => new Map(requirements.map((item) => [item.id, item])), [requirements]);
   const campusOptions = useMemo(() => uniqueOptions(requirements.map((item) => item.campus).filter(Boolean)), [requirements]);
   const statusOptions = useMemo(() => uniqueOptions(activities.map((item) => item.status).filter(Boolean)), [activities]);
-  const agendaItems = useMemo(() => mergeManualAndActivityReservations(items, activities, requirementById, technicians), [items, activities, requirementById, technicians]);
+  const workdayRange = useMemo(() => buildWorkdayRange(workdayStartTime, workdayEndTime), [workdayStartTime, workdayEndTime]);
+  const dayHours = useMemo(() => buildDayHours(workdayRange.startHour, workdayRange.endHour), [workdayRange]);
+  const agendaItems = useMemo(() => mergeManualAndActivityReservations(items, activities, requirementById, technicians, workdayRange), [items, activities, requirementById, technicians, workdayRange]);
   const visibleItems = useMemo(() => agendaItems
     .filter((item) => !selectedTechnician || item.technicianEmail.toLowerCase() === selectedTechnician.toLowerCase())
     .filter((item) => {
@@ -109,10 +116,28 @@ export default function AgendaCalendarPage() {
         </section>
 
         <section className="panel calendar-command-panel">
-          <div className="calendar-actions-left">
-            <button className="button secondary compact" type="button" title="Volver a hoy" onClick={() => setCursorDate(startOfDay(new Date()))}>Hoy</button>
-            <button className="button secondary compact" type="button" title="Actualizar calendario" onClick={() => load()}><RefreshCw size={16} /> Actualizar</button>
-            <Link className="button compact" href="/agenda" title="Ir al maestro detalle de agenda"><Edit3 size={16} /> Gestionar agenda</Link>
+          <div className="calendar-toolbar">
+            <div className="calendar-actions-left">
+              <button className="button secondary compact" type="button" title="Volver a hoy" onClick={() => setCursorDate(startOfDay(new Date()))}>Hoy</button>
+              <button className="button secondary compact" type="button" title="Actualizar calendario" onClick={() => load()}><RefreshCw size={16} /> Actualizar</button>
+              <Link className="button compact" href="/agenda" title="Ir al maestro detalle de agenda"><Edit3 size={16} /> Gestionar agenda</Link>
+            </div>
+            <div className="calendar-actions-right">
+              <div className="segmented-control" aria-label="Modo de calendario">
+                <button className={mode === "day" ? "active" : ""} type="button" onClick={() => setMode("day")}>Día</button>
+                <button className={mode === "week" ? "active" : ""} type="button" onClick={() => setMode("week")}>Semana</button>
+                <button className={mode === "month" ? "active" : ""} type="button" onClick={() => setMode("month")}>Mes</button>
+                <button className={mode === "list" ? "active" : ""} type="button" onClick={() => setMode("list")}>Lista</button>
+              </div>
+              <div className="period-navigation">
+                <button className="icon-button" type="button" title="Periodo anterior" onClick={() => movePeriod(-1)}><ChevronLeft size={16} /></button>
+                <label className="calendar-date-field">
+                  <span>Fecha</span>
+                  <input type="date" value={toDateInput(cursorDate)} onChange={(event) => setCursorDate(startOfDay(new Date(`${event.target.value}T00:00`)))} />
+                </label>
+                <button className="icon-button" type="button" title="Periodo siguiente" onClick={() => movePeriod(1)}><ChevronRight size={16} /></button>
+              </div>
+            </div>
           </div>
 
           <label className="field calendar-search top-space">
@@ -142,36 +167,6 @@ export default function AgendaCalendarPage() {
                 {statusOptions.map((item) => <option key={item} value={item}>{activityStatusLabel(item)}</option>)}
               </select>
             </label>
-            <label className="field">
-              <span>Vista</span>
-              <select value={mode} onChange={(event) => setMode(event.target.value as CalendarMode)}>
-                <option value="day">Día</option>
-                <option value="week">Semana</option>
-                <option value="month">Mes</option>
-                <option value="list">Lista</option>
-              </select>
-            </label>
-            <label className="field">
-              <span>Días</span>
-              <select value={weekScope} onChange={(event) => setWeekScope(event.target.value as WeekScope)} disabled={mode === "day" || mode === "month"}>
-                <option value="workdays">Días laborales</option>
-                <option value="full">Semana completa</option>
-              </select>
-            </label>
-          </div>
-
-          <div className="calendar-options top-space">
-            <div className="segmented-control" aria-label="Modo de calendario">
-              <button className={mode === "day" ? "active" : ""} type="button" onClick={() => setMode("day")}>Día</button>
-              <button className={mode === "week" ? "active" : ""} type="button" onClick={() => setMode("week")}>Semana</button>
-              <button className={mode === "month" ? "active" : ""} type="button" onClick={() => setMode("month")}>Mes</button>
-              <button className={mode === "list" ? "active" : ""} type="button" onClick={() => setMode("list")}>Lista</button>
-            </div>
-            <div className="period-navigation">
-              <button className="icon-button" type="button" title="Periodo anterior" onClick={() => movePeriod(-1)}><ChevronLeft size={16} /></button>
-              <strong>{periodLabel(cursorDate, mode, includeWeekend)}</strong>
-              <button className="icon-button" type="button" title="Periodo siguiente" onClick={() => movePeriod(1)}><ChevronRight size={16} /></button>
-            </div>
           </div>
 
         </section>
@@ -180,12 +175,18 @@ export default function AgendaCalendarPage() {
           <div className="card-head calendar-visual-head">
             <div>
               <h2>{mode === "list" ? "Próximos compromisos" : "Visual de agenda"}</h2>
-              <p>{calendarSummary(periodItems, mode)}</p>
+              <p>{periodLabel(cursorDate, mode, includeWeekend)} | {calendarSummary(periodItems, mode)} | Jornada {workdayStartTime}-{workdayEndTime} | Replanificación {replanningWindowDays} días</p>
             </div>
-            <span className="badge"><ListFilter size={14} /> {mode === "day" ? "Vista día" : mode === "week" ? "Vista semana" : mode === "month" ? "Vista mes" : "Vista lista"}</span>
+            <div className="calendar-visual-actions">
+              <label className="check-field calendar-week-toggle">
+                <input type="checkbox" checked={weekScope === "full"} disabled={mode === "day" || mode === "month"} onChange={(event) => setWeekScope(event.target.checked ? "full" : "workdays")} />
+                Mostrar días semanales
+              </label>
+              <span className="badge"><ListFilter size={14} /> {mode === "day" ? "Vista día" : mode === "week" ? "Vista semana" : mode === "month" ? "Vista mes" : "Vista lista"}</span>
+            </div>
           </div>
-          {mode === "day" && <DayView date={cursorDate} items={periodItems} onOpen={setSelectedItem} />}
-          {mode === "week" && <WeekView days={periodDays} items={periodItems} onOpen={setSelectedItem} />}
+          {mode === "day" && <DayView date={cursorDate} items={periodItems} hours={dayHours} onOpen={setSelectedItem} />}
+          {mode === "week" && <WeekView days={periodDays} items={periodItems} hours={dayHours} onOpen={setSelectedItem} />}
           {mode === "month" && <MonthView cursorDate={cursorDate} days={periodDays} items={periodItems} onOpen={setSelectedItem} />}
           {mode === "list" && <ListView items={periodItems} onOpen={setSelectedItem} />}
         </section>
@@ -222,7 +223,7 @@ export default function AgendaCalendarPage() {
   );
 }
 
-function DayView({ date, items, onOpen }: { date: Date; items: AgendaItem[]; onOpen: (item: AgendaItem) => void }) {
+function DayView({ date, items, hours, onOpen }: { date: Date; items: AgendaItem[]; hours: number[]; onOpen: (item: AgendaItem) => void }) {
   return (
     <div className="day-calendar top-space">
       <div className="day-calendar-head">
@@ -230,7 +231,7 @@ function DayView({ date, items, onOpen }: { date: Date; items: AgendaItem[]; onO
         <strong>{formatFullDate(date)}</strong>
       </div>
       <div className="day-timeline">
-        {dayHours.map((hour) => {
+        {hours.map((hour) => {
           const hourItems = items.filter((item) => new Date(item.startAt).getHours() === hour);
           return (
             <div className="day-hour-row" key={hour}>
@@ -246,12 +247,12 @@ function DayView({ date, items, onOpen }: { date: Date; items: AgendaItem[]; onO
   );
 }
 
-function WeekView({ days, items, onOpen }: { days: Date[]; items: AgendaItem[]; onOpen: (item: AgendaItem) => void }) {
+function WeekView({ days, items, hours, onOpen }: { days: Date[]; items: AgendaItem[]; hours: number[]; onOpen: (item: AgendaItem) => void }) {
   return (
     <div className={`week-calendar top-space ${days.length === 5 ? "workweek" : ""}`}>
       <div className="week-grid-head empty-cell">Hora</div>
       {days.map((day) => <div className="week-grid-head" key={day.toISOString()}><strong>{weekday(day)}</strong><span>{shortDate(day)}</span></div>)}
-      {dayHours.map((hour) => (
+      {hours.map((hour) => (
         <div className="week-grid-row" key={hour}>
           <div className="week-time-cell">{String(hour).padStart(2, "0")}:00</div>
           {days.map((day) => {
@@ -317,23 +318,25 @@ function CalendarEvent({ item, compact = false, onOpen }: { item: AgendaItem; co
   );
 }
 
-function mergeManualAndActivityReservations(manualItems: AgendaItem[], activities: Activity[], requirements: Map<string, Requirement>, technicians: User[]) {
+function mergeManualAndActivityReservations(manualItems: AgendaItem[], activities: Activity[], requirements: Map<string, Requirement>, technicians: User[], workdayRange: WorkdayRange) {
   const manualActivityIds = new Set(manualItems.map((item) => item.activityId));
   const generated = activities
     .filter((activity) => !manualActivityIds.has(activity.id) && !isClosed(activity.status))
-    .flatMap((activity) => buildActivityReservations(activity, requirements.get(activity.requirementId), technicians));
+    .flatMap((activity) => buildActivityReservations(activity, requirements.get(activity.requirementId), technicians, workdayRange));
   return [...manualItems, ...generated];
 }
 
-function buildActivityReservations(activity: Activity, requirement: Requirement | undefined, technicians: User[]) {
+type WorkdayRange = { startHour: number; startMinute: number; endHour: number; endMinute: number };
+
+function buildActivityReservations(activity: Activity, requirement: Requirement | undefined, technicians: User[], workdayRange: WorkdayRange) {
   const start = parseRequirementDate(requirement?.startDate, requirement?.startTime);
   const end = parseRequirementDate(requirement?.endDate || activity.productDeliveryDate || requirement?.startDate, requirement?.endTime);
   if (!start || !end) return [];
   const responsible = resolveTechnician(activity.productResponsible, technicians);
   const days = daysBetween(start, end);
   return days.map((day) => {
-    const startAt = withTime(day, 8, 0);
-    const endAt = withTime(day, 17, 0);
+    const startAt = withTime(day, workdayRange.startHour, workdayRange.startMinute);
+    const endAt = withTime(day, workdayRange.endHour, workdayRange.endMinute);
     return {
       id: `auto-${activity.id}-${day.toISOString().slice(0, 10)}`,
       activityId: activity.id,
@@ -354,6 +357,28 @@ function parseRequirementDate(date?: string | null, time?: string | null) {
   if (!date) return null;
   const value = new Date(`${date.slice(0, 10)}T${time || "08:00"}`);
   return Number.isNaN(value.getTime()) ? null : startOfDay(value);
+}
+
+function buildWorkdayRange(startValue: string, endValue: string): WorkdayRange {
+  const start = parseTimeParts(startValue, "08:00");
+  const end = parseTimeParts(endValue, "17:00");
+  if (end.hour < start.hour || (end.hour === start.hour && end.minute <= start.minute)) return { startHour: 8, startMinute: 0, endHour: 17, endMinute: 0 };
+  return { startHour: start.hour, startMinute: start.minute, endHour: end.hour, endMinute: end.minute };
+}
+
+function buildDayHours(startHour: number, endHour: number) {
+  const safeStart = Math.max(0, Math.min(23, startHour));
+  const safeEnd = Math.max(safeStart + 1, Math.min(24, endHour));
+  return Array.from({ length: safeEnd - safeStart + 1 }, (_, index) => safeStart + index);
+}
+
+function parseTimeParts(value: string | undefined, fallback: string) {
+  const match = normalizeTime(value, fallback).match(/^(\d{2}):(\d{2})$/);
+  return { hour: Number(match?.[1] ?? fallback.slice(0, 2)), minute: Number(match?.[2] ?? fallback.slice(3, 5)) };
+}
+
+function normalizeTime(value: string | undefined, fallback: string) {
+  return value && /^\d{2}:\d{2}$/.test(value) ? value : fallback;
 }
 
 function resolveTechnician(value: string, technicians: User[]) {
@@ -479,6 +504,10 @@ function weekday(value: Date) {
 
 function shortWeekdayDate(value: Date) {
   return value.toLocaleDateString("es-EC", { weekday: "short", day: "numeric" }) + ` · ${value.toLocaleTimeString("es-EC", { hour: "2-digit", minute: "2-digit" })}`;
+}
+
+function toDateInput(value: Date) {
+  return new Date(value.getTime() - value.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 }
 
 function uniqueOptions(values: string[]) {

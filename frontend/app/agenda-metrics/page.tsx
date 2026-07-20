@@ -1,7 +1,7 @@
 "use client";
 
 import { AppNav } from "../nav";
-import { Activity, api, getSession, Requirement, showToast } from "../lib";
+import { Activity, api, getSession, Requirement, showToast, type BrandSettings, defaultBrandSettings } from "../lib";
 import { BarChart3, ChevronLeft, ChevronRight, RefreshCw, Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
@@ -32,14 +32,17 @@ export default function AgendaMetricsPage() {
   const [selectedCampus, setSelectedCampus] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
   const [search, setSearch] = useState("");
+  const [workdayStartTime, setWorkdayStartTime] = useState(defaultBrandSettings.workdayStartTime);
+  const [workdayEndTime, setWorkdayEndTime] = useState(defaultBrandSettings.workdayEndTime);
 
   async function load() {
     const session = getSession();
-    const [activityData, requirementData, userData, agendaData] = await Promise.all([
+    const [activityData, requirementData, userData, agendaData, brandData] = await Promise.all([
       api<Activity[]>("/api/activities"),
       api<Requirement[]>("/api/requirements"),
       api<User[]>("/api/identity/users/technicians").catch(() => []),
-      api<AgendaItem[]>("/api/agenda").catch(() => [])
+      api<AgendaItem[]>("/api/agenda").catch(() => []),
+      api<Partial<BrandSettings>>("/api/identity/brand-settings").catch(() => defaultBrandSettings)
     ]);
     const canSeeAll = session?.user.roles.includes("Administrador") || session?.user.roles.includes("Coordinador");
     const visibleTechnicians = canSeeAll ? userData : userData.filter((user) => user.email.toLowerCase() === session?.user.email.toLowerCase());
@@ -50,6 +53,8 @@ export default function AgendaMetricsPage() {
     setActivities(filterActivities(activityData, session));
     setRequirements(requirementData);
     setItems(agendaData);
+    setWorkdayStartTime(normalizeTime(brandData.workdayStartTime, defaultBrandSettings.workdayStartTime));
+    setWorkdayEndTime(normalizeTime(brandData.workdayEndTime, defaultBrandSettings.workdayEndTime));
   }
 
   useEffect(() => {
@@ -64,7 +69,8 @@ export default function AgendaMetricsPage() {
   const campusOptions = useMemo(() => uniqueOptions(requirements.map((item) => item.campus).filter(Boolean)), [requirements]);
   const statusOptions = useMemo(() => uniqueOptions(activities.map((item) => item.status).filter(Boolean)), [activities]);
   const periodDays = period === "day" ? [cursorDate] : period === "week" ? weekDays(cursorDate) : monthDays(cursorDate);
-  const agendaItems = useMemo(() => mergeManualAndActivityReservations(items, activities, requirementById, technicians), [items, activities, requirementById, technicians]);
+  const workdayRange = useMemo(() => buildWorkdayRange(workdayStartTime, workdayEndTime), [workdayStartTime, workdayEndTime]);
+  const agendaItems = useMemo(() => mergeManualAndActivityReservations(items, activities, requirementById, technicians, workdayRange), [items, activities, requirementById, technicians, workdayRange]);
   const visibleItems = useMemo(() => agendaItems
     .filter((item) => !selectedTechnician || item.technicianEmail.toLowerCase() === selectedTechnician.toLowerCase())
     .filter((item) => {
@@ -244,15 +250,17 @@ function AttentionItem({ tone, title, detail }: { tone: "danger" | "warning" | "
   return <div className={`attention-item ${tone}`}><span /><div><strong>{title}</strong><small>{detail}</small></div></div>;
 }
 
-function mergeManualAndActivityReservations(manualItems: AgendaItem[], activities: Activity[], requirements: Map<string, Requirement>, technicians: User[]) {
+type WorkdayRange = { startHour: number; startMinute: number; endHour: number; endMinute: number };
+
+function mergeManualAndActivityReservations(manualItems: AgendaItem[], activities: Activity[], requirements: Map<string, Requirement>, technicians: User[], workdayRange: WorkdayRange) {
   const manualActivityIds = new Set(manualItems.map((item) => item.activityId));
   const generated = activities
     .filter((activity) => !manualActivityIds.has(activity.id) && !isClosed(activity.status))
-    .flatMap((activity) => buildActivityReservations(activity, requirements.get(activity.requirementId), technicians));
+    .flatMap((activity) => buildActivityReservations(activity, requirements.get(activity.requirementId), technicians, workdayRange));
   return [...manualItems, ...generated];
 }
 
-function buildActivityReservations(activity: Activity, requirement: Requirement | undefined, technicians: User[]) {
+function buildActivityReservations(activity: Activity, requirement: Requirement | undefined, technicians: User[], workdayRange: WorkdayRange) {
   const start = parseRequirementDate(requirement?.startDate);
   const end = parseRequirementDate(requirement?.endDate || activity.productDeliveryDate || requirement?.startDate);
   if (!start || !end) return [];
@@ -266,8 +274,8 @@ function buildActivityReservations(activity: Activity, requirement: Requirement 
     productType: activity.productType,
     technicianName: responsible.name,
     technicianEmail: responsible.email,
-    startAt: withTime(day, 8, 0).toISOString(),
-    endAt: withTime(day, 17, 0).toISOString(),
+    startAt: withTime(day, workdayRange.startHour, workdayRange.startMinute).toISOString(),
+    endAt: withTime(day, workdayRange.endHour, workdayRange.endMinute).toISOString(),
     title: `${activity.productId} - ${activity.productType}`,
     notes: "Reserva automática por fechas del requerimiento."
   }));
@@ -322,6 +330,22 @@ function capacityByPeriod(period: MetricPeriod) {
 
 function isClosed(status: string) {
   return ["Approved", "Completed"].includes(status);
+}
+
+function buildWorkdayRange(startValue: string, endValue: string): WorkdayRange {
+  const start = parseTimeParts(startValue, "08:00");
+  const end = parseTimeParts(endValue, "17:00");
+  if (end.hour < start.hour || (end.hour === start.hour && end.minute <= start.minute)) return { startHour: 8, startMinute: 0, endHour: 17, endMinute: 0 };
+  return { startHour: start.hour, startMinute: start.minute, endHour: end.hour, endMinute: end.minute };
+}
+
+function parseTimeParts(value: string | undefined, fallback: string) {
+  const safe = normalizeTime(value, fallback);
+  return { hour: Number(safe.slice(0, 2)), minute: Number(safe.slice(3, 5)) };
+}
+
+function normalizeTime(value: string | undefined, fallback: string) {
+  return value && /^\d{2}:\d{2}$/.test(value) ? value : fallback;
 }
 
 function daysBetween(start: Date, end: Date) {

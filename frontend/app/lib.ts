@@ -76,6 +76,9 @@ export type BrandSettings = {
   showDemoCredentials: boolean;
   showOffice365Login: boolean;
   showProductIdField: boolean;
+  workdayStartTime: string;
+  workdayEndTime: string;
+  replanningWindowDays: number;
   title: string;
   subtitle: string;
 };
@@ -141,6 +144,9 @@ export const defaultBrandSettings: BrandSettings = {
   showDemoCredentials: true,
   showOffice365Login: true,
   showProductIdField: false,
+  workdayStartTime: "08:00",
+  workdayEndTime: "17:00",
+  replanningWindowDays: 15,
   title: "Creamos conexiones que dejan huella",
   subtitle: "Universidad Indoamérica"
 };

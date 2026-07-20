@@ -425,6 +425,9 @@ public sealed record UpsertBrandSettingsRequest(
     bool ShowDemoCredentials,
     bool ShowOffice365Login,
     bool ShowProductIdField,
+    string WorkdayStartTime,
+    string WorkdayEndTime,
+    int ReplanningWindowDays,
     string Title,
     string Subtitle);
 public sealed record CreateUserRequest(string Name, string Email, string Password, string AuthProvider, bool AllowMicrosoftLogin, string[] Roles, string[] ScreenPermissions, Guid? FacultyId, Guid? CampusId, string MenuMode, bool MenuCollapsed);
@@ -569,6 +572,9 @@ public sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> option
             entity.Property(x => x.ShowDemoCredentials).HasDefaultValue(true);
             entity.Property(x => x.ShowOffice365Login).HasDefaultValue(true);
             entity.Property(x => x.ShowProductIdField).HasDefaultValue(false);
+            entity.Property(x => x.WorkdayStartTime).HasMaxLength(5).HasDefaultValue("08:00");
+            entity.Property(x => x.WorkdayEndTime).HasMaxLength(5).HasDefaultValue("17:00");
+            entity.Property(x => x.ReplanningWindowDays).HasDefaultValue(15);
             entity.Property(x => x.Title).HasMaxLength(180);
             entity.Property(x => x.Subtitle).HasMaxLength(240);
         });
@@ -638,6 +644,9 @@ public sealed class BrandSettings
     public bool ShowDemoCredentials { get; set; } = true;
     public bool ShowOffice365Login { get; set; } = true;
     public bool ShowProductIdField { get; set; }
+    public string WorkdayStartTime { get; set; } = "08:00";
+    public string WorkdayEndTime { get; set; } = "17:00";
+    public int ReplanningWindowDays { get; set; } = 15;
     public string Title { get; set; } = "Creamos conexiones que dejan huella";
     public string Subtitle { get; set; } = "Universidad Indoamérica";
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
@@ -717,6 +726,9 @@ public sealed class BrandSettings
         ShowDemoCredentials = request.ShowDemoCredentials;
         ShowOffice365Login = request.ShowOffice365Login;
         ShowProductIdField = request.ShowProductIdField;
+        WorkdayStartTime = NormalizeTime(request.WorkdayStartTime, "08:00");
+        WorkdayEndTime = NormalizeTime(request.WorkdayEndTime, "17:00");
+        ReplanningWindowDays = Math.Clamp(request.ReplanningWindowDays, 0, 365);
         Title = request.Title.Trim();
         Subtitle = request.Subtitle.Trim();
         UpdatedAt = DateTimeOffset.UtcNow;
@@ -724,6 +736,7 @@ public sealed class BrandSettings
 
     private static string NormalizeGradientDirection(string value) => value is "to right" or "to bottom" ? value : "135deg";
     private static string NormalizeFontWeight(string value, string fallback) => value is "400" or "600" or "700" ? value : fallback;
+    private static string NormalizeTime(string value, string fallback) => TimeOnly.TryParse(value, out var time) ? time.ToString("HH:mm") : fallback;
 }
 
 public static class ScreenAccess
@@ -982,6 +995,9 @@ public static class IdentitySchema
                     [ShowDemoCredentials] bit NOT NULL DEFAULT(1),
                     [ShowOffice365Login] bit NOT NULL DEFAULT(1),
                     [ShowProductIdField] bit NOT NULL DEFAULT(0),
+                    [WorkdayStartTime] nvarchar(5) NOT NULL DEFAULT('08:00'),
+                    [WorkdayEndTime] nvarchar(5) NOT NULL DEFAULT('17:00'),
+                    [ReplanningWindowDays] int NOT NULL DEFAULT(15),
                     [Title] nvarchar(180) NOT NULL,
                     [Subtitle] nvarchar(240) NOT NULL,
                     [CreatedAt] datetimeoffset NOT NULL,
@@ -1116,6 +1132,18 @@ public static class IdentitySchema
             IF COL_LENGTH('BrandSettings', 'ShowProductIdField') IS NULL
             BEGIN
                 ALTER TABLE [BrandSettings] ADD [ShowProductIdField] bit NOT NULL DEFAULT(0)
+            END
+            IF COL_LENGTH('BrandSettings', 'WorkdayStartTime') IS NULL
+            BEGIN
+                ALTER TABLE [BrandSettings] ADD [WorkdayStartTime] nvarchar(5) NOT NULL DEFAULT('08:00')
+            END
+            IF COL_LENGTH('BrandSettings', 'WorkdayEndTime') IS NULL
+            BEGIN
+                ALTER TABLE [BrandSettings] ADD [WorkdayEndTime] nvarchar(5) NOT NULL DEFAULT('17:00')
+            END
+            IF COL_LENGTH('BrandSettings', 'ReplanningWindowDays') IS NULL
+            BEGIN
+                ALTER TABLE [BrandSettings] ADD [ReplanningWindowDays] int NOT NULL DEFAULT(15)
             END
             IF COL_LENGTH('BrandSettings', 'UseGradient') IS NULL
             BEGIN

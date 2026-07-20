@@ -1,7 +1,7 @@
 "use client";
 
 import { AppNav } from "../nav";
-import { Activity, api, getSession, Requirement, showToast } from "../lib";
+import { Activity, api, getSession, Requirement, showToast, type BrandSettings, defaultBrandSettings } from "../lib";
 import { CalendarDays, Edit3, Plus, RefreshCw, Save, Search, Trash2, X } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 
@@ -30,14 +30,17 @@ export default function AgendaPage() {
   const [editing, setEditing] = useState<AgendaItem | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [workdayStartTime, setWorkdayStartTime] = useState(defaultBrandSettings.workdayStartTime);
+  const [workdayEndTime, setWorkdayEndTime] = useState(defaultBrandSettings.workdayEndTime);
 
   async function load() {
     const session = getSession();
-    const [activityData, requirementData, userData, agendaData] = await Promise.all([
+    const [activityData, requirementData, userData, agendaData, brandData] = await Promise.all([
       api<Activity[]>("/api/activities"),
       api<Requirement[]>("/api/requirements"),
       api<User[]>("/api/identity/users/technicians").catch(() => []),
-      api<AgendaItem[]>("/api/agenda").catch(() => [])
+      api<AgendaItem[]>("/api/agenda").catch(() => []),
+      api<Partial<BrandSettings>>("/api/identity/brand-settings").catch(() => defaultBrandSettings)
     ]);
     const visibleTechnicians = session?.user.roles.includes("Administrador") || session?.user.roles.includes("Coordinador")
       ? userData
@@ -49,6 +52,8 @@ export default function AgendaPage() {
     setActivities(filterActivities(activityData, session));
     setRequirements(requirementData);
     setItems(agendaData);
+    setWorkdayStartTime(normalizeTime(brandData.workdayStartTime, defaultBrandSettings.workdayStartTime));
+    setWorkdayEndTime(normalizeTime(brandData.workdayEndTime, defaultBrandSettings.workdayEndTime));
   }
 
   useEffect(() => {
@@ -60,7 +65,8 @@ export default function AgendaPage() {
 
   const technician = technicians.find((item) => item.email === selectedTechnician);
   const requirementById = useMemo(() => new Map(requirements.map((item) => [item.id, item])), [requirements]);
-  const agendaItems = useMemo(() => mergeManualAndActivityReservations(items, activities, requirementById, technicians), [items, activities, requirementById, technicians]);
+  const workdayRange = useMemo(() => buildWorkdayRange(workdayStartTime, workdayEndTime), [workdayStartTime, workdayEndTime]);
+  const agendaItems = useMemo(() => mergeManualAndActivityReservations(items, activities, requirementById, technicians, workdayRange), [items, activities, requirementById, technicians, workdayRange]);
   const visibleItems = useMemo(() => agendaItems
     .filter((item) => !selectedTechnician || item.technicianEmail.toLowerCase() === selectedTechnician.toLowerCase())
     .filter((item) => matchesAgenda(item, search)), [agendaItems, selectedTechnician, search]);
@@ -226,15 +232,17 @@ function matchesAgenda(item: AgendaItem, term: string) {
   return [item.title, item.notes, item.productId, item.productType, item.technicianName, item.technicianEmail].some((value) => value.toLowerCase().includes(query));
 }
 
-function mergeManualAndActivityReservations(manualItems: AgendaItem[], activities: Activity[], requirements: Map<string, Requirement>, technicians: User[]) {
+type WorkdayRange = { startHour: number; startMinute: number; endHour: number; endMinute: number };
+
+function mergeManualAndActivityReservations(manualItems: AgendaItem[], activities: Activity[], requirements: Map<string, Requirement>, technicians: User[], workdayRange: WorkdayRange) {
   const manualActivityIds = new Set(manualItems.map((item) => item.activityId));
   const generated = activities
     .filter((activity) => !manualActivityIds.has(activity.id) && !isClosed(activity.status))
-    .flatMap((activity) => buildActivityReservations(activity, requirements.get(activity.requirementId), technicians));
+    .flatMap((activity) => buildActivityReservations(activity, requirements.get(activity.requirementId), technicians, workdayRange));
   return [...manualItems, ...generated].sort((left, right) => new Date(left.startAt).getTime() - new Date(right.startAt).getTime());
 }
 
-function buildActivityReservations(activity: Activity, requirement: Requirement | undefined, technicians: User[]) {
+function buildActivityReservations(activity: Activity, requirement: Requirement | undefined, technicians: User[], workdayRange: WorkdayRange) {
   const start = parseDate(requirement?.startDate);
   const end = parseDate(requirement?.endDate || activity.productDeliveryDate || requirement?.startDate);
   if (!start || !end) return [];
@@ -247,8 +255,8 @@ function buildActivityReservations(activity: Activity, requirement: Requirement 
     productType: activity.productType,
     technicianName: responsible.name,
     technicianEmail: responsible.email,
-    startAt: withTime(day, 8, 0).toISOString(),
-    endAt: withTime(day, 17, 0).toISOString(),
+    startAt: withTime(day, workdayRange.startHour, workdayRange.startMinute).toISOString(),
+    endAt: withTime(day, workdayRange.endHour, workdayRange.endMinute).toISOString(),
     title: `${activity.productId} - ${activity.productType}`,
     notes: "Reserva automática por fechas del requerimiento."
   }));
@@ -289,6 +297,22 @@ function withTime(value: Date, hour: number, minute: number) {
 
 function isClosed(status: string) {
   return ["Approved", "Completed"].includes(status);
+}
+
+function buildWorkdayRange(startValue: string, endValue: string): WorkdayRange {
+  const start = parseTimeParts(startValue, "08:00");
+  const end = parseTimeParts(endValue, "17:00");
+  if (end.hour < start.hour || (end.hour === start.hour && end.minute <= start.minute)) return { startHour: 8, startMinute: 0, endHour: 17, endMinute: 0 };
+  return { startHour: start.hour, startMinute: start.minute, endHour: end.hour, endMinute: end.minute };
+}
+
+function parseTimeParts(value: string | undefined, fallback: string) {
+  const safe = normalizeTime(value, fallback);
+  return { hour: Number(safe.slice(0, 2)), minute: Number(safe.slice(3, 5)) };
+}
+
+function normalizeTime(value: string | undefined, fallback: string) {
+  return value && /^\d{2}:\d{2}$/.test(value) ? value : fallback;
 }
 
 function formatDateTime(value: string) {
