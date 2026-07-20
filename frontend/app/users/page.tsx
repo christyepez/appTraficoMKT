@@ -24,6 +24,7 @@ const screenLabels: Record<string, string> = {
   dashboard: "Requerimientos",
   activities: "Productos",
   agenda: "Agenda técnica",
+  "agenda-calendar": "Calendario técnico",
   evidence: "Adjuntos",
   approvals: "Aprobaciones",
   metrics: "Métricas",
@@ -262,10 +263,10 @@ function highlight(text: string, term: string) {
 }
 
 function defaultScreensForRole(role: string) {
-  if (role === "Administrador") return ["dashboard", "activities", "agenda", "evidence", "approvals", "metrics", "audit", "admin", "users", "storage", "initial-import", "branding", "notifications", "my-notifications", "notification-log"];
-  if (role === "Coordinador") return ["dashboard", "activities", "agenda", "evidence", "approvals", "metrics", "audit", "my-notifications"];
-  if (role === "Tecnico") return ["dashboard", "activities", "agenda", "evidence", "my-notifications"];
+  if (role === "Administrador") return ["dashboard", "activities", "agenda", "agenda-calendar", "evidence", "approvals", "metrics", "audit", "admin", "users", "storage", "initial-import", "branding", "notifications", "my-notifications", "notification-log"];
+  if (role === "Coordinador") return ["dashboard", "activities", "agenda", "agenda-calendar", "evidence", "approvals", "metrics", "audit", "my-notifications"];
+  if (role === "Tecnico") return ["dashboard", "activities", "agenda", "agenda-calendar", "evidence", "my-notifications"];
   if (role === "Aprobador") return ["dashboard", "approvals", "my-notifications"];
-  if (role === "Auditor") return ["dashboard", "activities", "agenda", "evidence", "approvals", "metrics", "audit"];
+  if (role === "Auditor") return ["dashboard", "activities", "agenda", "agenda-calendar", "evidence", "approvals", "metrics", "audit"];
   return ["dashboard"];
 }

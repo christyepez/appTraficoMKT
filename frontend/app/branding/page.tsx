@@ -316,7 +316,7 @@ function categorySummary(category: BrandCategory, settings: BrandSettings) {
 }
 
 const menuOptions = [
-  ["dashboard", "Requerimientos"], ["activities", "Productos"], ["agenda", "Agenda técnica"], ["evidence", "Adjuntos"], ["approvals", "Aprobaciones"],
+  ["dashboard", "Requerimientos"], ["activities", "Productos"], ["agenda", "Agenda técnica"], ["agenda-calendar", "Calendario técnico"], ["evidence", "Adjuntos"], ["approvals", "Aprobaciones"],
   ["metrics", "Métricas"], ["audit", "Auditorías"], ["admin", "Administración"], ["users", "Usuarios"],
   ["storage", "Archivos"], ["initial-import", "Carga inicial"], ["branding", "Manejo Marca"], ["notifications", "Notificaciones"],
   ["my-notifications", "Mis notificaciones"], ["notification-log", "Registro notificaciones"]

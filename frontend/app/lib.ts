@@ -111,7 +111,7 @@ export const defaultBrandSettings: BrandSettings = {
   menuMode: "horizontal",
   menuCollapsed: false,
   mobileMenuCollapsed: true,
-  menuOrder: "dashboard,activities,agenda,evidence,approvals,metrics,audit,admin,users,storage,initial-import,branding,notifications,my-notifications,notification-log",
+  menuOrder: "dashboard,activities,agenda,agenda-calendar,evidence,approvals,metrics,audit,admin,users,storage,initial-import,branding,notifications,my-notifications,notification-log",
   headerTextAlign: "center",
   headerTextPosition: "middle",
   showHeaderTitle: true,
@@ -257,6 +257,7 @@ export const translations: Record<string, Record<string, string>> = {
     "Requerimientos": "Requirements",
     "Productos": "Products",
     "Agenda técnica": "Technical agenda",
+    "Calendario técnico": "Technical calendar",
     "Adjuntos": "Attachments",
     "Aprobaciones": "Approvals",
     "Métricas": "Metrics",
@@ -299,12 +300,13 @@ export function t(text: string) {
 }
 
 function defaultScreensForRoles(roles: string[]) {
-  if (roles.includes("Administrador")) return ["dashboard", "activities", "agenda", "evidence", "approvals", "metrics", "audit", "admin", "users", "storage", "initial-import", "branding", "notifications", "my-notifications", "notification-log"];
-  if (roles.includes("Coordinador")) return ["dashboard", "activities", "agenda", "evidence", "approvals", "metrics", "audit", "my-notifications"];
+  if (roles.includes("Administrador")) return ["dashboard", "activities", "agenda", "agenda-calendar", "evidence", "approvals", "metrics", "audit", "admin", "users", "storage", "initial-import", "branding", "notifications", "my-notifications", "notification-log"];
+  if (roles.includes("Coordinador")) return ["dashboard", "activities", "agenda", "agenda-calendar", "evidence", "approvals", "metrics", "audit", "my-notifications"];
   const screens = new Set(["dashboard"]);
   if (roles.includes("Tecnico")) {
     screens.add("activities");
     screens.add("agenda");
+    screens.add("agenda-calendar");
     screens.add("evidence");
     screens.add("my-notifications");
   }
@@ -314,6 +316,8 @@ function defaultScreensForRoles(roles: string[]) {
   }
   if (roles.includes("Auditor")) {
     screens.add("activities");
+    screens.add("agenda");
+    screens.add("agenda-calendar");
     screens.add("evidence");
     screens.add("approvals");
     screens.add("metrics");

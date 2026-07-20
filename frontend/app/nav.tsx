@@ -10,6 +10,7 @@ const items = [
   { href: "/dashboard", label: "Requerimientos", icon: ClipboardList },
   { href: "/activities", label: "Productos", icon: ListChecks },
   { href: "/agenda", label: "Agenda técnica", icon: CalendarDays },
+  { href: "/agenda-calendar", label: "Calendario técnico", icon: CalendarDays },
   { href: "/evidence", label: "Adjuntos", icon: FileCheck2 },
   { href: "/approvals", label: "Aprobaciones", icon: CheckCircle2 },
   { href: "/metrics", label: "Métricas", icon: BarChart3 },
