@@ -13,10 +13,10 @@ export function UserStatusActions({
 }) {
   return (
     <div className="actions">
-      <button disabled={pending} onClick={() => onEdit(user)}>
+      <button className="button secondary compact" disabled={pending} onClick={() => onEdit(user)}>
         Editar
       </button>
-      <button disabled={pending || !user.isActive} onClick={() => onDisable(user.id)}>
+      <button className="button danger compact" disabled={pending || !user.isActive} onClick={() => onDisable(user.id)}>
         {pending ? "Procesando" : "Inactivar"}
       </button>
     </div>

@@ -403,5 +403,6 @@
 - [x] H25-R1: desacoplar por completo `LoginExperience`.
 - [x] H25-R2: migrar CSS concreto restante a CSS Modules; validacion visual pendiente en H25-R4.
 - [x] H25-R3: consolidar modelos y campos duplicados.
+- [x] Corregir regresion visual: aplicar variantes institucionales a todos los botones de produccion sin estilo.
 - [ ] H25-R4: ejecutar regresion manual con servicios y roles reales.
 - [ ] Repetir H25 y obtener GO antes de recomendar PR a `main`.

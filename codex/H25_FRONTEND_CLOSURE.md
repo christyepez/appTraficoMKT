@@ -66,6 +66,7 @@ movieron a CSS Modules; `globals.css` conserva tokens y patrones compartidos.
 | Codigo obsoleto | Cumple con deuda | Sin marcadores TODO/FIXME; permanecen fachadas compatibles con 57 consumidores. |
 | Componentes criticos probados | Cumple automatizado | Cada feature tiene pruebas; login incluye componente, formulario, hook, SSO y PKCE. |
 | Teclado, foco y dialogs | Cumple automatizado | Popup y chatbot reutilizan `AccessibleDialog`; falta regresion manual. |
+| Botones y paleta institucional | Cumple automatizado | Todos los botones de produccion declaran un patron visual o variante especializada; pruebas verifican principal, secundario y peligro. |
 | Estados de pantalla | Cumple automatizado | Hooks/componentes cubren carga, error, vacio y exito por modulo. Falta validacion real. |
 
 ## Matriz de regresion manual pendiente

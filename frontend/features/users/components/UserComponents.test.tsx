@@ -44,8 +44,12 @@ describe("user components", () => {
     await user.click(screen.getByRole("button", { name: "Reintentar" }));
     expect(retry).toHaveBeenCalled();
     view.rerender(<UserList {...props} loading={false} users={[managed]} />);
-    await user.click(screen.getByRole("button", { name: "Editar" }));
-    await user.click(screen.getByRole("button", { name: "Inactivar" }));
+    const editButton = screen.getByRole("button", { name: "Editar" });
+    const disableButton = screen.getByRole("button", { name: "Inactivar" });
+    expect(editButton).toHaveClass("button", "secondary");
+    expect(disableButton).toHaveClass("button", "danger");
+    await user.click(editButton);
+    await user.click(disableButton);
     expect(edit).toHaveBeenCalledWith(managed);
     expect(disable).toHaveBeenCalledWith("1");
   });
