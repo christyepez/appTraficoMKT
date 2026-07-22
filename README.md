@@ -7,6 +7,7 @@ Aplicacion base para recopilar requerimientos, asignar actividades al equipo tec
 - [Indice documental](docs/README.md)
 - [Arquitectura C4 en 4 niveles](docs/architecture/c4.md)
 - [Arquitectura tecnica](docs/technical/technical-architecture.md)
+- [Arquitectura frontend](docs/technical/frontend-architecture.md)
 - [Especificacion funcional](docs/functional/functional-specification.md)
 - [Manual completo del Administrador](docs/functional/administrator-guide.md)
 - [Guia funcional de usuario](docs/functional/user-guide.md)
@@ -15,6 +16,7 @@ Aplicacion base para recopilar requerimientos, asignar actividades al equipo tec
 - [Git Flow y ambientes](docs/operations/git-flow.md)
 - [Arquitectura frontend del modulo Productos](frontend/features/products/README.md)
 - [Cierre tecnico H6 de Productos](codex/H6_PRODUCT_CLOSURE.md)
+- [Auditoria integral H25](codex/H25_FRONTEND_CLOSURE.md)
 
 ## Pantallas de ejemplo
 
@@ -59,7 +61,8 @@ Bandeja y globo de notificaciones:
 - `backend/src/Services/Identity/Identity.Api`: login, usuarios, roles, perfiles y token JWT.
 - `backend/src/Services/Administration/Administration.Api`: CRUD de facultades, sedes, aprobadores y catalogos.
 - `backend/tests/Requirements.UnitTests`: pruebas unitarias del workflow.
-- `frontend`: aplicacion Next.js con pantallas independientes por funcion.
+- `frontend`: aplicacion Next.js organizada por rutas de composicion, features,
+  servicios tipados, hooks, esquemas Zod, `core` transversal y recursos `shared`.
 - `deploy/nginx.conf`: reverse proxy para despliegue productivo.
 - `analytics`: modelo BI, scripts SQL, DAX, Power Query, PBIP/PBIR y documentacion del panel Power BI.
 

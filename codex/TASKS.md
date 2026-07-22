@@ -20,10 +20,10 @@
 | H13 Métricas generales | Completado | Fuentes parciales, cálculos, conceptos y secciones analíticas desacoplados. |
 | H14 Auditoria | Completado | Tres fuentes normalizadas, filtros, paginación y detalle seguro desacoplados. |
 | H15 Administración de catálogos | Completado | Grupos, relaciones, formularios discriminados y CRUD desacoplados. |
-| H16 Usuarios y permisos visibles | Pendiente | Ver `codex/prompts/05-administration.md`; es el siguiente hito. |
-| H17-H20 Configuracion operativa | Pendiente | Ver `codex/prompts/06-operations.md`. |
-| H21-H23 Acceso y canales publicos | Pendiente | Ver `codex/prompts/07-access-public.md`. |
-| H24-H25 Consolidacion y cierre | Pendiente | Ver `codex/prompts/08-consolidation.md`. |
+| H16 Usuarios y permisos visibles | Completado | Administracion, roles, pantallas y preferencias modularizados. |
+| H17-H20 Configuracion operativa | Completado | Marca, notificaciones, almacenamiento e importacion modularizados. |
+| H21-H23 Acceso y canales publicos | Completado | Acceso local, recuperacion, formulario publico y satisfaccion modularizados. |
+| H24-H25 Consolidacion y cierre | Auditado / NO-GO | Ver `codex/H25_FRONTEND_CLOSURE.md` y remediaciones H25-R1 a H25-R4. |
 
 ## Sprint 0
 
@@ -121,10 +121,10 @@
 
 ## Hitos H7-H25
 
-- [ ] Ejecutar cada prompt en el orden de `codex/FRONTEND_MASTER_ROADMAP.md`.
-- [ ] Revisar y aprobar cada puerta antes del siguiente hito.
-- [ ] Mantener la aplicacion aislada de PortalCorporativo.
-- [ ] No fusionar `feature1.0` a `main` antes del GO de H25.
+- [x] Ejecutar cada prompt en el orden de `codex/FRONTEND_MASTER_ROADMAP.md`.
+- [x] Revisar cada puerta y registrar los incumplimientos de H25.
+- [x] Mantener la aplicacion aislada de PortalCorporativo.
+- [x] No fusionar `feature1.0` a `main` mientras H25 permanezca NO-GO.
 
 ## Sprint 7 - Evidencias
 
@@ -388,3 +388,20 @@
 - [x] Probar roles, pantallas, orden, colapso, responsive, sesión, tema e idioma.
 - [x] Ejecutar pruebas, cobertura, lint, TypeScript y build.
 - [x] Publicar commit H24 y detenerse antes de H25.
+
+## Sprint 25 - Regresion integral y cierre
+
+- [x] Revisar las 23 rutas funcionales y sus estados esperados.
+- [x] Ejecutar pruebas, cobertura, lint, TypeScript y build de produccion.
+- [x] Verificar imports circulares, acceso HTTP en presentacion y modelos duplicados.
+- [x] Revisar composicion de paginas, formularios, CSS, dialogs, foco y labels.
+- [x] Confirmar aislamiento de PortalCorporativo y conservacion de versiones.
+- [x] Comparar metricas de H0 contra H25.
+- [x] Preparar matriz manual por rol y pantalla.
+- [x] Actualizar README, arquitectura, roadmap, tareas y riesgos.
+- [x] Emitir dictamen NO-GO y no abrir PR ni hacer merge.
+- [ ] H25-R1: desacoplar por completo `LoginExperience`.
+- [ ] H25-R2: migrar CSS concreto restante a CSS Modules.
+- [ ] H25-R3: consolidar modelos y campos duplicados.
+- [ ] H25-R4: ejecutar regresion manual con servicios y roles reales.
+- [ ] Repetir H25 y obtener GO antes de recomendar PR a `main`.

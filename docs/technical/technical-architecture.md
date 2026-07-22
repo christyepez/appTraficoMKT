@@ -16,6 +16,9 @@ App Trafico MKT es una plataforma para gestionar requerimientos de marketing/com
 - Satisfaccion: formulario publico interno protegido por token HMAC-SHA256.
 - Archivos: Local por defecto, con parametrizacion para Blob Storage o FTP.
 
+La separacion de capas, reglas de dependencias, politica CSS y estrategia de
+pruebas del cliente se documentan en [Arquitectura frontend](frontend-architecture.md).
+
 ## Microservicios
 
 | Servicio | Ruta local | Responsabilidad |
@@ -231,4 +234,3 @@ Para activar despliegues reales configurar environments `dev`, `test` y `prod` c
 - Secret `DEPLOY_HOST`
 - Secret `DEPLOY_USER`
 - Secret `DEPLOY_SSH_KEY`
-

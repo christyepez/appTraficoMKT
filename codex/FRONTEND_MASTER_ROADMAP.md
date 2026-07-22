@@ -56,7 +56,7 @@ y verificable, manteniendo la aplicacion aislada de `PortalCorporativo`.
 | H22 | Formulario publico desacoplado | `prompts/07-access-public.md` Prompt H22 |
 | H23 | Satisfaccion publica desacoplada | `prompts/07-access-public.md` Prompt H23 |
 | H24 | Navegacion, layout y CSS global consolidados | `prompts/08-consolidation.md` Prompt H24 |
-| H25 | Regresion integral y cierre de `feature1.0` | `prompts/08-consolidation.md` Prompt H25 |
+| H25 | Auditoria integral ejecutada; cierre NO-GO con remediaciones | `codex/H25_FRONTEND_CLOSURE.md` |
 
 ## Dependencias entre modulos
 
@@ -102,3 +102,10 @@ feature1.0/agenda-h9
 
 Cada rama hija debe regresar mediante PR a `feature1.0`; `main` se actualiza solo
 despues de H25 y de una autorizacion explicita.
+
+## Resultado H25
+
+La automatizacion, cobertura, lint, TypeScript y build estan verdes. El dictamen
+es **NO-GO** hasta resolver H25-R1 a H25-R4 y completar la regresion manual. No se
+recomienda abrir el PR a `main` en el estado actual. Ver
+`codex/H25_FRONTEND_CLOSURE.md`.
