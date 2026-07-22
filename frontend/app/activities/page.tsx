@@ -1,31 +1,22 @@
 "use client";
 
 import { AppNav } from "../nav";
-import { Activity, Requirement, defaultBrandSettings, getSession, showToast } from "../lib";
-import { PaginationControls, paginate, type PaginationState } from "../pagination";
-import { Highlight } from "../search";
+import type { Activity } from "../lib";
+import { ProductFilters } from "../../features/products/components/ProductFilters";
 import { ProductForm } from "../../features/products/components/ProductForm";
-import type { Approval, EvidenceItem, ProductCatalogs, Technician } from "../../features/products/models/product.models";
-import { createExternalProductEvidence, deleteProduct, deleteProductEvidence, getProductWorkspace, saveProduct, updateProductStatus, uploadProductEvidence } from "../../features/products/services/product.service";
-import { approvalDecisionLabel, buildNextProductId, filterProductsForSession, filterRequirementsForSession, matchesProductSearch, normalizeProductStatus, productStatusLabel, productStepState, workflowButtonClass } from "../../features/products/utils/product.utils";
-import { Edit3, Eye, FileText, Paperclip, Play, Plus, RefreshCw, Send, Trash2, Upload, X } from "lucide-react";
-import { FormEvent, useEffect, useState } from "react";
+import { ProductList } from "../../features/products/components/ProductList";
+import { useProductsWorkspace } from "../../features/products/hooks/useProductsWorkspace";
+import type { EvidenceItem } from "../../features/products/models/product.models";
+import { createExternalProductEvidence, deleteProductEvidence, updateProductStatus, uploadProductEvidence } from "../../features/products/services/product.service";
+import { approvalDecisionLabel, productStatusLabel } from "../../features/products/utils/product.utils";
+import { Eye, FileText, Paperclip, Plus, RefreshCw, Trash2, Upload, X } from "lucide-react";
+import { FormEvent, useState } from "react";
 
 export default function ActivitiesPage() {
-  const [requirements, setRequirements] = useState<Requirement[]>([]);
-  const [activities, setActivities] = useState<Activity[]>([]);
-  const [technicians, setTechnicians] = useState<Technician[]>([]);
-  const [catalogs, setCatalogs] = useState<ProductCatalogs>({
-    requirementTypes: [],
-    targetAudiences: [],
-    productTypes: [],
-    diffusionChannels: [],
-    mainKpis: []
-  });
+  const workspace = useProductsWorkspace();
+  const { requirements, products: activities, technicians, catalogs, evidence, approvals, suggestedProductId, showProductIdField, isInitialLoading, isRefreshing, loadError, message, pendingProductIds, refresh, save, changeStatus, remove, reportFeedback } = workspace;
   const [editing, setEditing] = useState<Activity | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
-  const [evidence, setEvidence] = useState<EvidenceItem[]>([]);
-  const [approvals, setApprovals] = useState<Approval[]>([]);
   const [attachmentActivityId, setAttachmentActivityId] = useState("");
   const [attachmentDetailActivityId, setAttachmentDetailActivityId] = useState("");
   const [approvalVersionsActivityId, setApprovalVersionsActivityId] = useState("");
@@ -34,86 +25,31 @@ export default function ActivitiesPage() {
   const [attachmentMode, setAttachmentMode] = useState<"file" | "url">("file");
   const [attachmentUrl, setAttachmentUrl] = useState("");
   const [dragging, setDragging] = useState(false);
-  const [suggestedProductId, setSuggestedProductId] = useState("PROD-0001");
-  const [showProductIdField, setShowProductIdField] = useState(defaultBrandSettings.showProductIdField);
   const [isUploading, setIsUploading] = useState(false);
-  const [message, setMessage] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [showCompleted, setShowCompleted] = useState(false);
-  const [pagination, setPagination] = useState<PaginationState>({ page: 1, pageSize: 10 });
-
-  async function load() {
-    const session = getSession();
-    const workspace = await getProductWorkspace();
-    const visibleRequirements = filterRequirementsForSession(workspace.requirements, session);
-    const visibleActivities = filterProductsForSession(workspace.products, visibleRequirements, session);
-    setRequirements(visibleRequirements);
-    setActivities(visibleActivities);
-    setEvidence(workspace.evidence.filter((item) => visibleActivities.some((activity) => activity.id === item.activityId)));
-    setApprovals(workspace.approvals.filter((item) => visibleActivities.some((activity) => activity.id === item.activityId)));
-    const fallbackUser = session
-      ? [{ id: session.user.id, name: session.user.name, email: session.user.email, roles: session.user.roles, isActive: true }]
-      : [];
-    const technicalUsers = workspace.technicians.filter((user) => user.isActive && user.roles.some((role) => role.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === "tecnico"));
-    setTechnicians(technicalUsers.length ? technicalUsers : fallbackUser);
-    setCatalogs(workspace.catalogs);
-    setSuggestedProductId(workspace.nextProductId ?? buildNextProductId(workspace.products));
-    setShowProductIdField(workspace.showProductIdField);
-  }
 
   async function openEditor(activity: Activity | null = null) {
-    await load().catch(() => undefined);
+    await refresh().catch(() => undefined);
     setEditing(activity);
     setIsEditorOpen(true);
-  }
-
-  useEffect(() => {
-    const timer = window.setInterval(() => load().catch(() => undefined), 15000);
-    load().catch((error) => {
-      showToast(error instanceof Error ? error.message : "No se pudo cargar productos.", "error");
-      if (!getSession()) location.assign("/login");
-    });
-    return () => window.clearInterval(timer);
-  }, []);
-
-  async function changeStatus(id: string, action: "start" | "submit-approval") {
-    try {
-      await updateProductStatus(id, action);
-      setMessage("Estado actualizado correctamente.");
-      showToast("Estado actualizado correctamente.");
-      await load();
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : "No se pudo actualizar el estado.");
-    }
-  }
-
-  async function removeActivity(id: string) {
-    if (!window.confirm("¿Eliminar este producto? El registro quedará eliminado de forma lógica.")) return;
-    try {
-      await deleteProduct(id);
-      setMessage("Producto eliminado correctamente.");
-      showToast("Producto eliminado correctamente.");
-      await load();
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : "No se pudo eliminar el producto.");
-    }
   }
 
   async function removeEvidence(id: string) {
     if (!window.confirm("¿Eliminar este adjunto? El archivo quedará inactivo.")) return;
     try {
       await deleteProductEvidence(id);
-      showToast("Adjunto eliminado correctamente.");
-      await load();
+      reportFeedback("Adjunto eliminado correctamente.");
+      await refresh();
     } catch (error) {
-      showToast(error instanceof Error ? error.message : "No se pudo eliminar el adjunto.", "error");
+      reportFeedback(error instanceof Error ? error.message : "No se pudo eliminar el adjunto.", "error");
     }
   }
 
   function pickAttachment(nextFile?: File | null) {
     if (!nextFile) return;
     if (nextFile.size > 50 * 1024 * 1024) {
-      showToast("El archivo no puede superar 50 MB.", "error");
+      reportFeedback("El archivo no puede superar 50 MB.", "error");
       return;
     }
     setAttachmentFile(nextFile);
@@ -132,7 +68,7 @@ export default function ActivitiesPage() {
     event.preventDefault();
     if (isUploading) return;
     if (!attachmentActivityId || (attachmentMode === "file" && !attachmentFile) || (attachmentMode === "url" && !attachmentUrl.trim())) {
-      showToast("Seleccione un producto y complete el origen del adjunto.", "error");
+      reportFeedback("Seleccione un producto y complete el origen del adjunto.", "error");
       return;
     }
     setIsUploading(true);
@@ -158,16 +94,12 @@ export default function ActivitiesPage() {
       setAttachmentPreview("");
       setAttachmentUrl("");
       setAttachmentMode("file");
-      showToast("Adjunto cargado en el producto.");
-      await load();
+      reportFeedback("Adjunto cargado en el producto.");
+      await refresh();
     } finally {
       setIsUploading(false);
     }
   }
-
-  const filtered = activities
-    .filter((item) => showCompleted ? normalizeProductStatus(item.status) === "Approved" : normalizeProductStatus(item.status) !== "Approved")
-    .filter((item) => matchesProductSearch(item, searchTerm));
 
   return (
     <main className="app-shell">
@@ -182,13 +114,11 @@ export default function ActivitiesPage() {
             requirements={requirements}
             catalogs={catalogs}
             technicians={technicians}
-            onSave={saveProduct}
-            onFeedback={(feedback, type) => showToast(feedback, type === "error" ? "error" : undefined)}
-            onSuccess={async (successMessage) => {
-              setMessage(successMessage);
+            onSave={save}
+            onFeedback={reportFeedback}
+            onSuccess={() => {
               setEditing(null);
               setIsEditorOpen(false);
-              await load();
             }}
             onCancel={() => { setEditing(null); setIsEditorOpen(false); }}
           />
@@ -198,15 +128,11 @@ export default function ActivitiesPage() {
             <h2>Seguimiento de productos</h2>
             <div className="actions">
               <button className="icon-button" title="Crear producto" onClick={() => openEditor(null)}><Plus size={16} /></button>
-              <button className="button secondary" title="Actualizar seguimiento de productos" onClick={load}><RefreshCw size={16} /> Actualizar</button>
+              <button className="button secondary" title="Actualizar seguimiento de productos" disabled={isRefreshing} onClick={() => void refresh().catch(() => undefined)}><RefreshCw size={16} /> {isRefreshing ? "Actualizando" : "Actualizar"}</button>
             </div>
           </div>
           {message && <span className="badge">{message}</span>}
-          <label className="field top-space">
-            <span>Buscar en seguimiento</span>
-            <input value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="Buscar por producto, responsable, KPI, canal, estado..." />
-          </label>
-          <label className="check-field top-space"><input type="checkbox" checked={showCompleted} onChange={(event) => setShowCompleted(event.target.checked)} /> Ver productos finalizados</label>
+          <ProductFilters searchTerm={searchTerm} showCompleted={showCompleted} isRefreshing={isRefreshing} onSearchChange={setSearchTerm} onShowCompletedChange={setShowCompleted} />
           {attachmentActivityId && (
             <form className="attachment-panel top-space" onSubmit={uploadAttachment}>
               <div className="card-head">
@@ -317,45 +243,22 @@ export default function ActivitiesPage() {
               </section>
             </div>
           )}
-          <div className="stack compact-stack top-space">
-            {paginate(filtered, pagination).items.map((item) => (
-              <article className="card compact-card" key={item.id}>
-                <div className="card-head">
-                  <div className="compact-title">
-                    <h3>{highlight(`${item.productId} - ${item.productType}`, searchTerm)}</h3>
-                    <p>{highlight(`${item.requirementType} | ${item.productResponsible} | ${item.diffusionChannel}`, searchTerm)}</p>
-                  </div>
-                  <div className="card-meta">
-                    <span className="badge">{productStatusLabel(item.status)}</span>
-                    <div className="actions">
-                      {normalizeProductStatus(item.status) !== "Approved" && <>
-                        <button className={workflowButtonClass(productStepState(item, "start"))} disabled={productStepState(item, "start") !== "ready"} title="Cambiar producto a en progreso" onClick={() => changeStatus(item.id, "start")}><Play size={16} /></button>
-                        <button className={workflowButtonClass(productStepState(item, "evidence"))} disabled={productStepState(item, "evidence") !== "ready"} title="Adjuntar evidencia o archivo a este producto" onClick={() => setAttachmentActivityId(item.id)}><Paperclip size={16} /></button>
-                        <button className={workflowButtonClass(productStepState(item, "approval"))} disabled={productStepState(item, "approval") !== "ready"} title="Enviar producto a aprobación" onClick={() => changeStatus(item.id, "submit-approval")}><Send size={16} /></button>
-                      </>}
-                      <button className="icon-button" title="Ver detalle y adjuntos del producto" onClick={() => setAttachmentDetailActivityId(item.id)}><Eye size={16} /></button>
-                      <button className="icon-button" title="Ver versiones enviadas a aprobación" onClick={() => setApprovalVersionsActivityId(item.id)}><FileText size={16} /></button>
-                      {normalizeProductStatus(item.status) !== "Approved" && <>
-                        <button className="icon-button" title="Editar datos del producto" onClick={() => openEditor(item)}><Edit3 size={16} /></button>
-                        <button className="icon-button danger" title="Eliminar lógicamente el producto" onClick={() => removeActivity(item.id)}><Trash2 size={16} /></button>
-                      </>}
-                    </div>
-                  </div>
-                </div>
-                <div className="detail-grid compact-detail-grid">
-                  <div className="detail-item"><span>KPI</span><strong>{highlight(item.mainKpi || "N/A", searchTerm)}</strong></div>
-                  <div className="detail-item"><span>Entrega</span><strong>{item.productDeliveryDate ?? "Sin fecha"}</strong></div>
-                  <div className="detail-item">
-                    <span>Adjuntos</span>
-                    <button className="link-button" type="button" title="Ver detalle de adjuntos" onClick={() => setAttachmentDetailActivityId(item.id)}>
-                      {evidence.filter((file) => file.activityId === item.id).length}
-                    </button>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
-          <PaginationControls state={pagination} totalItems={filtered.length} onChange={setPagination} />
+          <ProductList
+            products={activities}
+            evidence={evidence}
+            searchTerm={searchTerm}
+            showCompleted={showCompleted}
+            isInitialLoading={isInitialLoading}
+            loadError={loadError}
+            pendingProductIds={pendingProductIds}
+            onRetry={() => void refresh().catch(() => undefined)}
+            onChangeStatus={(productId, action) => void changeStatus(productId, action)}
+            onAttach={setAttachmentActivityId}
+            onViewEvidence={setAttachmentDetailActivityId}
+            onViewApprovals={setApprovalVersionsActivityId}
+            onEdit={(product) => void openEditor(product)}
+            onDelete={(productId) => void remove(productId)}
+          />
         </section>
       </section>
     </main>
@@ -372,8 +275,4 @@ function EvidencePreview({ item }: { item: EvidenceItem }) {
   if (/\.(png|jpg|jpeg|gif|webp)$/i.test(lowerName)) return <div className="file-preview"><img src={item.storageUrl} alt={item.fileName} /></div>;
   if (lowerName.endsWith(".pdf")) return <div className="file-preview"><iframe src={item.storageUrl} title={item.fileName} /></div>;
   return <div className="inline-facts"><span><FileText size={14} /> Vista previa no disponible para este tipo de archivo.</span></div>;
-}
-
-function highlight(text: string, term: string) {
-  return <Highlight search={term}>{text}</Highlight>;
 }

@@ -1,6 +1,7 @@
 import type { Activity, Requirement } from "../../../shared/models/api.models";
 
 export type Product = Activity;
+export type ProductStatusAction = "start" | "submit-approval" | "evidence-attached";
 
 export type CatalogItem = {
   id: string;

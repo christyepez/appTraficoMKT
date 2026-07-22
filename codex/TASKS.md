@@ -7,7 +7,7 @@
 | H0 Gobierno y linea base | Completado | Estrategia aprobada y publicada; Prompt 0 ejecutado. |
 | H1 Fundacion Productos | Completado | Modulo base, servicio, utilidades y pruebas publicados en `feature1.0`. |
 | H2 Formulario | Completado | React Hook Form, Zod, campos accesibles y pruebas de alta/edicion/error. |
-| H3 Seguimiento y workflow | Pendiente | - |
+| H3 Seguimiento y workflow | Completado | Hook de workspace, filtros, listado, tarjetas y acciones probados. |
 | H4 Evidencias y aprobaciones | Pendiente | - |
 | H5 UX, CSS y accesibilidad | Pendiente | - |
 | H6 Estabilizacion Productos | Pendiente | - |
@@ -57,6 +57,19 @@
 - [x] Probar renderizado, validaciones, alta, edicion y error del servicio.
 - [x] Ejecutar lint, TypeScript, cobertura y build.
 - [x] Publicar commit del formulario desacoplado.
+
+## Sprint 3
+
+- [x] Crear `useProductsWorkspace` para carga, polling y refresco.
+- [x] Centralizar guardado, transiciones y eliminación de Productos.
+- [x] Evitar solicitudes duplicadas durante acciones y actualizaciones.
+- [x] Extraer `ProductFilters`, `ProductList` y `ProductCard`.
+- [x] Extraer `ProductWorkflowActions`.
+- [x] Diferenciar carga inicial, error recuperable, vacío y filtros sin resultados.
+- [x] Mostrar el estado de actualización y bloquear acciones pendientes.
+- [x] Probar búsqueda, visibilidad, paginación, workflow y reintento.
+- [x] Ejecutar lint, TypeScript, cobertura y build.
+- [x] Publicar commit de seguimiento y workflow.
 
 ## Hitos H7-H25
 
