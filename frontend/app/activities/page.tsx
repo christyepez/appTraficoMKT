@@ -1,63 +1,25 @@
 "use client";
 
 import { AppNav } from "../nav";
-import { Activity, Requirement, api, defaultBrandSettings, getSession, showToast, type BrandSettings } from "../lib";
+import { Activity, Requirement, defaultBrandSettings, getSession, showToast } from "../lib";
 import { PaginationControls, paginate, type PaginationState } from "../pagination";
 import { Highlight } from "../search";
+import type { Approval, CatalogItem, EvidenceItem, ProductCatalogs, Technician } from "../../features/products/models/product.models";
+import { createExternalProductEvidence, deleteProduct, deleteProductEvidence, getProductWorkspace, saveProduct, updateProductStatus, uploadProductEvidence } from "../../features/products/services/product.service";
+import { approvalDecisionLabel, buildNextProductId, filterProductsForSession, filterRequirementsForSession, matchesProductSearch, normalizeProductStatus, productStatusLabel, productStepState, workflowButtonClass } from "../../features/products/utils/product.utils";
 import { Edit3, Eye, FileText, Paperclip, Play, Plus, RefreshCw, Save, Send, Trash2, Upload, X } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
-
-type CatalogItem = {
-  id: string;
-  type: string;
-  code: string;
-  name: string;
-  isActive: boolean;
-};
-
-type Catalogs = {
-  tipoRequerimiento: CatalogItem[];
-  publicoObjetivo: CatalogItem[];
-  tipoProducto: CatalogItem[];
-  canalDifusion: CatalogItem[];
-  kpiPrincipal: CatalogItem[];
-};
-
-type EvidenceItem = {
-  id: string;
-  activityId: string;
-  fileName: string;
-  storageUrl: string;
-  uploadedBy: string;
-};
-
-type User = {
-  id: string;
-  name: string;
-  email: string;
-  roles: string[];
-  isActive: boolean;
-};
-
-type Approval = {
-  id: string;
-  activityId: string;
-  decision: string;
-  approvedBy: string;
-  comments: string;
-  createdAt: string;
-};
 
 export default function ActivitiesPage() {
   const [requirements, setRequirements] = useState<Requirement[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
-  const [technicians, setTechnicians] = useState<User[]>([]);
-  const [catalogs, setCatalogs] = useState<Catalogs>({
-    tipoRequerimiento: [],
-    publicoObjetivo: [],
-    tipoProducto: [],
-    canalDifusion: [],
-    kpiPrincipal: []
+  const [technicians, setTechnicians] = useState<Technician[]>([]);
+  const [catalogs, setCatalogs] = useState<ProductCatalogs>({
+    requirementTypes: [],
+    targetAudiences: [],
+    productTypes: [],
+    diffusionChannels: [],
+    mainKpis: []
   });
   const [requirementId, setRequirementId] = useState("");
   const [editing, setEditing] = useState<Activity | null>(null);
@@ -83,40 +45,21 @@ export default function ActivitiesPage() {
 
   async function load() {
     const session = getSession();
-    const [reqs, acts, evs, aps, users, nextProduct, brand, tipoRequerimiento, publicoObjetivo, tipoProducto, canalDifusion, kpiPrincipal] = await Promise.all([
-      api<Requirement[]>("/api/requirements"),
-      api<Activity[]>("/api/activities"),
-      api<EvidenceItem[]>("/api/evidence"),
-      api<Approval[]>("/api/approvals").catch(() => []),
-      api<User[]>("/api/identity/users/technicians").catch(() => []),
-      api<{ productId: string }>("/api/activities/next-product-id").catch(() => null),
-      api<BrandSettings>("/api/identity/brand-settings").catch(() => defaultBrandSettings),
-      api<CatalogItem[]>("/api/admin/catalogs/by-type/TipoRequerimiento"),
-      api<CatalogItem[]>("/api/admin/catalogs/by-type/PublicoObjetivo"),
-      api<CatalogItem[]>("/api/admin/catalogs/by-type/TipoProducto"),
-      api<CatalogItem[]>("/api/admin/catalogs/by-type/CanalDifusion"),
-      api<CatalogItem[]>("/api/admin/catalogs/by-type/KpiPrincipal")
-    ]);
-    const visibleRequirements = filterRequirementsForSession(reqs, session);
-    const visibleActivities = filterActivitiesForSession(acts, visibleRequirements, session);
+    const workspace = await getProductWorkspace();
+    const visibleRequirements = filterRequirementsForSession(workspace.requirements, session);
+    const visibleActivities = filterProductsForSession(workspace.products, visibleRequirements, session);
     setRequirements(visibleRequirements);
     setActivities(visibleActivities);
-    setEvidence(evs.filter((item) => visibleActivities.some((activity) => activity.id === item.activityId)));
-    setApprovals(aps.filter((item) => visibleActivities.some((activity) => activity.id === item.activityId)));
+    setEvidence(workspace.evidence.filter((item) => visibleActivities.some((activity) => activity.id === item.activityId)));
+    setApprovals(workspace.approvals.filter((item) => visibleActivities.some((activity) => activity.id === item.activityId)));
     const fallbackUser = session
       ? [{ id: session.user.id, name: session.user.name, email: session.user.email, roles: session.user.roles, isActive: true }]
       : [];
-    const technicalUsers = users.filter((user) => user.isActive && user.roles.some((role) => role.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === "tecnico"));
+    const technicalUsers = workspace.technicians.filter((user) => user.isActive && user.roles.some((role) => role.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === "tecnico"));
     setTechnicians(technicalUsers.length ? technicalUsers : fallbackUser);
-    setCatalogs({
-      tipoRequerimiento: tipoRequerimiento.filter((item) => item.isActive),
-      publicoObjetivo: publicoObjetivo.filter((item) => item.isActive),
-      tipoProducto: tipoProducto.filter((item) => item.isActive),
-      canalDifusion: canalDifusion.filter((item) => item.isActive),
-      kpiPrincipal: kpiPrincipal.filter((item) => item.isActive)
-    });
-    setSuggestedProductId(nextProduct?.productId ?? nextProductId(acts));
-    setShowProductIdField(Boolean(brand.showProductIdField));
+    setCatalogs(workspace.catalogs);
+    setSuggestedProductId(workspace.nextProductId ?? buildNextProductId(workspace.products));
+    setShowProductIdField(workspace.showProductIdField);
     setRequirementId((current) => current && visibleRequirements.some((item) => item.id === current) ? current : "");
   }
 
@@ -147,20 +90,18 @@ export default function ActivitiesPage() {
       const productTypeId = String(form.get("productTypeId") ?? "");
       const diffusionChannelId = String(form.get("diffusionChannelId") ?? "");
       const mainKpiId = String(form.get("mainKpiId") ?? "");
-      const requirementType = catalogs.tipoRequerimiento.find((item) => item.id === requirementTypeId);
-      const targetAudience = catalogs.publicoObjetivo.find((item) => item.id === targetAudienceId);
-      const productType = catalogs.tipoProducto.find((item) => item.id === productTypeId);
-      const diffusionChannel = catalogs.canalDifusion.find((item) => item.id === diffusionChannelId);
-      const mainKpi = catalogs.kpiPrincipal.find((item) => item.id === mainKpiId);
+      const requirementType = catalogs.requirementTypes.find((item) => item.id === requirementTypeId);
+      const targetAudience = catalogs.targetAudiences.find((item) => item.id === targetAudienceId);
+      const productType = catalogs.productTypes.find((item) => item.id === productTypeId);
+      const diffusionChannel = catalogs.diffusionChannels.find((item) => item.id === diffusionChannelId);
+      const mainKpi = catalogs.mainKpis.find((item) => item.id === mainKpiId);
       const productResponsible = String(form.get("productResponsible") ?? "").trim();
       if (!requirementId || !requirementType || !targetAudience || !productType || !diffusionChannel || !mainKpi || !productResponsible) {
         showToast("Complete los combos requeridos y el responsable antes de guardar.", "error");
         setMessage("Complete los combos requeridos y el responsable antes de guardar.");
         return;
       }
-      await api<Activity>(`/api/activities${editing ? `/${editing.id}` : ""}`, {
-        method: editing ? "PUT" : "POST",
-        body: JSON.stringify({
+      await saveProduct(editing, {
           requirementId,
           productId: form.get("productId"),
           requirementTypeId,
@@ -177,7 +118,6 @@ export default function ActivitiesPage() {
           productResponsible,
           productDeliveryDate: form.get("productDeliveryDate") || null,
           observations: form.get("observations")
-        })
       });
       event.currentTarget.reset();
       setEditing(null);
@@ -195,9 +135,9 @@ export default function ActivitiesPage() {
     }
   }
 
-  async function patch(url: string) {
+  async function changeStatus(id: string, action: "start" | "submit-approval") {
     try {
-      await api(url, { method: "PATCH" });
+      await updateProductStatus(id, action);
       setMessage("Estado actualizado correctamente.");
       showToast("Estado actualizado correctamente.");
       await load();
@@ -209,7 +149,7 @@ export default function ActivitiesPage() {
   async function removeActivity(id: string) {
     if (!window.confirm("¿Eliminar este producto? El registro quedará eliminado de forma lógica.")) return;
     try {
-      await api(`/api/activities/${id}`, { method: "DELETE" });
+      await deleteProduct(id);
       setMessage("Producto eliminado correctamente.");
       showToast("Producto eliminado correctamente.");
       await load();
@@ -221,7 +161,7 @@ export default function ActivitiesPage() {
   async function removeEvidence(id: string) {
     if (!window.confirm("¿Eliminar este adjunto? El archivo quedará inactivo.")) return;
     try {
-      await api(`/api/evidence/${id}`, { method: "DELETE" });
+      await deleteProductEvidence(id);
       showToast("Adjunto eliminado correctamente.");
       await load();
     } catch (error) {
@@ -260,21 +200,18 @@ export default function ActivitiesPage() {
       if (attachmentMode === "file" && attachmentFile) {
         form.set("activityId", attachmentActivityId);
         form.set("file", attachmentFile);
-        await api<EvidenceItem>("/api/evidence/upload", { method: "POST", body: form });
+        await uploadProductEvidence(form);
       } else {
         const url = new URL(attachmentUrl.trim());
-        await api<EvidenceItem>("/api/evidence", {
-          method: "POST",
-          body: JSON.stringify({
+        await createExternalProductEvidence({
             activityId: attachmentActivityId,
-            fileName: form.get("urlName") || url.pathname.split("/").filter(Boolean).pop() || url.hostname,
+            fileName: String(form.get("urlName") || url.pathname.split("/").filter(Boolean).pop() || url.hostname),
             contentType: "text/uri-list",
             storageUrl: url.toString(),
             uploadedBy: form.get("uploadedBy")
-          })
         });
       }
-      await api(`/api/activities/${attachmentActivityId}/evidence-attached`, { method: "PATCH" });
+      await updateProductStatus(attachmentActivityId, "evidence-attached");
       setAttachmentActivityId("");
       setAttachmentFile(null);
       setAttachmentPreview("");
@@ -288,8 +225,8 @@ export default function ActivitiesPage() {
   }
 
   const filtered = activities
-    .filter((item) => showCompleted ? normalizedActivityStatus(item.status) === "Approved" : normalizedActivityStatus(item.status) !== "Approved")
-    .filter((item) => matchesSearch(item, searchTerm));
+    .filter((item) => showCompleted ? normalizeProductStatus(item.status) === "Approved" : normalizeProductStatus(item.status) !== "Approved")
+    .filter((item) => matchesProductSearch(item, searchTerm));
 
   return (
     <main className="app-shell">
@@ -311,12 +248,12 @@ export default function ActivitiesPage() {
               </select>
             </label>
             {showProductIdField && <label className="field"><span>Id producto</span><input name="productId" required readOnly value={editing?.productId ?? suggestedProductId} title="Código secuencial generado automáticamente" /></label>}
-            <SelectField label="Tipo requerimiento" name="requirementTypeId" items={catalogs.tipoRequerimiento} defaultValue={editing?.requirementTypeId} />
+            <SelectField label="Tipo requerimiento" name="requirementTypeId" items={catalogs.requirementTypes} defaultValue={editing?.requirementTypeId} />
             <label className="field field-wide"><span>Objetivo estratégico</span><textarea name="strategicObjective" defaultValue={editing?.strategicObjective ?? ""} /></label>
-            <SelectField label="Público objetivo" name="targetAudienceId" items={catalogs.publicoObjetivo} defaultValue={editing?.targetAudienceId} />
-            <SelectField label="Tipo producto" name="productTypeId" items={catalogs.tipoProducto} defaultValue={editing?.productTypeId} />
-            <SelectField label="Canal difusión" name="diffusionChannelId" items={catalogs.canalDifusion} defaultValue={editing?.diffusionChannelId} />
-            <SelectField label="KPI principal" name="mainKpiId" items={catalogs.kpiPrincipal} defaultValue={editing?.mainKpiId} />
+            <SelectField label="Público objetivo" name="targetAudienceId" items={catalogs.targetAudiences} defaultValue={editing?.targetAudienceId} />
+            <SelectField label="Tipo producto" name="productTypeId" items={catalogs.productTypes} defaultValue={editing?.productTypeId} />
+            <SelectField label="Canal difusión" name="diffusionChannelId" items={catalogs.diffusionChannels} defaultValue={editing?.diffusionChannelId} />
+            <SelectField label="KPI principal" name="mainKpiId" items={catalogs.mainKpis} defaultValue={editing?.mainKpiId} />
             <label className="field">
               <span>Responsable producto</span>
               <select name="productResponsible" required defaultValue={editing?.productResponsible ?? ""}>
@@ -399,7 +336,7 @@ export default function ActivitiesPage() {
                     <h2>Adjuntos del producto</h2>
                     <p>{activities.find((item) => item.id === attachmentDetailActivityId)?.productId ?? "Producto seleccionado"}</p>
                   </div>
-                  <span className="badge">{activityStatusLabel(activities.find((item) => item.id === attachmentDetailActivityId)?.status ?? "")}</span>
+                  <span className="badge">{productStatusLabel(activities.find((item) => item.id === attachmentDetailActivityId)?.status ?? "")}</span>
                   <button className="icon-button" type="button" title="Cerrar detalle de adjuntos" onClick={() => setAttachmentDetailActivityId("")}><X size={16} /></button>
                 </div>
                 <div className="stack compact-stack top-space">
@@ -468,16 +405,16 @@ export default function ActivitiesPage() {
                     <p>{highlight(`${item.requirementType} | ${item.productResponsible} | ${item.diffusionChannel}`, searchTerm)}</p>
                   </div>
                   <div className="card-meta">
-                    <span className="badge">{activityStatusLabel(item.status)}</span>
+                    <span className="badge">{productStatusLabel(item.status)}</span>
                     <div className="actions">
-                      {normalizedActivityStatus(item.status) !== "Approved" && <>
-                        <button className={workflowButtonClass(activityStepState(item, "start"))} disabled={activityStepState(item, "start") !== "ready"} title="Cambiar producto a en progreso" onClick={() => patch(`/api/activities/${item.id}/start`)}><Play size={16} /></button>
-                        <button className={workflowButtonClass(activityStepState(item, "evidence"))} disabled={activityStepState(item, "evidence") !== "ready"} title="Adjuntar evidencia o archivo a este producto" onClick={() => setAttachmentActivityId(item.id)}><Paperclip size={16} /></button>
-                        <button className={workflowButtonClass(activityStepState(item, "approval"))} disabled={activityStepState(item, "approval") !== "ready"} title="Enviar producto a aprobación" onClick={() => patch(`/api/activities/${item.id}/submit-approval`)}><Send size={16} /></button>
+                      {normalizeProductStatus(item.status) !== "Approved" && <>
+                        <button className={workflowButtonClass(productStepState(item, "start"))} disabled={productStepState(item, "start") !== "ready"} title="Cambiar producto a en progreso" onClick={() => changeStatus(item.id, "start")}><Play size={16} /></button>
+                        <button className={workflowButtonClass(productStepState(item, "evidence"))} disabled={productStepState(item, "evidence") !== "ready"} title="Adjuntar evidencia o archivo a este producto" onClick={() => setAttachmentActivityId(item.id)}><Paperclip size={16} /></button>
+                        <button className={workflowButtonClass(productStepState(item, "approval"))} disabled={productStepState(item, "approval") !== "ready"} title="Enviar producto a aprobación" onClick={() => changeStatus(item.id, "submit-approval")}><Send size={16} /></button>
                       </>}
                       <button className="icon-button" title="Ver detalle y adjuntos del producto" onClick={() => setAttachmentDetailActivityId(item.id)}><Eye size={16} /></button>
                       <button className="icon-button" title="Ver versiones enviadas a aprobación" onClick={() => setApprovalVersionsActivityId(item.id)}><FileText size={16} /></button>
-                      {normalizedActivityStatus(item.status) !== "Approved" && <>
+                      {normalizeProductStatus(item.status) !== "Approved" && <>
                         <button className="icon-button" title="Editar datos del producto" onClick={() => openEditor(item)}><Edit3 size={16} /></button>
                         <button className="icon-button danger" title="Eliminar lógicamente el producto" onClick={() => removeActivity(item.id)}><Trash2 size={16} /></button>
                       </>}
@@ -509,27 +446,6 @@ function formatDate(value?: string) {
   return new Intl.DateTimeFormat("es-EC", { dateStyle: "short", timeStyle: "short" }).format(new Date(value));
 }
 
-function activityStatusLabel(status: string) {
-  const normalized = normalizedActivityStatus(status);
-  const labels: Record<string, string> = {
-    Todo: "Por hacer",
-    InProgress: "Producto en proceso",
-    EvidenceAttached: "Evidencia adjunta",
-    PendingApproval: "Pendiente de aprobación",
-    Approved: "Aprobado",
-    Rejected: "Producto en proceso"
-  };
-  return labels[normalized] ?? normalized;
-}
-
-function approvalDecisionLabel(decision: string) {
-  return decision === "Approved" ? "Aprobado" : decision === "Rejected" ? "Rechazado" : decision;
-}
-
-function normalizedActivityStatus(status: string) {
-  return status === "Rejected" ? "InProgress" : status;
-}
-
 function EvidencePreview({ item }: { item: EvidenceItem }) {
   const lowerName = item.fileName.toLowerCase();
   if (/\.(png|jpg|jpeg|gif|webp)$/i.test(lowerName)) return <div className="file-preview"><img src={item.storageUrl} alt={item.fileName} /></div>;
@@ -549,62 +465,6 @@ function SelectField({ label, name, items, defaultValue = "" }: { label: string;
   );
 }
 
-function nextProductId(activities: Activity[]) {
-  const max = activities.reduce((current, item) => {
-    const match = /^PROD-(\d+)$/i.exec(item.productId.trim());
-    return match ? Math.max(current, Number(match[1])) : current;
-  }, 0);
-  return `PROD-${String(max + 1).padStart(4, "0")}`;
-}
-
-function filterRequirementsForSession(requirements: Requirement[], session: ReturnType<typeof getSession>) {
-  if (!session || session.user.roles.some((role) => ["Administrador", "Auditor", "Coordinador"].includes(role))) return requirements;
-  const userKeys = [session.user.name, session.user.email].map((value) => value.toLowerCase());
-  return requirements.filter((item) => userKeys.includes(item.requestedBy.toLowerCase()));
-}
-
-function filterActivitiesForSession(activities: Activity[], visibleRequirements: Requirement[], session: ReturnType<typeof getSession>) {
-  if (!session || session.user.roles.some((role) => ["Administrador", "Auditor", "Coordinador"].includes(role))) return activities;
-  const userKeys = [session.user.name, session.user.email].map((value) => value.toLowerCase());
-  const visibleRequirementIds = new Set(visibleRequirements.map((item) => item.id));
-  return activities.filter((item) => userKeys.includes(item.productResponsible.toLowerCase()) || visibleRequirementIds.has(item.requirementId));
-}
-
-function matchesSearch(item: Activity, term: string) {
-  const query = term.trim().toLowerCase();
-  if (!query) return true;
-  return [
-    item.productId,
-    item.productType,
-    item.requirementType,
-    item.productResponsible,
-    item.diffusionChannel,
-    item.mainKpi,
-    activityStatusLabel(item.status),
-    item.observations
-  ].join(" ").toLowerCase().includes(query);
-}
-
 function highlight(text: string, term: string) {
   return <Highlight search={term}>{text}</Highlight>;
-}
-
-type StepState = "pending" | "ready" | "done";
-
-function activityStepState(item: Activity, step: "start" | "evidence" | "approval"): StepState {
-  const order = ["Todo", "InProgress", "EvidenceAttached", "PendingApproval", "Approved", "Rejected"];
-  const current = order.indexOf(normalizedActivityStatus(item.status));
-  if (step === "start") return current <= 0 ? "ready" : "done";
-  if (step === "evidence") {
-    if (current <= 0) return "pending";
-    return current === 1 ? "ready" : "done";
-  }
-  if (current < 2) return "pending";
-  return current === 2 ? "ready" : "done";
-}
-
-function workflowButtonClass(state: StepState) {
-  if (state === "done") return "icon-button success";
-  if (state === "ready") return "icon-button warning";
-  return "icon-button pending";
 }

@@ -9,3 +9,4 @@
 | R-005 | Abstracciones prematuras | Medio | Exigir dos consumidores antes de mover a `shared`. |
 | R-006 | Next.js 16.0.8 reportado con vulnerabilidad | Alto | Mantener version por decision actual y evaluar un parche seguro de Next.js 16 en una tarea separada. |
 | R-007 | Convergencia futura con PortalCorporativo | Medio | ADR-001 y nueva iniciativa antes de cualquier integracion. |
+| R-008 | Paginas legacy incumplen reglas nuevas de hooks de React | Medio | Excepcion limitada a `app/**/*.tsx`; retirar por modulo al migrar cada pagina. Los modulos nuevos mantienen las reglas activas. |

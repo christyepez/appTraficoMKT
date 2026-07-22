@@ -5,7 +5,7 @@
 | Hito | Estado | Evidencia |
 |---|---|---|
 | H0 Gobierno y linea base | Completado | Estrategia aprobada y publicada; Prompt 0 ejecutado. |
-| H1 Fundacion Productos | En progreso | Autorizado despues del Prompt 0. |
+| H1 Fundacion Productos | Completado | Modulo base, servicio, utilidades y pruebas publicados en `feature1.0`. |
 | H2 Formulario | Pendiente | - |
 | H3 Seguimiento y workflow | Pendiente | - |
 | H4 Evidencias y aprobaciones | Pendiente | - |
@@ -33,17 +33,18 @@
 
 ## Sprint 1
 
-- [ ] Crear estructura `features/products`.
-- [ ] Crear modelos iniciales.
-- [ ] Crear servicio inicial sobre `fetch`.
-- [ ] Extraer utilidades puras del workflow.
-- [ ] Crear primeras pruebas unitarias.
-- [ ] Completar instalacion y lockfile de dependencias.
-- [ ] Migrar `activities/page.tsx` a los modelos, servicios y utilidades.
-- [ ] Agregar pruebas del servicio y filtros por sesion.
-- [ ] Ejecutar `pnpm test`.
-- [ ] Ejecutar `pnpm build`.
-- [ ] Publicar commit de fundacion.
+- [x] Crear estructura `features/products`.
+- [x] Crear modelos iniciales.
+- [x] Crear servicio inicial sobre `fetch`.
+- [x] Extraer utilidades puras del workflow.
+- [x] Crear primeras pruebas unitarias.
+- [x] Completar instalacion y lockfile de dependencias.
+- [x] Migrar `activities/page.tsx` a los modelos, servicios y utilidades.
+- [x] Agregar pruebas del servicio y filtros por sesion.
+- [x] Ejecutar `pnpm lint` y registrar la deuda legacy.
+- [x] Ejecutar `pnpm test`.
+- [x] Ejecutar `pnpm build`.
+- [x] Publicar commit de fundacion.
 
 ## Hitos H7-H25
 
