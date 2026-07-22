@@ -286,3 +286,17 @@
 - [x] Probar defaults, validaciones, preview, guardado, cancelación y errores.
 - [x] Ejecutar lint, TypeScript, cobertura y build.
 - [x] Publicar commit H17 y detenerse antes de H18.
+
+## Sprint 18 - Notificaciones y bitácoras
+
+- [x] Inventariar configuración, registros personales, bitácora y endpoints.
+- [x] Crear modelos, esquema, servicios, utilidades y hooks del dominio.
+- [x] Modularizar configuración con React Hook Form y Zod.
+- [x] Separar editor visual, HTML y vista previa segura.
+- [x] Sanear HTML y aislarlo en un `iframe sandbox` sin scripts.
+- [x] Modularizar bandeja personal y acuse con bloqueo de doble acción.
+- [x] Compartir filtros, paginación y presentación de registros.
+- [x] Modularizar bitácora con carga, error recuperable y vacío.
+- [x] Mantener Power Automate, webhooks, backend y envío real sin cambios.
+- [x] Ejecutar pruebas, cobertura, lint, TypeScript y build final.
+- [x] Publicar los tres commits H18 y detenerse antes de H19.
