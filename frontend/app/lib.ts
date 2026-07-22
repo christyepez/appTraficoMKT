@@ -1,76 +1,10 @@
-export type SessionUser = {
-  id: string;
-  name: string;
-  email: string;
-  roles: string[];
-  screenPermissions: string[];
-  menuMode?: "horizontal" | "vertical";
-  menuCollapsed?: boolean;
-  mustChangePassword?: boolean;
-};
+import { getSession } from "../core/auth/session";
 
-export type AuthSession = {
-  accessToken: string;
-  expiresAt: string;
-  user: SessionUser;
-};
+export { clearSession, getSession, logoutSession, saveSession } from "../core/auth/session";
+export type { AuthSession, SessionUser } from "../core/auth/session";
 
 export { applyBrandVariables, defaultBrandSettings } from "../core/branding/brand-settings";
 export type { BrandSettings } from "../core/branding/brand-settings";
-export function getSession(): AuthSession | null {
-  if (typeof window === "undefined") return null;
-  const raw = window.localStorage.getItem("requirements-session");
-  if (!raw) return null;
-
-  try {
-    const session = JSON.parse(raw) as AuthSession;
-    if (session.expiresAt && new Date(session.expiresAt).getTime() <= Date.now()) {
-      clearSession();
-      return null;
-    }
-    const roles = session.user?.roles ?? [];
-    const screenPermissions = session.user?.screenPermissions ?? defaultScreensForRoles(roles);
-
-    return {
-      ...session,
-      user: {
-        id: session.user?.id ?? "",
-        name: session.user?.name ?? "Usuario",
-        email: session.user?.email ?? "",
-        roles,
-        screenPermissions,
-        menuMode: session.user?.menuMode === "vertical" ? "vertical" : "horizontal",
-        menuCollapsed: Boolean(session.user?.menuCollapsed),
-        mustChangePassword: Boolean(session.user?.mustChangePassword)
-      }
-    };
-  } catch {
-    clearSession();
-    return null;
-  }
-}
-
-export function saveSession(session: AuthSession) {
-  window.sessionStorage.removeItem("requirements-explicit-logout");
-  window.localStorage.removeItem("requirements-session");
-  window.localStorage.removeItem("requirements-last-toast");
-  window.localStorage.setItem("requirements-session", JSON.stringify(session));
-  window.dispatchEvent(new Event("requirements-session-changed"));
-}
-
-export function clearSession() {
-  window.localStorage.removeItem("requirements-session");
-  window.localStorage.removeItem("requirements-last-toast");
-  window.sessionStorage.removeItem("msal-state");
-  window.sessionStorage.removeItem("msal-code-verifier");
-  window.dispatchEvent(new Event("requirements-session-changed"));
-}
-
-export function logoutSession() {
-  window.sessionStorage.setItem("requirements-explicit-logout", "1");
-  clearSession();
-}
-
 export type ToastType = "success" | "error" | "info";
 const toastStorageKey = "requirements-last-toast";
 
@@ -127,35 +61,6 @@ export function t(text: string) {
   if (typeof window === "undefined") return text;
   const language = window.localStorage.getItem("ui-language") ?? "es";
   return translations[language]?.[text] ?? text;
-}
-
-function defaultScreensForRoles(roles: string[]) {
-  if (roles.includes("Administrador")) return ["dashboard", "activities", "agenda", "agenda-calendar", "agenda-metrics", "evidence", "approvals", "metrics", "audit", "admin", "users", "storage", "initial-import", "branding", "notifications", "my-notifications", "notification-log"];
-  if (roles.includes("Coordinador")) return ["dashboard", "activities", "agenda", "agenda-calendar", "agenda-metrics", "evidence", "approvals", "metrics", "audit", "my-notifications"];
-  const screens = new Set(["dashboard"]);
-  if (roles.includes("Tecnico")) {
-    screens.add("activities");
-    screens.add("agenda");
-    screens.add("agenda-calendar");
-    screens.add("agenda-metrics");
-    screens.add("evidence");
-    screens.add("my-notifications");
-  }
-  if (roles.includes("Aprobador")) {
-    screens.add("approvals");
-    screens.add("my-notifications");
-  }
-  if (roles.includes("Auditor")) {
-    screens.add("activities");
-    screens.add("agenda");
-    screens.add("agenda-calendar");
-    screens.add("agenda-metrics");
-    screens.add("evidence");
-    screens.add("approvals");
-    screens.add("metrics");
-    screens.add("audit");
-  }
-  return Array.from(screens);
 }
 
 export async function api<T>(url: string, init: RequestInit = {}): Promise<T> {
