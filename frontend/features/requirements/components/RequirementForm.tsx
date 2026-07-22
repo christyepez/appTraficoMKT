@@ -2,8 +2,9 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, Save, X } from "lucide-react";
-import { cloneElement, type ReactElement, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
+import { FormField as Field } from "../../../shared/components/FormField";
 import type { Requirement, RequirementCatalogs, SaveRequirementPayload } from "../models/requirement.models";
 import { mapRequirementFormToPayload, requirementDefaults, requirementFormSchema, type RequirementFormValues } from "../schemas/requirement.schema";
 import { RequirementDialog } from "./RequirementDialog";
@@ -54,7 +55,7 @@ export function RequirementForm({ requirement, catalogs, onSave, onSuccess, onFe
         <button autoFocus className="icon-button" type="button" aria-label="Cerrar formulario" disabled={isSubmitting} onClick={onCancel}><X size={16} /></button>
       </div>
       <form className="form" onSubmit={handleSubmit(submit)} noValidate>
-        <Field label="Actividad o evento" error={errors.activityOrEvent?.message}><input {...register("activityOrEvent")} /></Field>
+        <Field idPrefix="requirement" errorClassName={styles.fieldError} label="Actividad o evento" error={errors.activityOrEvent?.message}><input {...register("activityOrEvent")} /></Field>
         <Field label="Correo del solicitante" error={errors.requestedBy?.message}><input type="email" {...register("requestedBy")} /></Field>
         <Field label="Facultad" error={errors.facultyId?.message}><select {...register("facultyId", { onChange: () => setValue("careerId", "") })}><option value="">Seleccione…</option>{catalogs.faculties.map(option)}</select></Field>
         <Field label="Carrera" error={errors.careerId?.message}><select {...register("careerId")} disabled={!facultyId}><option value="">Seleccione…</option>{careers.map(option)}</select></Field>
@@ -75,11 +76,6 @@ export function RequirementForm({ requirement, catalogs, onSave, onSuccess, onFe
       </form>
     </RequirementDialog>
   );
-}
-
-function Field({ label, error, wide = false, children }: { label: string; error?: string; wide?: boolean; children: ReactElement<{ id?: string; "aria-invalid"?: boolean }> }) {
-  const id = `requirement-${label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
-  return <label className={`field ${wide ? "field-wide" : ""}`} htmlFor={id}><span>{label}</span>{cloneElement(children, { id, "aria-invalid": Boolean(error) || undefined })}{error && <small className={styles.fieldError} role="alert">{error}</small>}</label>;
 }
 
 function option(item: { id: string; name: string }) {

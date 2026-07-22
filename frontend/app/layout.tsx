@@ -3,15 +3,16 @@ import "./globals.css";
 import { ToastViewport } from "./toast";
 
 export const metadata: Metadata = {
-  title: "Requirements Platform",
-  description: "Requirement intake, activity tracking, evidence and approvals"
+  title: "Requerimientos MKT-UTI",
+  description: "Gestión de requerimientos, productos, evidencias y aprobaciones"
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="es">
       <body>
-        {children}
+        <a className="skip-link" href="#app-content">Saltar al contenido principal</a>
+        <div id="app-content" tabIndex={-1}>{children}</div>
         <ToastViewport />
       </body>
     </html>

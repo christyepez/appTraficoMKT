@@ -1,4 +1,4 @@
-import { api } from "../../app/lib";
+import { api } from "../api/api-client";
 import type { AuthSession } from "./session";
 
 export function loginLocal(email: string, password: string) {

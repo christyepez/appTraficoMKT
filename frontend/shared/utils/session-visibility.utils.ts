@@ -1,4 +1,4 @@
-import type { AuthSession } from "../../app/lib";
+import type { AuthSession } from "../../core/auth/session";
 import type { Activity, Requirement } from "../models/api.models";
 
 export function filterRequirementsForSession(requirements: Requirement[], session: AuthSession | null) {

@@ -2,9 +2,10 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Save, X } from "lucide-react";
-import { cloneElement, useCallback, useEffect, useMemo, useState, type ReactElement } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { showToast } from "../../../app/lib";
+import { FormField as Field } from "../../../shared/components/FormField";
 import type { PublicAvailability, PublicRequirementCatalogs, PublicRequirementPayload } from "../models/public-requirement.models";
 import { publicRequirementDefaults, publicRequirementSchema, type PublicRequirementValues } from "../schemas/public-requirement.schema";
 import { createPublicRequirement, getPublicRequirementCatalogs } from "../services/public-requirement.service";
@@ -95,7 +96,3 @@ export function PublicRequirementForm({ availability, onCancel, onSuccess, loadC
 }
 
 function option(item: { id: string; name: string }) { return <option key={item.id} value={item.id}>{item.name}</option>; }
-
-function Field({ label, error, wide = false, children }: { label: string; error?: string; wide?: boolean; children: ReactElement<{ "aria-invalid"?: boolean }> }) {
-  return <label className={`field${wide ? " field-wide" : ""}`}><span>{label}</span>{cloneElement(children, { "aria-invalid": Boolean(error) || undefined })}{error && <small role="alert">{error}</small>}</label>;
-}

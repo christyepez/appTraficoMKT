@@ -372,3 +372,19 @@
 - [x] Probar estados del token, validaciones, servicio, envío único y error API.
 - [x] Ejecutar pruebas, cobertura, lint, TypeScript y build.
 - [x] Publicar el commit H23 y detenerse antes de H24.
+
+## Sprint 24 - Shell, shared/core y CSS global
+
+- [x] Inventariar responsabilidades de `lib.ts`, `nav.tsx`, `layout.tsx` y `globals.css`.
+- [x] Documentar matriz KEEP/MOVE/MERGE/DELETE antes de modificar.
+- [x] Mover cliente HTTP a `core/api` sin cambiar contratos ni comportamiento.
+- [x] Mover toast e idioma a `core/configuration`.
+- [x] Centralizar menú, visibilidad y primera ruta en `core/permissions`.
+- [x] Dividir AppNav en servicio, hook, cabecera, perfil/notificaciones y menú.
+- [x] Convertir `app/lib.ts` y `app/nav.tsx` en fachadas mínimas justificadas.
+- [x] Consolidar `FormField` compartido en tres consumidores reales.
+- [x] Añadir salto accesible al contenido y metadatos consistentes al layout.
+- [x] Eliminar reglas CSS históricas sin consumidores y conservar patrones globales.
+- [x] Probar roles, pantallas, orden, colapso, responsive, sesión, tema e idioma.
+- [x] Ejecutar pruebas, cobertura, lint, TypeScript y build.
+- [x] Publicar commit H24 y detenerse antes de H25.

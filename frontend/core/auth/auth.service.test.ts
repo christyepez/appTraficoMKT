@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { api } from "../../app/lib";
+import { api } from "../api/api-client";
 import { changePassword, loginLocal, requestPasswordReset } from "./auth.service";
 
-vi.mock("../../app/lib", () => ({ api: vi.fn() }));
+vi.mock("../api/api-client", () => ({ api: vi.fn() }));
 
 describe("auth service", () => {
   beforeEach(() => vi.mocked(api).mockReset().mockResolvedValue({}));
