@@ -7,6 +7,8 @@ import Image from "next/image";
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { authenticatedRoute, safeAuthMessage } from "../../../core/auth/auth.utils";
+import { PublicRequirementForm } from "../../public-requirement/components/PublicRequirementForm";
+import { isPublicFeatureActive } from "../../public-requirement/utils/public-requirement.utils";
 import { LoginForm } from "./LoginForm";
 
 export function LoginExperience() {
@@ -21,15 +23,11 @@ export function LoginExperience() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isPublicFormOpen, setIsPublicFormOpen] = useState(false);
   const [chatMessage, setChatMessage] = useState("");
-  const [faculties, setFaculties] = useState<any[]>([]);
-  const [campuses, setCampuses] = useState<any[]>([]);
-  const [formats, setFormats] = useState<any[]>([]);
-  const [careers, setCareers] = useState<any[]>([]);
-  const [publicFacultyId, setPublicFacultyId] = useState("");
   const [catalogDefaults, setCatalogDefaults] = useState<{ faculty?: any; campus?: any; format?: any; career?: any }>({});
-  const showPublicPopup = isPublicFeatureActive(brand.showPublicRequirementForm, brand.publicRequirementFormActiveFrom, brand.publicRequirementFormActiveUntil);
-  const showPublicFullPage = isPublicFeatureActive(brand.showPublicRequirementFullPage, brand.publicRequirementFullPageActiveFrom, brand.publicRequirementFullPageActiveUntil);
-  const showChatbot = isPublicFeatureActive(brand.showLoginChatbot, brand.loginChatbotActiveFrom, brand.loginChatbotActiveUntil);
+  const popupAvailability = { enabled: brand.showPublicRequirementForm, activeFrom: brand.publicRequirementFormActiveFrom, activeUntil: brand.publicRequirementFormActiveUntil };
+  const showPublicPopup = isPublicFeatureActive(popupAvailability);
+  const showPublicFullPage = isPublicFeatureActive({ enabled: brand.showPublicRequirementFullPage, activeFrom: brand.publicRequirementFullPageActiveFrom, activeUntil: brand.publicRequirementFullPageActiveUntil });
+  const showChatbot = isPublicFeatureActive({ enabled: brand.showLoginChatbot, activeFrom: brand.loginChatbotActiveFrom, activeUntil: brand.loginChatbotActiveUntil });
 
   useEffect(() => {
     api<BrandSettings>("/api/identity/brand-settings").then((data) => setBrand({ ...defaultBrandSettings, ...data })).catch(() => undefined);
@@ -43,17 +41,12 @@ export function LoginExperience() {
       const activeCampuses = campusData.filter((item) => item.isActive);
       const activeFormats = formatData.filter((item) => item.isActive);
       const activeCareers = careerData.filter((item) => item.isActive);
-      setFaculties(activeFaculties);
-      setCampuses(activeCampuses);
-      setFormats(activeFormats);
-      setCareers(activeCareers);
       setCatalogDefaults({
         faculty: activeFaculties[0] ?? facultyData[0],
         campus: activeCampuses[0] ?? campusData[0],
         format: activeFormats[0] ?? formatData[0],
         career: activeCareers[0] ?? careerData[0]
       });
-      setPublicFacultyId(activeFaculties[0]?.id ?? "");
     }).catch(() => undefined);
 
     const params = new URLSearchParams(window.location.search);
@@ -143,42 +136,6 @@ export function LoginExperience() {
     }
   }
 
-  async function createPublicRequirement(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const form = new FormData(event.currentTarget);
-    const faculty = faculties.find((item) => item.id === publicFacultyId);
-    const campusId = String(form.get("campusId") ?? "");
-    const eventFormatId = String(form.get("eventFormatId") ?? "");
-    const careerId = String(form.get("careerId") ?? "");
-    const campus = campuses.find((item) => item.id === campusId);
-    const eventFormat = formats.find((item) => item.id === eventFormatId);
-    const career = careers.find((item) => item.id === careerId);
-    await api("/api/requirements", {
-      method: "POST",
-      body: JSON.stringify({
-        activityOrEvent: form.get("activityOrEvent"),
-        requestedBy: form.get("requestedBy"),
-        facultyId: publicFacultyId,
-        faculty: faculty?.name ?? "",
-        career: career?.name ?? "",
-        campusId,
-        campus: campus?.name ?? "",
-        place: form.get("place"),
-        startDate: form.get("startDate"),
-        startTime: form.get("startTime") || null,
-        endDate: form.get("endDate"),
-        endTime: form.get("endTime") || null,
-        eventObjective: form.get("eventObjective"),
-        eventFormatId,
-        eventFormat: eventFormat?.name ?? "",
-        requestDate: new Date().toISOString().slice(0, 10)
-      })
-    });
-    showToast("Requerimiento creado correctamente.");
-    event.currentTarget.reset();
-    setIsPublicFormOpen(false);
-  }
-
   return (
     <main className="login-page">
       <section className="login-panel">
@@ -221,24 +178,7 @@ export function LoginExperience() {
               </div>
               <button className="icon-button" type="button" title="Cerrar formulario público" onClick={() => setIsPublicFormOpen(false)}><X size={16} /></button>
             </div>
-            <form className="form top-space" onSubmit={createPublicRequirement}>
-              <label className="field"><span>Actividad o evento</span><input name="activityOrEvent" required /></label>
-              <label className="field"><span>Solicitante</span><input name="requestedBy" type="email" required placeholder="correo@uti.edu.ec" /></label>
-              <label className="field"><span>Facultad</span><select required value={publicFacultyId} onChange={(event) => setPublicFacultyId(event.target.value)}><option value="">Seleccione...</option>{faculties.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
-              <label className="field"><span>Carrera</span><select name="careerId" required><option value="">Seleccione...</option>{careers.filter((item) => !item.facultyId || item.facultyId === publicFacultyId).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
-              <label className="field"><span>Sede</span><select name="campusId" required><option value="">Seleccione...</option>{campuses.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
-              <label className="field"><span>Lugar</span><input name="place" required /></label>
-              <label className="field"><span>Fecha inicio</span><input name="startDate" type="date" required /></label>
-              <label className="field"><span>Hora inicio</span><input name="startTime" type="time" /></label>
-              <label className="field"><span>Fecha fin</span><input name="endDate" type="date" required /></label>
-              <label className="field"><span>Hora fin</span><input name="endTime" type="time" /></label>
-              <label className="field"><span>Formato</span><select name="eventFormatId" required><option value="">Seleccione...</option>{formats.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
-              <label className="field field-wide"><span>Objetivo del evento</span><textarea name="eventObjective" required /></label>
-              <div className="form-actions">
-                <button className="button"><Send size={16} /> Enviar requerimiento</button>
-                <button className="button secondary" type="button" onClick={() => setIsPublicFormOpen(false)}><X size={16} /> Cancelar</button>
-              </div>
-            </form>
+            <PublicRequirementForm availability={popupAvailability} onCancel={() => setIsPublicFormOpen(false)} />
           </section>
         </div>
       )}
@@ -285,12 +225,4 @@ async function sha256Base64Url(value: string) {
   const digest = await crypto.subtle.digest("SHA-256", data);
   const base64 = btoa(String.fromCharCode(...new Uint8Array(digest)));
   return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-}
-
-function isPublicFeatureActive(enabled: boolean, from?: string | null, until?: string | null) {
-  if (!enabled) return false;
-  const now = Date.now();
-  const fromTime = from ? new Date(from).getTime() : Number.NEGATIVE_INFINITY;
-  const untilTime = until ? new Date(until).getTime() : Number.POSITIVE_INFINITY;
-  return now >= fromTime && now <= untilTime;
 }

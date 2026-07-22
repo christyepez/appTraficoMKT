@@ -341,3 +341,19 @@
 - [x] Probar acceso válido/inválido, expiración, logout, recuperación y cambio obligatorio.
 - [x] Ejecutar pruebas, cobertura, lint, TypeScript y build.
 - [x] Publicar los tres commits H21 y detenerse antes de H22.
+
+## Sprint 22 - Formulario público de requerimientos
+
+- [x] Inventariar las implementaciones completa, modal y chatbot.
+- [x] Separar modelos, esquema Zod, servicio, utilidades y hook del flujo público.
+- [x] Implementar una sola versión de `PublicRequirementForm` para página y login.
+- [x] Mantener el chatbot separado por su contrato simplificado con valores predeterminados.
+- [x] Aplicar Facultad/Carrera dependiente y reutilizar los contratos de catálogos.
+- [x] Centralizar y probar la regla inclusiva de ventana de activación.
+- [x] Mostrar fuera de período, carga, error recuperable, vacío, envío y éxito.
+- [x] Evitar envíos duplicados mientras existe una petición activa.
+- [x] Reducir `public-requirement/page.tsx` a composición.
+- [x] Conservar el endpoint público y no agregar autenticación ni cambios backend.
+- [x] Probar catálogos, límites, validaciones, envío, duplicados y errores.
+- [x] Ejecutar pruebas, cobertura, lint, TypeScript y build.
+- [x] Publicar el commit H22 y detenerse antes de H23.
