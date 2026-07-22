@@ -18,7 +18,7 @@
 | H11 Métricas de Agenda | Completado | Indicadores, capacidad, carga técnica y filtros desacoplados sobre datos de Agenda. |
 | H12 Requerimientos y Dashboard | Completado | Formulario, filtros, workflow, permisos visibles y servicio tipado desacoplados. |
 | H13 Métricas generales | Completado | Fuentes parciales, cálculos, conceptos y secciones analíticas desacoplados. |
-| H14 Auditoria | Pendiente | Ver `codex/prompts/04-requirements-analytics.md`; es el siguiente hito. |
+| H14 Auditoria | Completado | Tres fuentes normalizadas, filtros, paginación y detalle seguro desacoplados. |
 | H15-H16 Administracion | Pendiente | Ver `codex/prompts/05-administration.md`. |
 | H17-H20 Configuracion operativa | Pendiente | Ver `codex/prompts/06-operations.md`. |
 | H21-H23 Acceso y canales publicos | Pendiente | Ver `codex/prompts/07-access-public.md`. |
@@ -227,3 +227,19 @@
 - [x] Probar cálculos, transformaciones, conceptos, parciales, vacíos y errores.
 - [x] Ejecutar lint, TypeScript, cobertura y build.
 - [x] Publicar commit H13 y detenerse antes de H14.
+
+## Sprint 14 - Auditoría
+
+- [x] Inventariar las fuentes de Requerimientos, Productos y Aprobaciones.
+- [x] Crear modelos y servicio tipado tolerante a fuentes parciales.
+- [x] Normalizar y ordenar eventos mediante funciones puras.
+- [x] Crear `useAuditLog` con polling, filtros y actualización no superpuesta.
+- [x] Extraer filtros, resumen, lista paginada y detalle del evento.
+- [x] Formatear fechas y payloads incompletos de manera segura.
+- [x] Ocultar tokens, contraseñas, secretos y autorización en payloads JSON.
+- [x] Diferenciar carga, error total, datos parciales y vacío.
+- [x] Mantener la auditoría como visualización sin alterar persistencia ni eventos.
+- [x] Reducir `audit/page.tsx` a composición sin acceso HTTP.
+- [x] Probar normalización, orden, filtros, detalle, parciales y errores.
+- [x] Ejecutar lint, TypeScript, cobertura y build.
+- [x] Publicar commit H14 y detenerse antes de H15.

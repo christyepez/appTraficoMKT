@@ -2,6 +2,7 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getSession, showToast } from "../../../app/lib";
 import { getMetricsWorkspace } from "../services/metrics.service";
+import type { MetricsWorkspaceData } from "../models/metrics.models";
 import { useMetricsDashboard } from "./useMetricsDashboard";
 vi.mock("../../../app/lib", () => ({ getSession: vi.fn(), showToast: vi.fn() }));
 vi.mock("../services/metrics.service", () => ({ getMetricsWorkspace: vi.fn() }));
@@ -23,4 +24,4 @@ describe("useMetricsDashboard", () => {
     serviceMock.mockRejectedValueOnce(new Error("Sin conexión")); const { result, unmount } = renderHook(() => useMetricsDashboard()); await waitFor(() => expect(result.current.loadError).toBe("Sin conexión")); expect(showToast).toHaveBeenCalledWith("Sin conexión", "error"); await act(async () => { await result.current.refresh(); }); expect(result.current.loadError).toBe(""); unmount();
   });
 });
-function data() { return { requirements: { totalRequirements: 3, completedRequirements: 1, averageHoursByStage: [], byStatus: [], byFaculty: [], byCampus: [], byFormat: [] }, products: { totalProducts: 2, approvedProducts: 1, averageHoursByStage: [], byStatus: [], workloadByResponsible: [], byProductType: [], byDiffusionChannel: [], byMainKpi: [], byTargetAudience: [] }, approvals: { auditEvents: 1, byDecision: [] }, usage: { totalUsers: 1, activeUsers: 1, usersLoggedLast7Days: 1, averageHoursSinceLastLogin: 2, recentUsers: [] }, activities: [], warnings: [] } as never; }
+function data(): MetricsWorkspaceData { return { requirements: { totalRequirements: 3, completedRequirements: 1, averageHoursByStage: [], byStatus: [], byFaculty: [], byCampus: [], byFormat: [] }, products: { totalProducts: 2, approvedProducts: 1, averageHoursByStage: [], byStatus: [], workloadByResponsible: [], byProductType: [], byDiffusionChannel: [], byMainKpi: [], byTargetAudience: [] }, approvals: { auditEvents: 1, byDecision: [] }, usage: { totalUsers: 1, activeUsers: 1, usersLoggedLast7Days: 1, averageHoursSinceLastLogin: 2, recentUsers: [] }, activities: [], warnings: [] } as unknown as MetricsWorkspaceData; }
