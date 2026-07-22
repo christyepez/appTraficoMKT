@@ -15,8 +15,8 @@
 | H8 Aprobaciones | Completado | Cola, decisiones validadas, adjuntos, permisos visibles y concurrencia desacoplados. |
 | H9 Agenda técnica | Completado | CRUD, reservas derivadas, jornadas, filtros y reglas de fechas modularizados. |
 | H10 Calendario técnico | Completado | Navegación, filtros, cuatro vistas y eventos reutilizan Agenda sin duplicar reservas. |
-| H11 Métricas de Agenda | Pendiente | Ver `codex/prompts/03-agenda.md`. |
-| H12-H14 Requerimientos y analitica | Pendiente | Ver `codex/prompts/04-requirements-analytics.md`. |
+| H11 Métricas de Agenda | Completado | Indicadores, capacidad, carga técnica y filtros desacoplados sobre datos de Agenda. |
+| H12-H14 Requerimientos y analitica | Pendiente | Ver `codex/prompts/04-requirements-analytics.md`; H12 es el siguiente hito. |
 | H15-H16 Administracion | Pendiente | Ver `codex/prompts/05-administration.md`. |
 | H17-H20 Configuracion operativa | Pendiente | Ver `codex/prompts/06-operations.md`. |
 | H21-H23 Acceso y canales publicos | Pendiente | Ver `codex/prompts/07-access-public.md`. |
@@ -181,3 +181,17 @@
 - [x] Reducir `agenda-calendar/page.tsx` a composición sin acceso HTTP.
 - [x] Ejecutar lint, TypeScript, cobertura y build.
 - [x] Publicar commit H10 y detenerse antes de H11.
+
+## Sprint 11 - Métricas de Agenda
+
+- [x] Reutilizar modelos, servicio, permisos y reservas derivadas de Agenda.
+- [x] Crear selectores puros para horas, ocupación, capacidad y agregaciones.
+- [x] Crear `useAgendaMetrics` para carga, visibilidad, período y estado derivado.
+- [x] Extraer filtros, resumen, capacidad, carga técnica y detalle operativo.
+- [x] Resolver datos incompletos y divisiones por cero con resultados seguros.
+- [x] Mostrar carga, error recuperable y vacío sin duplicar acceso HTTP.
+- [x] Crear CSS Module exclusivo para la visualización de métricas.
+- [x] Mantener la página como composición legible y sin lógica de negocio.
+- [x] Probar cálculos, filtros, capacidad, carga, datos incompletos y renderizado.
+- [x] Ejecutar lint, TypeScript, cobertura y build.
+- [x] Publicar commit H11 y detenerse antes de H12.

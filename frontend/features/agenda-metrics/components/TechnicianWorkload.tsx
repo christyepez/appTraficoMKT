@@ -1,0 +1,3 @@
+import type { WorkloadItem } from "../models/metrics.models";
+import styles from "../styles/Metrics.module.css";
+export function TechnicianWorkload({ title, items }: { title: string; items: WorkloadItem[] }) { return <section className="panel"><h2>{title}</h2><div className="agenda-load-list top-space">{items.map((item) => <div className="agenda-progress-row" key={item.label}><span>{item.label}</span><div role="progressbar" aria-label={item.label} aria-valuenow={item.percent} aria-valuemin={0} aria-valuemax={100}><b className={styles.bar} style={{ width: `${item.percent}%` }} /></div><strong>{item.hours.toFixed(1)} h</strong></div>)}{items.length === 0 && <div className="empty">Sin datos para este periodo.</div>}</div></section>; }
