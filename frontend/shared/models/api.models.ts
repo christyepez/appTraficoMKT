@@ -60,3 +60,22 @@ export type Approver = {
   approvalLevel: number;
   isActive: boolean;
 };
+
+export type EvidenceItem = {
+  id: string;
+  activityId: string;
+  fileName: string;
+  contentType?: string;
+  storageUrl: string;
+  uploadedBy: string;
+  createdAt?: string;
+};
+
+export type Approval = {
+  id: string;
+  activityId: string;
+  decision: string;
+  approvedBy: string;
+  comments: string;
+  createdAt?: string;
+};

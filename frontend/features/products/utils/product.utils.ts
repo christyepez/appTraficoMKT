@@ -1,5 +1,6 @@
-import type { AuthSession } from "../../../app/lib";
-import type { Activity, Requirement } from "../../../shared/models/api.models";
+import type { Activity } from "../../../shared/models/api.models";
+
+export { filterProductsForSession, filterRequirementsForSession } from "../../../shared/utils/session-visibility.utils";
 
 export type ProductStep = "start" | "evidence" | "approval";
 export type StepState = "pending" | "ready" | "done";
@@ -32,19 +33,6 @@ export function buildNextProductId(products: Activity[]) {
   return `PROD-${String(max + 1).padStart(4, "0")}`;
 }
 
-export function filterRequirementsForSession(requirements: Requirement[], session: AuthSession | null) {
-  if (hasFullProductAccess(session)) return requirements;
-  const keys = sessionUserKeys(session);
-  return requirements.filter((item) => keys.has(item.requestedBy.toLowerCase()));
-}
-
-export function filterProductsForSession(products: Activity[], visibleRequirements: Requirement[], session: AuthSession | null) {
-  if (hasFullProductAccess(session)) return products;
-  const keys = sessionUserKeys(session);
-  const requirementIds = new Set(visibleRequirements.map((item) => item.id));
-  return products.filter((item) => keys.has(item.productResponsible.toLowerCase()) || requirementIds.has(item.requirementId));
-}
-
 export function matchesProductSearch(item: Activity, term: string) {
   const query = term.trim().toLowerCase();
   if (!query) return true;
@@ -64,12 +52,4 @@ export function productStepState(item: Activity, step: ProductStep): StepState {
 
 export function workflowButtonClass(state: StepState) {
   return state === "done" ? "icon-button success" : state === "ready" ? "icon-button warning" : "icon-button pending";
-}
-
-function hasFullProductAccess(session: AuthSession | null) {
-  return !session || session.user.roles.some((role) => ["Administrador", "Auditor", "Coordinador"].includes(role));
-}
-
-function sessionUserKeys(session: AuthSession | null) {
-  return new Set([session?.user.name ?? "", session?.user.email ?? ""].map((value) => value.toLowerCase()).filter(Boolean));
 }

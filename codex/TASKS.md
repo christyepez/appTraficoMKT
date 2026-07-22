@@ -11,7 +11,8 @@
 | H4 Evidencias y aprobaciones | Completado | Adjuntos, galeria, vista previa y versiones desacoplados y probados. |
 | H5 UX, CSS y accesibilidad | Completado | CSS modular, responsive, foco visible y dialogs accesibles. |
 | H6 Estabilizacion Productos | Completado | Ver `codex/H6_PRODUCT_CLOSURE.md`: regresion automatizada verde y fusion condicionada a pruebas manuales. |
-| H7-H8 Evidencias y Aprobaciones | Pendiente | Ver `codex/prompts/02-evidence-approvals.md`. |
+| H7 Evidencias | Completado | Página autónoma modularizada con reutilización compartida, 63 pruebas y cobertura crítica completa. |
+| H8 Aprobaciones | Pendiente | Ver `codex/prompts/02-evidence-approvals.md`. |
 | H9-H11 Agenda | Pendiente | Ver `codex/prompts/03-agenda.md`. |
 | H12-H14 Requerimientos y analitica | Pendiente | Ver `codex/prompts/04-requirements-analytics.md`. |
 | H15-H16 Administracion | Pendiente | Ver `codex/prompts/05-administration.md`. |
@@ -119,3 +120,18 @@
 - [ ] Revisar y aprobar cada puerta antes del siguiente hito.
 - [ ] Mantener la aplicacion aislada de PortalCorporativo.
 - [ ] No fusionar `feature1.0` a `main` antes del GO de H25.
+
+## Sprint 7 - Evidencias
+
+- [x] Clasificar contratos, utilidades, dialog y preview como `REUSE` interna.
+- [x] Promover contratos de evidencia/aprobación y reglas con segundo consumidor a `shared`.
+- [x] Crear servicio tipado sobre los endpoints existentes.
+- [x] Crear `useEvidenceWorkspace` con permisos visibles, polling y operaciones bloqueadas.
+- [x] Extraer `EvidenceList`, `EvidenceCard`, `EvidenceUploadDialog` y `EvidencePreview`.
+- [x] Usar React Hook Form, Zod y validadores compartidos en la carga.
+- [x] Agregar estados de carga, error recuperable, vacío, actualización y éxito.
+- [x] Crear CSS Module exclusivo de Evidencias.
+- [x] Reducir `evidence/page.tsx` a composición sin acceso HTTP.
+- [x] Probar permisos visibles, archivos, URL, eliminación, previews, estados y errores.
+- [x] Ejecutar lint, TypeScript, cobertura y build.
+- [x] Publicar commit H7 y detenerse antes de H8.

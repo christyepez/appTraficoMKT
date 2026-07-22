@@ -11,7 +11,7 @@ type ApprovalVersionsDialogProps = {
 };
 
 export function ApprovalVersionsDialog({ product, approvals, onViewEvidence, onClose }: ApprovalVersionsDialogProps) {
-  const versions = approvals.filter((approval) => approval.activityId === product.id).sort((left, right) => new Date(left.createdAt).getTime() - new Date(right.createdAt).getTime());
+  const versions = approvals.filter((approval) => approval.activityId === product.id).sort((left, right) => new Date(left.createdAt ?? 0).getTime() - new Date(right.createdAt ?? 0).getTime());
   return (
     <ProductDialog labelledBy="approval-versions-title" onClose={onClose}>
         <div className="card-head">

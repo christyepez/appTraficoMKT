@@ -14,7 +14,7 @@ dependencia con `PortalCorporativo`.
 | `hooks/useProductsWorkspace.ts` | Orquestar carga, polling, permisos visibles, mutaciones, concurrencia y feedback | Servicio y reglas puras |
 | `services/product.service.ts` | Encapsular los contratos HTTP sobre el helper `api`, basado en `fetch` | Modelos compartidos y de la feature |
 | `schemas/` | Validar el formulario y convertir sus valores al comando de guardado | Zod |
-| `utils/` | Resolver filtros, workflow, paginacion y validacion/vista previa de evidencias | Funciones puras |
+| `utils/` | Resolver workflow, busqueda y paginacion; reexportar temporalmente reglas compartidas usadas por rutas existentes | Funciones puras y `shared/utils` |
 | `styles/Product.module.css` | Composicion visual exclusiva de Productos | Tokens y patrones de `app/globals.css` |
 
 `shared/models/api.models.ts` conserva el contrato API canonico. El alias
@@ -85,3 +85,7 @@ que cada modulo necesite. Un elemento se promueve a `shared` cuando exista un
 segundo consumidor real y mantenga el mismo contrato; los componentes de
 workflow y composicion propios de Productos permanecen locales.
 
+En H7 se comprobó el segundo uso de contratos de evidencia/aprobación,
+visibilidad por sesión, validación de adjuntos, vista previa y dialog accesible;
+esas piezas ya residen en `shared`. Los wrappers locales conservan estilos y API
+de cada feature sin duplicar comportamiento.
