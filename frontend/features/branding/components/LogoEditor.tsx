@@ -1,0 +1,6 @@
+import type { UseFormRegister, UseFormSetValue } from "react-hook-form";
+import { showToast } from "../../../app/lib";
+import type { BrandFormValues } from "../schemas/branding.schema";
+import { readBrandImage } from "../utils/branding.utils";
+
+export function LogoEditor({ register, setValue }: { register: UseFormRegister<BrandFormValues>; setValue: UseFormSetValue<BrandFormValues> }) { async function load(field: "logo" | "chatbotIcon", file?: File) { if (!file) return; try { setValue(field, await readBrandImage(file), { shouldDirty: true, shouldValidate: true }); } catch (cause) { showToast(cause instanceof Error ? cause.message : "No se pudo leer la imagen.", "error"); } } return <fieldset className="field field-wide"><legend>Logo e imágenes</legend><div className="form"><label className="field"><span>URL del logo</span><input {...register("logo")}/></label><label className="field"><span>URL del icono Puma</span><input {...register("chatbotIcon")}/></label><label className="field"><span>Cargar logo (máximo 2 MB)</span><input type="file" accept="image/*" onChange={(event)=>void load("logo",event.target.files?.[0])}/></label><label className="field"><span>Cargar icono robot (máximo 2 MB)</span><input type="file" accept="image/*" onChange={(event)=>void load("chatbotIcon",event.target.files?.[0])}/></label></div></fieldset>; }

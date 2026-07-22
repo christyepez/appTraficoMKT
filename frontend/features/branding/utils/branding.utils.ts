@@ -1,0 +1,7 @@
+import type { BrandSettings } from "../models/branding.models";
+
+const periodKeys = ["publicRequirementFormActiveFrom", "publicRequirementFormActiveUntil", "publicRequirementFullPageActiveFrom", "publicRequirementFullPageActiveUntil", "loginChatbotActiveFrom", "loginChatbotActiveUntil"] as const;
+export function settingsForForm(settings: BrandSettings): BrandSettings { const result = { ...settings }; periodKeys.forEach((key) => { const date = settings[key]; result[key] = date ? localDateTime(date) : null; }); return result; }
+export function settingsForApi(settings: BrandSettings): BrandSettings { const result = { ...settings }; periodKeys.forEach((key) => { const date = settings[key]; result[key] = date ? new Date(date).toISOString() : null; }); return result; }
+export function localDateTime(value: string) { const date = new Date(value); return Number.isNaN(date.getTime()) ? "" : new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString().slice(0, 16); }
+export function readBrandImage(file: File): Promise<string> { if (!file.type.startsWith("image/")) return Promise.reject(new Error("Seleccione un archivo de imagen válido.")); if (file.size > 2 * 1024 * 1024) return Promise.reject(new Error("La imagen no puede superar 2 MB.")); return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result)); reader.onerror = () => reject(new Error("No se pudo leer la imagen seleccionada.")); reader.readAsDataURL(file); }); }

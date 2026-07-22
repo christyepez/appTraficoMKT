@@ -272,3 +272,17 @@
 - [x] Probar alta, edición, perfiles, pantallas, activación, validaciones y errores.
 - [x] Ejecutar lint, TypeScript, cobertura y build.
 - [x] Publicar commit H16 y detenerse antes de H17.
+
+## Sprint 17 - Marca y tema
+
+- [x] Inventariar configuración visual, menú, agenda, formularios y períodos públicos.
+- [x] Separar identidad visual y banderas funcionales sin cambiar el contrato API.
+- [x] Mover modelos, defaults y aplicación segura de CSS a `core/branding`.
+- [x] Crear esquema Zod, servicio tipado y `useBrandSettings`.
+- [x] Extraer formulario, colores, gradientes, tipografía, logos y vista previa.
+- [x] Mantener sin cambios los valores institucionales existentes.
+- [x] Aislar la vista previa del documento hasta guardar y restaurar al cancelar.
+- [x] Reducir `branding/page.tsx` a composición sin acceso HTTP.
+- [x] Probar defaults, validaciones, preview, guardado, cancelación y errores.
+- [x] Ejecutar lint, TypeScript, cobertura y build.
+- [x] Publicar commit H17 y detenerse antes de H18.

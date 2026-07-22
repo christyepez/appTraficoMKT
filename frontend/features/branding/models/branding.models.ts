@@ -1,0 +1,5 @@
+import type { BrandSettings } from "../../../core/branding/brand-settings";
+
+export type { BrandSettings };
+export type VisualBrandSettings = Pick<BrandSettings, "primary" | "primaryDark" | "accent" | "background" | "surface" | "foreground" | "muted" | "line" | "buttonText" | "secondary" | "secondaryText" | "success" | "warning" | "danger" | "topbarText" | "useGradient" | "gradientColor" | "gradientDirection" | "headerColor" | "headerUseGradient" | "headerGradientColor" | "headerGradientDirection" | "menuColor" | "menuUseGradient" | "menuGradientColor" | "menuGradientDirection" | "fontFamily" | "menuMode" | "menuCollapsed" | "mobileMenuCollapsed" | "menuOrder" | "headerTextAlign" | "headerTextPosition" | "showHeaderTitle" | "showHeaderSubtitle" | "headerTitleSize" | "headerSubtitleSize" | "headerTitleWeight" | "headerSubtitleWeight" | "headerTitleItalic" | "headerSubtitleItalic" | "headerTitleUnderline" | "headerSubtitleUnderline" | "headerTitleColor" | "headerSubtitleColor" | "brandVersion" | "logo" | "chatbotIcon" | "title" | "subtitle">;
+export type FunctionalBrandSettings = Omit<BrandSettings, keyof VisualBrandSettings>;

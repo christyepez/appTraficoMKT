@@ -1,0 +1,4 @@
+import type { BrandSettingsWorkspace } from "../hooks/useBrandSettings";
+import { BrandForm } from "./BrandForm";
+
+export function BrandSettingsPanel({workspace}:{workspace:BrandSettingsWorkspace}){if(workspace.loading)return <section className="content-shell"><div className="empty" role="status">Cargando configuración de marca…</div></section>;if(workspace.error)return <section className="content-shell"><div className="empty" role="alert">{workspace.error} <button onClick={()=>void workspace.reload()}>Reintentar</button></div></section>;return <section className="content-shell"><span className="badge" role="status">{workspace.message}</span><BrandForm settings={workspace.settings} saving={workspace.saving} onSave={workspace.save} onRestore={workspace.restore}/></section>;}
