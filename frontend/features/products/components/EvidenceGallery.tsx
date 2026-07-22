@@ -3,6 +3,7 @@ import type { Approval, EvidenceItem, Product } from "../models/product.models";
 import { canDeleteEvidence } from "../utils/evidence.utils";
 import { productStatusLabel } from "../utils/product.utils";
 import { EvidencePreview } from "./EvidencePreview";
+import { ProductDialog } from "./ProductDialog";
 
 type EvidenceGalleryProps = {
   product: Product;
@@ -16,8 +17,7 @@ type EvidenceGalleryProps = {
 export function EvidenceGallery({ product, evidence, approvals, pendingEvidenceIds, onDelete, onClose }: EvidenceGalleryProps) {
   const items = evidence.filter((file) => file.activityId === product.id);
   return (
-    <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="evidence-gallery-title" onKeyDown={(event) => { if (event.key === "Escape") onClose(); }}>
-      <section className="modal-panel">
+    <ProductDialog labelledBy="evidence-gallery-title" onClose={onClose}>
         <div className="card-head">
           <div><h2 id="evidence-gallery-title">Adjuntos del producto</h2><p>{product.productId}</p></div>
           <span className="badge">{productStatusLabel(product.status)}</span>
@@ -36,7 +36,6 @@ export function EvidenceGallery({ product, evidence, approvals, pendingEvidenceI
           ))}
           {items.length === 0 && <div className="empty">Sin adjuntos.</div>}
         </div>
-      </section>
-    </div>
+    </ProductDialog>
   );
 }

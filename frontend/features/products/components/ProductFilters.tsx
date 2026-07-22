@@ -8,15 +8,17 @@ type ProductFiltersProps = {
 
 export function ProductFilters({ searchTerm, showCompleted, isRefreshing, onSearchChange, onShowCompletedChange }: ProductFiltersProps) {
   return (
-    <div aria-label="Filtros de productos">
-      <label className="field top-space">
+    <fieldset className={styles.filters} aria-label="Filtros de productos">
+      <legend className={styles.visuallyHidden}>Filtros de productos</legend>
+      <label className={`field ${styles.searchField}`}>
         <span>Buscar en seguimiento</span>
         <input value={searchTerm} onChange={(event) => onSearchChange(event.target.value)} placeholder="Buscar por producto, responsable, KPI, canal, estado..." />
       </label>
-      <label className="check-field top-space">
+      <label className={`check-field ${styles.completedToggle}`}>
         <input type="checkbox" checked={showCompleted} onChange={(event) => onShowCompletedChange(event.target.checked)} /> Ver productos finalizados
       </label>
-      {isRefreshing && <span className="badge top-space" role="status">Actualizando productos…</span>}
-    </div>
+      {isRefreshing && <span className={`badge ${styles.updating}`} role="status">Actualizando productos…</span>}
+    </fieldset>
   );
 }
+import styles from "../styles/Product.module.css";

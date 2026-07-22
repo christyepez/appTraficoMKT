@@ -9,7 +9,7 @@
 | H2 Formulario | Completado | React Hook Form, Zod, campos accesibles y pruebas de alta/edicion/error. |
 | H3 Seguimiento y workflow | Completado | Hook de workspace, filtros, listado, tarjetas y acciones probados. |
 | H4 Evidencias y aprobaciones | Completado | Adjuntos, galeria, vista previa y versiones desacoplados y probados. |
-| H5 UX, CSS y accesibilidad | Pendiente | - |
+| H5 UX, CSS y accesibilidad | Completado | CSS modular, responsive, foco visible y dialogs accesibles. |
 | H6 Estabilizacion Productos | Pendiente | - |
 | H7-H8 Evidencias y Aprobaciones | Pendiente | Ver `codex/prompts/02-evidence-approvals.md`. |
 | H9-H11 Agenda | Pendiente | Ver `codex/prompts/03-agenda.md`. |
@@ -84,6 +84,20 @@
 - [x] Reducir `activities/page.tsx` por debajo de 120 líneas.
 - [x] Ejecutar lint, TypeScript, cobertura y build.
 - [x] Publicar commit de evidencias y aprobaciones.
+
+## Sprint 5
+
+- [x] Crear `Product.module.css` para composicion exclusiva del modulo.
+- [x] Mantener en CSS global solo patrones compartidos y foco visible.
+- [x] Mejorar jerarquia, espaciado, tarjetas y estados de feedback.
+- [x] Mejorar responsive y respetar movimiento reducido.
+- [x] Hacer seleccion de archivos operable con teclado.
+- [x] Crear `ProductDialog` con foco inicial, ciclo de Tab y restauracion.
+- [x] Cerrar dialogs con Escape salvo durante operaciones bloqueadas.
+- [x] Agregar etiquetas y grupos accesibles a acciones y filtros.
+- [x] Probar estructura accesible, teclado y estados visuales.
+- [x] Ejecutar lint, TypeScript, pruebas y build.
+- [x] Publicar commit de experiencia de Productos.
 
 ## Hitos H7-H25
 

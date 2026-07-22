@@ -3,6 +3,7 @@ import { PaginationControls, paginate, type PaginationState } from "../../../app
 import type { EvidenceItem, Product } from "../models/product.models";
 import { matchesProductSearch, normalizeProductStatus } from "../utils/product.utils";
 import { ProductCard } from "./ProductCard";
+import styles from "../styles/Product.module.css";
 
 type ProductListProps = {
   products: Product[];
@@ -42,7 +43,7 @@ export function ProductList({ products, evidence, searchTerm, showCompleted, isI
       {products.length > 0 && filtered.length === 0 && <div className="empty">No hay productos que coincidan con los filtros seleccionados.</div>}
       {filtered.length > 0 && (
         <>
-          <div className="stack compact-stack top-space">
+          <div className={`stack compact-stack top-space ${styles.productList}`}>
             {page.items.map((product) => (
               <ProductCard
                 key={product.id}

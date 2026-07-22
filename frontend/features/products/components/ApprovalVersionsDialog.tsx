@@ -1,6 +1,7 @@
 import { Paperclip, X } from "lucide-react";
 import type { Approval, Product } from "../models/product.models";
 import { approvalDecisionLabel } from "../utils/product.utils";
+import { ProductDialog } from "./ProductDialog";
 
 type ApprovalVersionsDialogProps = {
   product: Product;
@@ -12,8 +13,7 @@ type ApprovalVersionsDialogProps = {
 export function ApprovalVersionsDialog({ product, approvals, onViewEvidence, onClose }: ApprovalVersionsDialogProps) {
   const versions = approvals.filter((approval) => approval.activityId === product.id).sort((left, right) => new Date(left.createdAt).getTime() - new Date(right.createdAt).getTime());
   return (
-    <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="approval-versions-title" onKeyDown={(event) => { if (event.key === "Escape") onClose(); }}>
-      <section className="modal-panel">
+    <ProductDialog labelledBy="approval-versions-title" onClose={onClose}>
         <div className="card-head">
           <div><h2 id="approval-versions-title">Versiones enviadas a aprobación</h2><p>{product.productId}</p></div>
           <button autoFocus className="icon-button" type="button" title="Cerrar versiones de aprobación" aria-label="Cerrar versiones de aprobación" onClick={onClose}><X size={16} /></button>
@@ -27,8 +27,7 @@ export function ApprovalVersionsDialog({ product, approvals, onViewEvidence, onC
           ))}
           {versions.length === 0 && <div className="empty">Este producto aún no tiene versiones enviadas a aprobación.</div>}
         </div>
-      </section>
-    </div>
+    </ProductDialog>
   );
 }
 

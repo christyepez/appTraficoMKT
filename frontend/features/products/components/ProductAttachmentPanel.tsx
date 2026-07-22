@@ -5,6 +5,7 @@ import { FormEvent, useEffect, useState } from "react";
 import type { Product } from "../models/product.models";
 import { evidenceFileName, normalizeEvidenceUrl, validateEvidenceFile } from "../utils/evidence.utils";
 import { EvidencePreview } from "./EvidencePreview";
+import styles from "../styles/Product.module.css";
 
 type ProductAttachmentPanelProps = {
   product: Product;
@@ -72,15 +73,15 @@ export function ProductAttachmentPanel({ product, pending, onUploadFile, onUploa
   }
 
   return (
-    <form className="attachment-panel top-space" onSubmit={submit} aria-label={`Adjunto de ${product.productId}`}>
+    <form className={`attachment-panel top-space ${styles.attachmentPanel}`} onSubmit={submit} aria-label={`Adjunto de ${product.productId}`}>
       <div className="card-head">
         <div><h3>Adjunto de producto</h3><p>{product.productId}</p></div>
         <button className="icon-button" type="button" title="Cerrar carga de adjunto" aria-label="Cerrar carga de adjunto" disabled={pending} onClick={onClose}><X size={16} /></button>
       </div>
       <label className="field"><span>Origen del adjunto</span><select value={mode} disabled={pending} onChange={(event) => changeMode(event.target.value as "file" | "url")}><option value="file">Subir archivo</option><option value="url">Ingresar URL</option></select></label>
       {mode === "file" && (
-        <label className={dragging ? "drop-zone active" : "drop-zone"} onDragOver={(event) => { event.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={(event) => { event.preventDefault(); setDragging(false); selectFile(event.dataTransfer.files[0]); }}>
-          <input type="file" hidden disabled={pending} onChange={(event) => selectFile(event.target.files?.[0])} />
+        <label className={`${dragging ? "drop-zone active" : "drop-zone"} ${styles.dropZone}`} onDragOver={(event) => { event.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={(event) => { event.preventDefault(); setDragging(false); selectFile(event.dataTransfer.files[0]); }}>
+          <input className={styles.fileInput} type="file" aria-label="Seleccionar archivo" disabled={pending} onChange={(event) => selectFile(event.target.files?.[0])} />
           <span><Upload size={18} /> Arrastra un archivo o haz clic para seleccionar. Máximo 50 MB.</span>
         </label>
       )}
@@ -95,7 +96,7 @@ export function ProductAttachmentPanel({ product, pending, onUploadFile, onUploa
         </div>
       )}
       <label className="field"><span>Subido por</span><input value={uploadedBy} disabled={pending} onChange={(event) => setUploadedBy(event.target.value)} required /></label>
-      {error && <p role="alert" className="badge">{error}</p>}
+      {error && <p role="alert" className={styles.error}>{error}</p>}
       <button className="button compact" title="Cargar adjunto al producto seleccionado" disabled={pending}><Upload size={16} /> {pending ? "Cargando" : "Agregar adjunto"}</button>
     </form>
   );

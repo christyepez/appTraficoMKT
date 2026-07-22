@@ -8,6 +8,7 @@ import type { Requirement } from "../../../shared/models/api.models";
 import type { Product, ProductCatalogs, SaveProductPayload, Technician } from "../models/product.models";
 import { mapProductFormToPayload, productFormSchema, type ProductFormValues } from "../schemas/product.schema";
 import { ProductSelectField } from "./ProductSelectField";
+import { ProductDialog } from "./ProductDialog";
 import styles from "./ProductForm.module.css";
 
 type ProductFormProps = {
@@ -49,14 +50,13 @@ export function ProductForm({ product, suggestedProductId, showProductIdField, r
   const responsibleOptions = technicianOptions(technicians, product);
 
   return (
-    <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="product-form-title">
-      <section className="modal-panel">
+    <ProductDialog labelledBy="product-form-title" onClose={onCancel} closeDisabled={isSubmitting}>
         <div className="card-head">
           <div>
             <h2 id="product-form-title">{product ? "Editar producto" : "Producto o actividad"}</h2>
             <p className={styles.intro}>Complete la información operativa del producto.</p>
           </div>
-          <button className="icon-button" type="button" title="Cerrar formulario" aria-label="Cerrar formulario" disabled={isSubmitting} onClick={onCancel}><X size={16} /></button>
+          <button autoFocus className="icon-button" type="button" title="Cerrar formulario" aria-label="Cerrar formulario" disabled={isSubmitting} onClick={onCancel}><X size={16} /></button>
         </div>
         <form className="form" onSubmit={handleSubmit(submit)} noValidate>
           <ProductSelectField
@@ -90,8 +90,7 @@ export function ProductForm({ product, suggestedProductId, showProductIdField, r
             <button className="button secondary" type="button" title="Cancelar edición" disabled={isSubmitting} onClick={onCancel}><X size={16} /> Cancelar</button>
           </div>
         </form>
-      </section>
-    </div>
+    </ProductDialog>
   );
 }
 

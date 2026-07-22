@@ -9,6 +9,7 @@ import { ProductFilters } from "../../features/products/components/ProductFilter
 import { ProductForm } from "../../features/products/components/ProductForm";
 import { ProductList } from "../../features/products/components/ProductList";
 import { useProductsWorkspace } from "../../features/products/hooks/useProductsWorkspace";
+import styles from "../../features/products/styles/Product.module.css";
 import { Plus, RefreshCw } from "lucide-react";
 import { useState } from "react";
 
@@ -36,7 +37,7 @@ export default function ActivitiesPage() {
   return (
     <main className="app-shell">
       <AppNav />
-      <section className="content-shell tracking-layout">
+      <section className={`content-shell tracking-layout ${styles.workspace}`}>
         {isEditorOpen && (
           <ProductForm
             key={editing?.id ?? `new-${suggestedProductId}`}
@@ -55,15 +56,15 @@ export default function ActivitiesPage() {
             onCancel={() => { setEditing(null); setIsEditorOpen(false); }}
           />
         )}
-        <section className="panel">
-          <div className="card-head">
+        <section className={`panel ${styles.trackingPanel}`}>
+          <div className={`card-head ${styles.header}`}>
             <h2>Seguimiento de productos</h2>
             <div className="actions">
-              <button className="icon-button" title="Crear producto" onClick={() => openEditor(null)}><Plus size={16} /></button>
-              <button className="button secondary" title="Actualizar seguimiento de productos" disabled={isRefreshing} onClick={() => void refresh().catch(() => undefined)}><RefreshCw size={16} /> {isRefreshing ? "Actualizando" : "Actualizar"}</button>
+              <button className="icon-button" type="button" title="Crear producto" aria-label="Crear producto" onClick={() => openEditor(null)}><Plus size={16} /></button>
+              <button className="button secondary" type="button" title="Actualizar seguimiento de productos" aria-label="Actualizar seguimiento de productos" disabled={isRefreshing} onClick={() => void refresh().catch(() => undefined)}><RefreshCw size={16} /> {isRefreshing ? "Actualizando" : "Actualizar"}</button>
             </div>
           </div>
-          {message && <span className="badge">{message}</span>}
+          {message && <span className={styles.feedback} role="status" aria-live="polite">{message}</span>}
           <ProductFilters searchTerm={searchTerm} showCompleted={showCompleted} isRefreshing={isRefreshing} onSearchChange={setSearchTerm} onShowCompletedChange={setShowCompleted} />
           {attachmentProduct && <ProductAttachmentPanel product={attachmentProduct} pending={pendingEvidenceIds.has(attachmentProduct.id)} onUploadFile={uploadEvidence} onUploadUrl={addExternalEvidence} onClose={() => setAttachmentActivityId("")} />}
           {evidenceProduct && <EvidenceGallery product={evidenceProduct} evidence={evidence} approvals={approvals} pendingEvidenceIds={pendingEvidenceIds} onDelete={(id) => void removeEvidence(id)} onClose={() => setAttachmentDetailActivityId("")} />}
