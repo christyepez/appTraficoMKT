@@ -313,3 +313,17 @@
 - [x] Probar proveedores, validaciones, edición, errores y tratamiento de secretos.
 - [x] Ejecutar cobertura, lint, TypeScript y build.
 - [x] Publicar commit H19 y detenerse antes de H20.
+
+## Sprint 20 - Carga inicial
+
+- [x] Inventariar tipos, plantillas, historial, contrato multipart y resultados.
+- [x] Crear modelos, servicio, utilidades, hook y componentes del módulo.
+- [x] Validar extensión XLSX y límite de 50 MB antes del envío.
+- [x] Enviar `FormData` sin establecer manualmente `Content-Type`.
+- [x] Extraer selector, plantillas, drop zone, progreso y resumen.
+- [x] Preparar detalle accesible para errores por hoja y fila disponibles.
+- [x] Cubrir selección, carga, resultado parcial, error y reintento.
+- [x] Reducir `initial-import/page.tsx` a composición sin acceso HTTP.
+- [x] Mantener plantillas, parser, semillas y datos sin cambios.
+- [x] Ejecutar cobertura, lint, TypeScript y build.
+- [x] Publicar commit H20 y detenerse antes de H21.

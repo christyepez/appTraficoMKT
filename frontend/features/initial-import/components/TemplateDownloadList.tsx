@@ -1,0 +1,1 @@
+import{importScopes}from"../models/import.models";import{templateHref}from"../utils/import.utils";export function TemplateDownloadList(){return <div className="catalog-tabs catalog-tabs-horizontal top-space">{importScopes.map(item=><a className="tab import-option" key={item.value} href={templateHref(item.value)} download>Plantilla {item.label}</a>)}</div>;}
