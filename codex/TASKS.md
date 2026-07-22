@@ -13,7 +13,8 @@
 | H6 Estabilizacion Productos | Completado | Ver `codex/H6_PRODUCT_CLOSURE.md`: regresion automatizada verde y fusion condicionada a pruebas manuales. |
 | H7 Evidencias | Completado | Página autónoma modularizada con reutilización compartida, 63 pruebas y cobertura crítica completa. |
 | H8 Aprobaciones | Completado | Cola, decisiones validadas, adjuntos, permisos visibles y concurrencia desacoplados. |
-| H9-H11 Agenda | Pendiente | Ver `codex/prompts/03-agenda.md`. |
+| H9 Agenda técnica | Completado | CRUD, reservas derivadas, jornadas, filtros y reglas de fechas modularizados. |
+| H10-H11 Calendario y métricas de Agenda | Pendiente | Ver `codex/prompts/03-agenda.md`. |
 | H12-H14 Requerimientos y analitica | Pendiente | Ver `codex/prompts/04-requirements-analytics.md`. |
 | H15-H16 Administracion | Pendiente | Ver `codex/prompts/05-administration.md`. |
 | H17-H20 Configuracion operativa | Pendiente | Ver `codex/prompts/06-operations.md`. |
@@ -151,3 +152,18 @@
 - [x] Probar decisiones, comentarios, adjuntos, permisos, errores y doble envío.
 - [x] Ejecutar lint, TypeScript, cobertura y build.
 - [x] Publicar commit H8 y detenerse antes de H9.
+
+## Sprint 9 - Agenda técnica
+
+- [x] Inventariar agenda manual, reservas derivadas, técnicos, jornadas, filtros y edición.
+- [x] Crear modelos, esquema Zod y servicio sobre endpoints existentes.
+- [x] Extraer reglas puras de jornada, fechas, duración y combinación de reservas.
+- [x] Crear `useAgendaWorkspace` con visibilidad, métricas y operaciones bloqueadas.
+- [x] Extraer `AgendaForm`, `AgendaFilters`, `AgendaList` y `AgendaItemCard`.
+- [x] Usar React Hook Form y Zod para alta/edición.
+- [x] Mostrar carga, error recuperable, vacío, actualización y resultado.
+- [x] Crear CSS Module exclusivo de Agenda.
+- [x] Reducir `agenda/page.tsx` a composición sin acceso HTTP.
+- [x] Probar jornadas, fechas, duración, reservas, filtros, permisos, CRUD y errores.
+- [x] Ejecutar lint, TypeScript, cobertura y build.
+- [x] Publicar commit H9 y detenerse antes de H10.

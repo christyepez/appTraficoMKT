@@ -1,0 +1,12 @@
+.workspace { gap: 20px; }
+.header { gap: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+.summary { display: grid; grid-template-columns: minmax(240px, 1fr) repeat(3, minmax(130px, .5fr)); gap: 12px; align-items: end; }
+.filters { display: grid; grid-template-columns: minmax(220px, .6fr) minmax(280px, 1fr); gap: 16px; align-items: end; margin-top: 16px; }
+.feedback { display: inline-flex; margin-top: 12px; padding: 8px 12px; border-left: 4px solid var(--success); background: #eaf6ef; color: #175c38; }
+.card { border-left: 4px solid transparent; transition: border-color 160ms ease; }
+.card:hover, .card:focus-within { border-left-color: var(--accent); }
+.dialogBackdrop { backdrop-filter: blur(2px); }
+.dialogPanel { overscroll-behavior: contain; }
+@media (max-width: 850px) { .summary, .filters { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 600px) { .summary, .filters { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { .card { transition: none; } }
