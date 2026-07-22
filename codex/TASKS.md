@@ -258,3 +258,17 @@
 - [x] Probar variantes, relaciones, CRUD, inactivación y errores.
 - [x] Ejecutar lint, TypeScript, cobertura y build.
 - [x] Publicar commit H15 y detenerse antes de H16.
+
+## Sprint 16 - Usuarios y permisos visibles
+
+- [x] Inventariar usuarios, perfiles, pantallas visibles y endpoints existentes.
+- [x] Crear modelos, esquema Zod, servicio, utilidades y `useUsersAdministration`.
+- [x] Extraer formulario, selectores, lista, acciones de estado y composición.
+- [x] Centralizar los valores iniciales y las pantallas sugeridas por perfil.
+- [x] Conservar `fetch`, los contratos backend y el proveedor inmutable al editar.
+- [x] Mostrar carga, error, vacío, confirmación y bloqueo de doble acción.
+- [x] Distinguir visibilidad de interfaz y autorización efectiva del backend.
+- [x] Reducir `users/page.tsx` a composición sin acceso HTTP.
+- [x] Probar alta, edición, perfiles, pantallas, activación, validaciones y errores.
+- [x] Ejecutar lint, TypeScript, cobertura y build.
+- [x] Publicar commit H16 y detenerse antes de H17.
