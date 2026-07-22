@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { defaultBrandSettings, getSession, showToast } from "../../../app/lib";
 import type { Requirement } from "../../../shared/models/api.models";
 import type { Approval, EvidenceItem, Product, ProductCatalogs, ProductStatusAction, SaveProductPayload, Technician } from "../models/product.models";
-import { deleteProduct, getProductWorkspace, saveProduct, updateProductStatus } from "../services/product.service";
+import { createExternalProductEvidence, deleteProduct, deleteProductEvidence, getProductWorkspace, saveProduct, updateProductStatus, uploadProductEvidence } from "../services/product.service";
 import { buildNextProductId, filterProductsForSession, filterRequirementsForSession } from "../utils/product.utils";
 
 const emptyCatalogs: ProductCatalogs = {
@@ -29,8 +29,10 @@ export function useProductsWorkspace(pollInterval = 15_000) {
   const [loadError, setLoadError] = useState("");
   const [message, setMessage] = useState("");
   const [pendingProductIds, setPendingProductIds] = useState<Set<string>>(() => new Set());
+  const [pendingEvidenceIds, setPendingEvidenceIds] = useState<Set<string>>(() => new Set());
   const activeLoad = useRef<Promise<void> | null>(null);
   const pendingProductIdsRef = useRef<Set<string>>(new Set());
+  const pendingEvidenceIdsRef = useRef<Set<string>>(new Set());
 
   const load = useCallback((initial = false) => {
     if (activeLoad.current) return activeLoad.current;
@@ -122,6 +124,64 @@ export function useProductsWorkspace(pollInterval = 15_000) {
     }
   }, [refreshAfterMutation, reportFeedback]);
 
+  const uploadEvidence = useCallback(async (productId: string, file: File, uploadedBy: string) => {
+    if (!startPending(pendingEvidenceIdsRef.current, productId)) return false;
+    setPendingEvidenceIds(new Set(pendingEvidenceIdsRef.current));
+    try {
+      const form = new FormData();
+      form.set("activityId", productId);
+      form.set("file", file);
+      form.set("uploadedBy", uploadedBy);
+      await uploadProductEvidence(form);
+      await updateProductStatus(productId, "evidence-attached");
+      reportFeedback("Adjunto cargado en el producto.");
+      await refreshAfterMutation();
+      return true;
+    } catch (error) {
+      reportFeedback(error instanceof Error ? error.message : "No se pudo cargar el adjunto.", "error");
+      return false;
+    } finally {
+      finishPending(pendingEvidenceIdsRef.current, productId);
+      setPendingEvidenceIds(new Set(pendingEvidenceIdsRef.current));
+    }
+  }, [refreshAfterMutation, reportFeedback]);
+
+  const addExternalEvidence = useCallback(async (productId: string, fileName: string, storageUrl: string, uploadedBy: string) => {
+    if (!startPending(pendingEvidenceIdsRef.current, productId)) return false;
+    setPendingEvidenceIds(new Set(pendingEvidenceIdsRef.current));
+    try {
+      await createExternalProductEvidence({ activityId: productId, fileName, contentType: "text/uri-list", storageUrl, uploadedBy });
+      await updateProductStatus(productId, "evidence-attached");
+      reportFeedback("Adjunto cargado en el producto.");
+      await refreshAfterMutation();
+      return true;
+    } catch (error) {
+      reportFeedback(error instanceof Error ? error.message : "No se pudo registrar el enlace.", "error");
+      return false;
+    } finally {
+      finishPending(pendingEvidenceIdsRef.current, productId);
+      setPendingEvidenceIds(new Set(pendingEvidenceIdsRef.current));
+    }
+  }, [refreshAfterMutation, reportFeedback]);
+
+  const removeEvidence = useCallback(async (evidenceId: string) => {
+    if (pendingEvidenceIdsRef.current.has(evidenceId) || !window.confirm("¿Eliminar este adjunto? El archivo quedará inactivo.")) return false;
+    startPending(pendingEvidenceIdsRef.current, evidenceId);
+    setPendingEvidenceIds(new Set(pendingEvidenceIdsRef.current));
+    try {
+      await deleteProductEvidence(evidenceId);
+      reportFeedback("Adjunto eliminado correctamente.");
+      await refreshAfterMutation();
+      return true;
+    } catch (error) {
+      reportFeedback(error instanceof Error ? error.message : "No se pudo eliminar el adjunto.", "error");
+      return false;
+    } finally {
+      finishPending(pendingEvidenceIdsRef.current, evidenceId);
+      setPendingEvidenceIds(new Set(pendingEvidenceIdsRef.current));
+    }
+  }, [refreshAfterMutation, reportFeedback]);
+
   useEffect(() => {
     void load(true).catch(() => undefined);
     const timer = window.setInterval(() => void load(false).catch(() => undefined), pollInterval);
@@ -142,10 +202,14 @@ export function useProductsWorkspace(pollInterval = 15_000) {
     loadError,
     message,
     pendingProductIds,
+    pendingEvidenceIds,
     refresh: () => load(false),
     save,
     changeStatus,
     remove,
+    uploadEvidence,
+    addExternalEvidence,
+    removeEvidence,
     reportFeedback
   };
 }

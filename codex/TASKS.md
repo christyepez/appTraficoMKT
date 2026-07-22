@@ -8,7 +8,7 @@
 | H1 Fundacion Productos | Completado | Modulo base, servicio, utilidades y pruebas publicados en `feature1.0`. |
 | H2 Formulario | Completado | React Hook Form, Zod, campos accesibles y pruebas de alta/edicion/error. |
 | H3 Seguimiento y workflow | Completado | Hook de workspace, filtros, listado, tarjetas y acciones probados. |
-| H4 Evidencias y aprobaciones | Pendiente | - |
+| H4 Evidencias y aprobaciones | Completado | Adjuntos, galeria, vista previa y versiones desacoplados y probados. |
 | H5 UX, CSS y accesibilidad | Pendiente | - |
 | H6 Estabilizacion Productos | Pendiente | - |
 | H7-H8 Evidencias y Aprobaciones | Pendiente | Ver `codex/prompts/02-evidence-approvals.md`. |
@@ -70,6 +70,20 @@
 - [x] Probar búsqueda, visibilidad, paginación, workflow y reintento.
 - [x] Ejecutar lint, TypeScript, cobertura y build.
 - [x] Publicar commit de seguimiento y workflow.
+
+## Sprint 4
+
+- [x] Extraer `ProductAttachmentPanel`.
+- [x] Extraer `EvidenceGallery` y `EvidencePreview`.
+- [x] Extraer `ApprovalVersionsDialog`.
+- [x] Centralizar operaciones de evidencias en el hook y servicios locales.
+- [x] Validar archivo, URL, peso y tipo de vista previa.
+- [x] Bloquear eliminación después de aprobación o rechazo.
+- [x] Mejorar cierre por teclado y foco inicial de dialogs.
+- [x] Probar archivos, enlaces, previews, eliminación y versiones.
+- [x] Reducir `activities/page.tsx` por debajo de 120 líneas.
+- [x] Ejecutar lint, TypeScript, cobertura y build.
+- [x] Publicar commit de evidencias y aprobaciones.
 
 ## Hitos H7-H25
 

@@ -79,5 +79,5 @@ export type ExternalEvidencePayload = {
   fileName: string;
   contentType: "text/uri-list";
   storageUrl: string;
-  uploadedBy: FormDataEntryValue | null;
+  uploadedBy: string;
 };

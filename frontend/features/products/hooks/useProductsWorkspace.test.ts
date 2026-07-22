@@ -4,7 +4,7 @@ import { getSession, showToast } from "../../../app/lib";
 import type { AuthSession } from "../../../app/lib";
 import type { Activity, Requirement } from "../../../shared/models/api.models";
 import type { ProductWorkspaceData } from "../models/product.models";
-import { deleteProduct, getProductWorkspace, saveProduct, updateProductStatus } from "../services/product.service";
+import { createExternalProductEvidence, deleteProduct, deleteProductEvidence, getProductWorkspace, saveProduct, updateProductStatus, uploadProductEvidence } from "../services/product.service";
 import { useProductsWorkspace } from "./useProductsWorkspace";
 
 vi.mock("../../../app/lib", () => ({
@@ -14,10 +14,13 @@ vi.mock("../../../app/lib", () => ({
 }));
 
 vi.mock("../services/product.service", () => ({
+  createExternalProductEvidence: vi.fn(),
   deleteProduct: vi.fn(),
+  deleteProductEvidence: vi.fn(),
   getProductWorkspace: vi.fn(),
   saveProduct: vi.fn(),
-  updateProductStatus: vi.fn()
+  updateProductStatus: vi.fn(),
+  uploadProductEvidence: vi.fn()
 }));
 
 const getWorkspaceMock = vi.mocked(getProductWorkspace);
@@ -25,6 +28,9 @@ const getSessionMock = vi.mocked(getSession);
 const updateStatusMock = vi.mocked(updateProductStatus);
 const deleteProductMock = vi.mocked(deleteProduct);
 const saveProductMock = vi.mocked(saveProduct);
+const uploadEvidenceMock = vi.mocked(uploadProductEvidence);
+const externalEvidenceMock = vi.mocked(createExternalProductEvidence);
+const deleteEvidenceMock = vi.mocked(deleteProductEvidence);
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -33,6 +39,9 @@ beforeEach(() => {
   updateStatusMock.mockResolvedValue(undefined as never);
   deleteProductMock.mockResolvedValue(undefined as never);
   saveProductMock.mockResolvedValue({} as never);
+  uploadEvidenceMock.mockResolvedValue({} as never);
+  externalEvidenceMock.mockResolvedValue({} as never);
+  deleteEvidenceMock.mockResolvedValue(undefined as never);
   vi.spyOn(window, "confirm").mockReturnValue(true);
 });
 
@@ -124,6 +133,53 @@ describe("useProductsWorkspace", () => {
     await act(async () => { await result.current.remove("product1"); });
     expect(result.current.message).toBe("No se pudo eliminar.");
     expect(result.current.pendingProductIds.size).toBe(0);
+    unmount();
+  });
+
+  it("carga archivo y enlace, actualiza estado y elimina evidencia", async () => {
+    const { result, unmount } = renderHook(() => useProductsWorkspace(60_000));
+    await waitFor(() => expect(result.current.isInitialLoading).toBe(false));
+    const file = new File(["contenido"], "archivo.pdf", { type: "application/pdf" });
+
+    await act(async () => { expect(await result.current.uploadEvidence("product1", file, "Equipo")).toBe(true); });
+    expect(uploadEvidenceMock).toHaveBeenCalledWith(expect.any(FormData));
+    expect(updateStatusMock).toHaveBeenCalledWith("product1", "evidence-attached");
+
+    await act(async () => { expect(await result.current.addExternalEvidence("product1", "Video", "https://example.com/video", "Equipo")).toBe(true); });
+    expect(externalEvidenceMock).toHaveBeenCalledWith(expect.objectContaining({ fileName: "Video", storageUrl: "https://example.com/video" }));
+
+    await act(async () => { expect(await result.current.removeEvidence("evidence1")).toBe(true); });
+    expect(deleteEvidenceMock).toHaveBeenCalledWith("evidence1");
+    unmount();
+  });
+
+  it("maneja fallos y duplicados de evidencia", async () => {
+    let resolveUpload!: () => void;
+    uploadEvidenceMock.mockReturnValueOnce(new Promise((resolve) => { resolveUpload = () => resolve({}); }) as never);
+    const { result, unmount } = renderHook(() => useProductsWorkspace(60_000));
+    await waitFor(() => expect(result.current.isInitialLoading).toBe(false));
+    const file = new File(["contenido"], "archivo.pdf", { type: "application/pdf" });
+
+    let first!: Promise<boolean>;
+    await act(async () => {
+      first = result.current.uploadEvidence("product1", file, "Equipo");
+      expect(await result.current.uploadEvidence("product1", file, "Equipo")).toBe(false);
+    });
+    resolveUpload();
+    await act(async () => { await first; });
+    expect(uploadEvidenceMock).toHaveBeenCalledTimes(1);
+
+    uploadEvidenceMock.mockRejectedValueOnce("sin detalle");
+    await act(async () => { expect(await result.current.uploadEvidence("product1", file, "Equipo")).toBe(false); });
+    externalEvidenceMock.mockRejectedValueOnce(new Error("Enlace rechazado."));
+    await act(async () => { expect(await result.current.addExternalEvidence("product1", "Video", "https://example.com", "Equipo")).toBe(false); });
+    externalEvidenceMock.mockRejectedValueOnce("sin detalle");
+    await act(async () => { expect(await result.current.addExternalEvidence("product1", "Video", "https://example.com", "Equipo")).toBe(false); });
+    deleteEvidenceMock.mockRejectedValueOnce(new Error("Adjunto bloqueado."));
+    await act(async () => { expect(await result.current.removeEvidence("evidence1")).toBe(false); });
+    deleteEvidenceMock.mockRejectedValueOnce("sin detalle");
+    await act(async () => { expect(await result.current.removeEvidence("evidence1")).toBe(false); });
+    expect(result.current.pendingEvidenceIds.size).toBe(0);
     unmount();
   });
 });
