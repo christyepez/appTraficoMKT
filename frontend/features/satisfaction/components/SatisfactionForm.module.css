@@ -2,7 +2,7 @@
   grid-column: 1 / -1;
   margin: 0;
   padding: 12px;
-  border: 1px solid var(--line);
+  border: 0;
   border-radius: 6px;
 }
 
@@ -23,13 +23,13 @@
   place-items: center;
   gap: 4px;
   min-height: 48px;
-  border: 1px solid var(--line);
+  border: 0;
   border-radius: 6px;
+  background: var(--secondary);
   cursor: pointer;
 }
 
 .ratingOptions label:has(input:checked) {
-  border-color: var(--primary);
   background: color-mix(in srgb, var(--primary) 10%, white);
 }
 

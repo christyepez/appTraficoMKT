@@ -1,5 +1,5 @@
-.page { min-height: 100vh; display: grid; place-items: center; padding: 20px; background: #eef2f6; }
-.panel { width: min(420px, 100%); display: grid; gap: 14px; padding: 24px; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+.page { width: 100%; min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; padding: 20px; background: #eef2f6; }
+.panel { width: min(420px, 100%); display: grid; gap: 14px; padding: 24px; border: 0; border-radius: 8px; background: #fff; }
 .panel :global(.form) { grid-template-columns: 1fr; }
 .brand { margin-bottom: 8px; align-items: center; text-align: center; }
 .brand strong { font-family: Georgia, "Times New Roman", serif; font-size: 22px; line-height: 1.15; }
@@ -8,9 +8,9 @@
 .satisfactionPanel { width: min(620px, calc(100vw - 32px)); }
 .summary, .success { display: grid; gap: 6px; padding: 14px; border: 1px solid var(--line); border-radius: 6px; background: #f7f8fa; }
 .success { place-items: center; color: var(--success); text-align: center; }
-.chatbotLauncher { position: fixed; right: 22px; bottom: 22px; z-index: 50; width: 64px; height: 64px; border: 3px solid var(--accent); border-radius: 50%; background: var(--surface); box-shadow: 0 18px 38px rgba(0, 0, 0, 0.22); cursor: pointer; }
+.chatbotLauncher { position: fixed; right: 22px; bottom: 22px; z-index: 50; width: 64px; height: 64px; border: 0; border-radius: 50%; background: var(--surface); box-shadow: 0 18px 38px rgba(0, 0, 0, 0.22); cursor: pointer; }
 .chatbotLauncher img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-.chatbotPanel { position: fixed; right: 22px; bottom: 96px; z-index: 51; width: min(420px, calc(100vw - 32px)); max-height: calc(100vh - 130px); overflow: auto; padding: 18px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); box-shadow: 0 18px 44px rgba(0, 0, 0, 0.22); }
+.chatbotPanel { position: fixed; right: 22px; bottom: 96px; z-index: 51; width: min(420px, calc(100vw - 32px)); max-height: calc(100dvh - 130px); overflow: auto; padding: 18px; border: 0; border-radius: 8px; background: var(--surface); box-shadow: 0 18px 44px rgba(0, 0, 0, 0.22); }
 .actions { display: grid; gap: 10px; }
 .publicDialog { width: min(760px, calc(100vw - 32px)); max-height: calc(100vh - 48px); overflow: auto; }
 @media (max-width: 980px) { .publicDialog { width: 100%; max-height: calc(100vh - 24px); padding: 14px; } }

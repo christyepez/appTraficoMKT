@@ -1,4 +1,4 @@
-.section { max-width: 1180px; margin-left: auto; margin-right: auto; }
+.section { width: 100%; max-width: none; margin: 0; }
 .preview { display: flex; align-items: center; gap: 18px; padding: 22px; border: 4px solid var(--accent); border-radius: 8px; color: #fff; }
 .preview img { width: min(260px, 48%); max-height: 86px; object-fit: contain; background: transparent; }
 .preview h3 { margin: 0 0 6px; font-size: 22px; }

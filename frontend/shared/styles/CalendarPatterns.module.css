@@ -1,5 +1,7 @@
 .root {
-  max-width: 1480px;
+  width: auto;
+  max-width: none;
+  min-height: calc(100dvh - 86px);
 }
 
 .root :global(.calendar-hero) {
@@ -51,7 +53,7 @@
 .root :global(.calendar-search) :global(.input-with-icon) {
   min-height: 46px;
   padding: 0 12px;
-  border: 1px solid var(--line);
+  border: 0;
   border-radius: 8px;
   background: #fff;
 }
@@ -63,6 +65,13 @@
 
 .root :global(.calendar-search) :global(.input-with-icon) input:focus {
   outline: none;
+}
+
+.root :global(button),
+.root :global(input),
+.root :global(select),
+.root :global(textarea) {
+  border: 0;
 }
 
 .root :global(.calendar-filter-strip),
@@ -152,7 +161,7 @@
   display: inline-grid;
   grid-template-columns: repeat(4, minmax(76px, 1fr));
   overflow: hidden;
-  border: 1px solid var(--line);
+  border: 0;
   border-radius: 6px;
   background: var(--surface);
 }
@@ -160,7 +169,7 @@
 .root :global(.segmented-control) button {
   min-height: 38px;
   padding: 0 12px;
-  border-right: 1px solid var(--line);
+  border: 0;
   background: transparent;
   color: var(--foreground);
 }
