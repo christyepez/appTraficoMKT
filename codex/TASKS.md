@@ -17,7 +17,8 @@
 | H10 Calendario técnico | Completado | Navegación, filtros, cuatro vistas y eventos reutilizan Agenda sin duplicar reservas. |
 | H11 Métricas de Agenda | Completado | Indicadores, capacidad, carga técnica y filtros desacoplados sobre datos de Agenda. |
 | H12 Requerimientos y Dashboard | Completado | Formulario, filtros, workflow, permisos visibles y servicio tipado desacoplados. |
-| H13-H14 Analitica y auditoria | Pendiente | Ver `codex/prompts/04-requirements-analytics.md`; H13 es el siguiente hito. |
+| H13 Métricas generales | Completado | Fuentes parciales, cálculos, conceptos y secciones analíticas desacoplados. |
+| H14 Auditoria | Pendiente | Ver `codex/prompts/04-requirements-analytics.md`; es el siguiente hito. |
 | H15-H16 Administracion | Pendiente | Ver `codex/prompts/05-administration.md`. |
 | H17-H20 Configuracion operativa | Pendiente | Ver `codex/prompts/06-operations.md`. |
 | H21-H23 Acceso y canales publicos | Pendiente | Ver `codex/prompts/07-access-public.md`. |
@@ -211,3 +212,18 @@
 - [x] Probar alta, edición, filtros, transiciones, visibilidad, errores y servicios.
 - [x] Ejecutar lint, TypeScript, cobertura y build.
 - [x] Publicar commit H12 y detenerse antes de H13.
+
+## Sprint 13 - Métricas generales
+
+- [x] Inventariar contratos, cálculos, conceptos y secciones de la pantalla.
+- [x] Crear modelos y servicio tipado sobre las cinco fuentes existentes.
+- [x] Tolerar fuentes parciales y diferenciar carga, error total y vacío.
+- [x] Extraer cálculos puros de auditoría, esfuerzo, barras y carga por usuario.
+- [x] Crear `useMetricsDashboard` con polling y actualización no superpuesta.
+- [x] Extraer toolbar, tarjetas, segmentos, etapas, participación y usabilidad.
+- [x] Conservar visualizaciones CSS/HTML sin agregar librería de gráficos.
+- [x] Mantener `analytics/` y Power BI fuera del cambio.
+- [x] Reducir `metrics/page.tsx` a composición sin acceso HTTP.
+- [x] Probar cálculos, transformaciones, conceptos, parciales, vacíos y errores.
+- [x] Ejecutar lint, TypeScript, cobertura y build.
+- [x] Publicar commit H13 y detenerse antes de H14.

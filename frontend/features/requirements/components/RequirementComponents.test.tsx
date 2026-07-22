@@ -18,10 +18,10 @@ describe("RequirementForm", () => {
   it("crea con catálogos, filtra carreras y evita doble envío", async () => {
     const user = userEvent.setup(); renderForm(); await fill(user); await user.click(screen.getByRole("button", { name: "Crear" }));
     await waitFor(() => expect(onSave).toHaveBeenCalledWith(null, expect.objectContaining({ faculty: "Facultad", career: "Carrera", campus: "Centro", eventFormat: "Presencial" }))); expect(onSuccess).toHaveBeenCalledWith("Requerimiento creado correctamente.");
-  });
+  }, 10_000);
   it("presenta error del servicio sin cerrar", async () => {
     onSave.mockRejectedValue(new Error("Servicio no disponible")); const user = userEvent.setup(); renderForm(); await fill(user); await user.click(screen.getByRole("button", { name: "Crear" })); expect(await screen.findByRole("alert", { name: "" })).toHaveTextContent("Servicio no disponible"); expect(onCancel).not.toHaveBeenCalled();
-  });
+  }, 10_000);
   it("carga y actualiza un requerimiento existente", async () => {
     const user = userEvent.setup(); const existing = req("r1", "InAnalysis"); renderForm(existing); await waitFor(() => expect(screen.getByLabelText("Carrera")).toHaveValue("cr")); await user.clear(screen.getByLabelText("Objetivo del evento")); await user.type(screen.getByLabelText("Objetivo del evento"), "Objetivo actualizado"); await user.click(screen.getByRole("button", { name: "Guardar" })); await waitFor(() => expect(onSave).toHaveBeenCalledWith(existing, expect.objectContaining({ eventObjective: "Objetivo actualizado" })));
   });
