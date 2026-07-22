@@ -300,3 +300,16 @@
 - [x] Mantener Power Automate, webhooks, backend y envío real sin cambios.
 - [x] Ejecutar pruebas, cobertura, lint, TypeScript y build final.
 - [x] Publicar los tres commits H18 y detenerse antes de H19.
+
+## Sprint 19 - Almacenamiento
+
+- [x] Inventariar proveedores, contrato CRUD y exposición actual de secretos.
+- [x] Crear modelos seguros, unión discriminada Zod, servicio, utilidades y hook.
+- [x] Descartar secretos inmediatamente después de recibir respuestas del API.
+- [x] Mostrar solo los campos correspondientes a Local, Blob o FTP.
+- [x] Exigir valores sensibles de reemplazo sin volver a mostrar los almacenados.
+- [x] Implementar listado, activación, carga, error, vacío y confirmaciones.
+- [x] Reducir `storage/page.tsx` a composición sin acceso HTTP.
+- [x] Probar proveedores, validaciones, edición, errores y tratamiento de secretos.
+- [x] Ejecutar cobertura, lint, TypeScript y build.
+- [x] Publicar commit H19 y detenerse antes de H20.
