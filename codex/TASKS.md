@@ -4,8 +4,8 @@
 
 | Hito | Estado | Evidencia |
 |---|---|---|
-| H0 Gobierno y linea base | En progreso | Rama `feature1.0`; build inicial exitoso; contratos Codex creados localmente. |
-| H1 Fundacion Productos | Pendiente de aprobacion | Se ejecutara con el prompt del Sprint 1. |
+| H0 Gobierno y linea base | Completado | Estrategia aprobada y publicada; Prompt 0 ejecutado. |
+| H1 Fundacion Productos | En progreso | Autorizado despues del Prompt 0. |
 | H2 Formulario | Pendiente | - |
 | H3 Seguimiento y workflow | Pendiente | - |
 | H4 Evidencias y aprobaciones | Pendiente | - |
@@ -27,8 +27,9 @@
 - [x] Revisar agentes disponibles en `CodexCommonAgents`.
 - [x] Confirmar aislamiento inicial respecto a `PortalCorporativo`.
 - [x] Definir arquitectura objetivo, hitos y sprints.
-- [ ] Confirmar la estrategia con el responsable del producto.
-- [ ] Publicar el commit documental.
+- [x] Confirmar la estrategia con el responsable del producto.
+- [x] Publicar el commit documental.
+- [x] Ejecutar Prompt 0 y aprobar sus ajustes.
 
 ## Sprint 1
 

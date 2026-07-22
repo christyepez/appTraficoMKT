@@ -8,7 +8,7 @@ y verificable, manteniendo la aplicacion aislada de `PortalCorporativo`.
 ## Reglas de ejecucion
 
 - Rama inicial: `feature1.0`.
-- Un hito por ejecucion y un commit funcional por incremento.
+- Un hito por ejecucion y uno o mas commits pequenos, compilables y revisables.
 - No iniciar un hito sin aprobar el anterior.
 - No cambiar contratos backend dentro de una refactorizacion frontend.
 - Mantener Next.js 16, React 19, TypeScript y `fetch`.
@@ -86,6 +86,7 @@ Cada hito debe cumplir:
 7. Diff revisado y commit acotado.
 8. `codex/TASKS.md` actualizado.
 9. Detencion antes del siguiente hito.
+10. Cobertura minima del 80% sobre codigo nuevo de reglas, servicios y hooks.
 
 ## Estrategia de ramas
 

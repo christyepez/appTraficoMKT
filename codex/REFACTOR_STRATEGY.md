@@ -53,7 +53,7 @@ creando archivos HTML que React no consume.
 | H4 | Evidencias y versiones de aprobacion desacopladas | Sprint 4 |
 | H5 | UX, accesibilidad y CSS modular consolidados | Sprint 5 |
 | H6 | Modulo Productos estabilizado y documentado | Sprint 6 |
-| H7 | Patron validado aplicado gradualmente al resto del frontend | Sprints 7+ |
+| H7-H25 | Patron aplicado al resto del frontend y cierre integral | Ver `FRONTEND_MASTER_ROADMAP.md` |
 
 ## Plan de sprints
 
@@ -118,6 +118,9 @@ Criterio de salida: `page.tsx` solo compone la pantalla y sus secciones.
 
 Objetivo: desacoplar carga, vista previa y versiones enviadas.
 
+Este sprint cubre esas capacidades dentro de Productos. La pagina autonoma de
+Evidencias se refactoriza en H7 y la cola autonoma de Aprobaciones en H8.
+
 - Crear `ProductAttachmentPanel`.
 - Crear `EvidenceGallery` y vista previa por tipo.
 - Crear `ApprovalVersionsDialog`.
@@ -155,14 +158,8 @@ Criterio de salida: Productos estable, documentado y listo para produccion.
 
 ### Sprint 7 en adelante - Expansion controlada
 
-Orden recomendado por deuda y afinidad:
-
-1. Evidencias y Aprobaciones.
-2. Agenda y Calendario.
-3. Dashboard y Metricas.
-4. Administracion y Usuarios.
-5. Marca, Notificaciones y Almacenamiento.
-6. Login y sesion dentro de la arquitectura autonoma actual.
+El orden detallado H7-H25, sus dependencias y prompts ejecutables se encuentran
+en `codex/FRONTEND_MASTER_ROADMAP.md` y `codex/prompts/README.md`.
 
 Cada modulo repite discovery, clasificacion, extraccion, pruebas, UX y cierre.
 
@@ -185,3 +182,6 @@ Cada modulo repite discovery, clasificacion, extraccion, pruebas, UX y cierre.
 - Pruebas de todas las reglas de workflow y permisos visibles.
 - Build y pruebas verdes en cada commit.
 - Sin aumento de errores TypeScript.
+- Cobertura minima del 80% sobre codigo nuevo de reglas, servicios y hooks.
+- `page.tsx` sin reglas ni acceso HTTP; el limite de lineas es un indicador, no
+  una condicion que justifique abstracciones artificiales.

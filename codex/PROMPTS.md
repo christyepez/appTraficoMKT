@@ -37,7 +37,9 @@ Lee unicamente:
 - codex/PROJECT_CONTEXT.md
 - codex/INSTRUCTIONS.md
 - codex/REFACTOR_STRATEGY.md
+- codex/FRONTEND_MASTER_ROADMAP.md
 - codex/TASKS.md
+- codex/prompts/README.md
 - CodexCommonAgents/AGENTS.md
 - CodexCommonAgents/agents/00-coordinator-agent.md
 - CodexCommonAgents/agents/02-solution-architect-agent.md
@@ -82,12 +84,15 @@ codex/REFACTOR_STRATEGY.md para crear la fundacion modular de Productos.
 
 Alcance:
 - Configurar Vitest, jsdom y Testing Library.
+- Agregar Testing Library user-event para interacciones de usuario.
 - Agregar React Hook Form y Zod, sin migrar aun el formulario.
 - Crear features/products/{models,services,utils}.
 - Mantener fetch detras de servicios tipados.
 - Extraer de activities/page.tsx solo modelos duplicados, reglas puras de
   estados, busqueda, permisos visibles y generacion de codigo.
 - Agregar pruebas unitarias para esas reglas.
+- Cubrir al menos 80% del codigo nuevo de reglas, servicios y hooks.
+- Definir contratos API canonicos sin duplicarlos entre app, shared y features.
 - No cambiar la apariencia ni extraer componentes visuales en este sprint.
 
 Criterios de aceptacion:
@@ -193,6 +198,10 @@ Prerequisito: H3 aprobado.
 PortalCorporativo y su Content/File API estan fuera de alcance.
 
 Ejecuta solo Sprint 4/Hito H4.
+
+Limite funcional: H4 cubre evidencias y versiones solo dentro de la experiencia
+de Productos. La pagina autonoma de Evidencias corresponde a H7 y la cola
+autonoma de Aprobaciones corresponde a H8.
 
 Extrae:
 - ProductAttachmentPanel.
