@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { CrudActionButton } from "../../../shared/components/CrudActionButton";
 import type { UsersAdministrationWorkspace } from "../hooks/useUsersAdministration";
 import type { ManagedUser } from "../models/user.models";
 import { UserForm } from "./UserForm";
@@ -45,7 +46,7 @@ export function UsersAdministration({ workspace }: { workspace: UsersAdministrat
               <input type="checkbox" checked={showInactive} onChange={(event) => setShowInactive(event.target.checked)} />
               Ver inactivos
             </label>
-            <button className="icon-button" onClick={() => openEditor(null)}>Crear usuario</button>
+            <CrudActionButton action="create" label="Crear usuario" onClick={() => openEditor(null)} />
             <button className="button secondary" disabled={workspace.isRefreshing} onClick={() => void workspace.refresh().catch(() => undefined)}>
               {workspace.isRefreshing ? "Actualizando" : "Actualizar"}
             </button>

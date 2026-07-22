@@ -405,5 +405,7 @@
 - [x] H25-R3: consolidar modelos y campos duplicados.
 - [x] Corregir regresion visual: aplicar variantes institucionales a todos los botones de produccion sin estilo.
 - [x] Hacer shells y controles fluidos a todo el viewport y retirar bordes visuales de controles.
+- [x] Uniformar acciones CRUD con iconos compartidos de crear, editar y eliminar.
+- [x] Recuperar tarjetas y formato enriquecido en Manejo de marca sin revertir su modularizacion.
 - [ ] H25-R4: ejecutar regresion manual con servicios y roles reales.
 - [ ] Repetir H25 y obtener GO antes de recomendar PR a `main`.

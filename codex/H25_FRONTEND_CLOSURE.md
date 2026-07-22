@@ -21,7 +21,7 @@ del refactor frontend:
 
 | Control | Resultado |
 |---|---|
-| `pnpm test` | PASS: 96 archivos, 325 pruebas. |
+| `pnpm test` | PASS: 97 archivos, 328 pruebas. |
 | `pnpm test:coverage` | PASS: 97.94% lineas/statements, 84.71% branches, 96.12% funciones. |
 | `pnpm lint` | PASS, sin errores ni warnings de ESLint. |
 | `pnpm build` | PASS: 24 rutas generadas; 23 rutas funcionales auditadas y `_not-found`. |
@@ -41,8 +41,8 @@ Linea base de codigo: `5ce370d`; cierre auditado antes del commit H25: `bd56be1`
 |---|---:|---:|---:|
 | Lineas totales en `page.tsx` | 5,703 | 365 | -93.6% |
 | Mayor `page.tsx` | 610 | 92 | -84.9% |
-| Archivos de prueba frontend | 0 | 96 | +96 |
-| Pruebas automatizadas | 0 | 325 | +325 |
+| Archivos de prueba frontend | 0 | 97 | +97 |
+| Pruebas automatizadas | 0 | 328 | +328 |
 | Llamadas `api(...)` desde TSX | 109 | 0 | -100% |
 | Lineas de `app/lib.ts` | 426 | 9 | -97.9% |
 | Lineas de `app/nav.tsx` | 209 | 1 | -99.5% |
@@ -67,6 +67,8 @@ movieron a CSS Modules; `globals.css` conserva tokens y patrones compartidos.
 | Componentes criticos probados | Cumple automatizado | Cada feature tiene pruebas; login incluye componente, formulario, hook, SSO y PKCE. |
 | Teclado, foco y dialogs | Cumple automatizado | Popup y chatbot reutilizan `AccessibleDialog`; falta regresion manual. |
 | Botones y paleta institucional | Cumple automatizado | Todos los botones de produccion declaran un patron visual o variante especializada; pruebas verifican principal, secundario y peligro. |
+| Iconografia CRUD | Cumple automatizado | Crear, editar y eliminar/inactivar reutilizan `CrudActionButton` con Plus, Pencil y Trash2, nombres accesibles y estado de peligro uniforme. |
+| Manejo de marca | Cumple automatizado | Diez tarjetas abren editores por categoria; titulo y subtitulo recuperan color, tamano, negrita, cursiva y subrayado con vista previa aislada. |
 | Responsive y viewport | Cumple estructural | Shells sin anchos maximos heredados, altura `100dvh`, controles fluidos y acciones apiladas en movil; falta confirmacion visual de H25-R4. |
 | Estados de pantalla | Cumple automatizado | Hooks/componentes cubren carga, error, vacio y exito por modulo. Falta validacion real. |
 

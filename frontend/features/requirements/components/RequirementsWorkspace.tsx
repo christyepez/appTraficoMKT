@@ -1,6 +1,7 @@
 "use client";
 
-import { Plus, RefreshCw } from "lucide-react";
+import { RefreshCw } from "lucide-react";
+import { CrudActionButton } from "../../../shared/components/CrudActionButton";
 import { useState } from "react";
 import type { Requirement } from "../models/requirement.models";
 import type { RequirementsWorkspace as Workspace } from "../hooks/useRequirementsWorkspace";
@@ -33,7 +34,7 @@ export function RequirementsWorkspace({ workspace }: { workspace: Workspace }) {
       {selected && <RelatedProductsDialog requirement={selected} activities={workspace.activities} onClose={() => setSelected(null)} />}
       <section className="panel">
         <div className="card-head"><div><span className="eyebrow">Operación de marketing</span><h2>Seguimiento de requerimientos</h2></div><div className="actions">
-          {workspace.permissions.canCreate && <button className="icon-button" type="button" title="Crear nuevo requerimiento" aria-label="Crear nuevo requerimiento" onClick={() => openForm(null)}><Plus size={16} /></button>}
+          {workspace.permissions.canCreate && <CrudActionButton action="create" label="Crear nuevo requerimiento" onClick={() => openForm(null)} />}
           <button className="button secondary" type="button" disabled={workspace.isRefreshing} onClick={() => void workspace.refresh().catch(() => undefined)}><RefreshCw size={16} /> Actualizar</button>
         </div></div>
         {workspace.message && <span className="badge" role="status">{workspace.message}</span>}

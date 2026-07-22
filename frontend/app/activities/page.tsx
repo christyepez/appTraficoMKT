@@ -10,7 +10,8 @@ import { ProductForm } from "../../features/products/components/ProductForm";
 import { ProductList } from "../../features/products/components/ProductList";
 import { useProductsWorkspace } from "../../features/products/hooks/useProductsWorkspace";
 import styles from "../../features/products/styles/Product.module.css";
-import { Plus, RefreshCw } from "lucide-react";
+import { CrudActionButton } from "../../shared/components/CrudActionButton";
+import { RefreshCw } from "lucide-react";
 import { useState } from "react";
 
 export default function ActivitiesPage() {
@@ -60,7 +61,7 @@ export default function ActivitiesPage() {
           <div className={`card-head ${styles.header}`}>
             <h2>Seguimiento de productos</h2>
             <div className="actions">
-              <button className="icon-button" type="button" title="Crear producto" aria-label="Crear producto" onClick={() => openEditor(null)}><Plus size={16} /></button>
+              <CrudActionButton action="create" label="Crear producto" onClick={() => openEditor(null)} />
               <button className="button secondary" type="button" title="Actualizar seguimiento de productos" aria-label="Actualizar seguimiento de productos" disabled={isRefreshing} onClick={() => void refresh().catch(() => undefined)}><RefreshCw size={16} /> {isRefreshing ? "Actualizando" : "Actualizar"}</button>
             </div>
           </div>

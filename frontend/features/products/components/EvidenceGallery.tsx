@@ -1,4 +1,5 @@
-import { Eye, FileText, Trash2, X } from "lucide-react";
+import { Eye, FileText, X } from "lucide-react";
+import { CrudActionButton } from "../../../shared/components/CrudActionButton";
 import type { Approval, EvidenceItem, Product } from "../models/product.models";
 import { canDeleteEvidence } from "../utils/evidence.utils";
 import { productStatusLabel } from "../utils/product.utils";
@@ -29,7 +30,7 @@ export function EvidenceGallery({ product, evidence, approvals, pendingEvidenceI
               <summary className="card-head collapse-title"><div className="compact-title"><h3><FileText size={16} /> {file.fileName}</h3><p>Subido por {file.uploadedBy || "Equipo técnico"}</p></div></summary>
               <div className="actions top-space">
                 <a className="icon-button" href={file.storageUrl} target="_blank" rel="noreferrer" title="Abrir adjunto" aria-label={`Abrir ${file.fileName}`}><Eye size={16} /></a>
-                {canDeleteEvidence(file.activityId, approvals) && <button className="icon-button danger" type="button" title="Eliminar adjunto" aria-label={`Eliminar ${file.fileName}`} disabled={pendingEvidenceIds.has(file.id)} onClick={() => onDelete(file.id)}><Trash2 size={16} /></button>}
+                {canDeleteEvidence(file.activityId, approvals) && <CrudActionButton action="delete" label={`Eliminar ${file.fileName}`} disabled={pendingEvidenceIds.has(file.id)} onClick={() => onDelete(file.id)} />}
               </div>
               <EvidencePreview fileName={file.fileName} source={file.storageUrl} />
             </details>

@@ -1,5 +1,6 @@
-import { Edit3, Eye, FileText, Trash2 } from "lucide-react";
+import { Eye, FileText } from "lucide-react";
 import { Highlight } from "../../../app/search";
+import { CrudActionButton } from "../../../shared/components/CrudActionButton";
 import type { Product } from "../models/product.models";
 import { normalizeProductStatus, productStatusLabel } from "../utils/product.utils";
 import { ProductWorkflowActions } from "./ProductWorkflowActions";
@@ -36,8 +37,8 @@ export function ProductCard({ product, searchTerm, evidenceCount, pending, onCha
             <button className="icon-button" type="button" title="Ver detalle y adjuntos del producto" aria-label="Ver detalle y adjuntos" onClick={() => onViewEvidence(product.id)}><Eye size={16} /></button>
             <button className="icon-button" type="button" title="Ver versiones enviadas a aprobación" aria-label="Ver versiones de aprobación" onClick={() => onViewApprovals(product.id)}><FileText size={16} /></button>
             {!approved && <>
-              <button className="icon-button" type="button" disabled={pending} title="Editar datos del producto" aria-label="Editar producto" onClick={() => onEdit(product)}><Edit3 size={16} /></button>
-              <button className="icon-button danger" type="button" disabled={pending} title="Eliminar lógicamente el producto" aria-label="Eliminar producto" onClick={() => onDelete(product.id)}><Trash2 size={16} /></button>
+              <CrudActionButton action="edit" label="Editar producto" disabled={pending} onClick={() => onEdit(product)} />
+              <CrudActionButton action="delete" label="Eliminar producto" disabled={pending} onClick={() => onDelete(product.id)} />
             </>}
           </div>
         </div>

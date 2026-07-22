@@ -1,3 +1,4 @@
+import { CrudActionButton } from "../../../shared/components/CrudActionButton";
 import type { ManagedUser } from "../models/user.models";
 
 export function UserStatusActions({
@@ -13,12 +14,8 @@ export function UserStatusActions({
 }) {
   return (
     <div className="actions">
-      <button className="button secondary compact" disabled={pending} onClick={() => onEdit(user)}>
-        Editar
-      </button>
-      <button className="button danger compact" disabled={pending || !user.isActive} onClick={() => onDisable(user.id)}>
-        {pending ? "Procesando" : "Inactivar"}
-      </button>
+      <CrudActionButton action="edit" label={`Editar ${user.name}`} disabled={pending} onClick={() => onEdit(user)} />
+      <CrudActionButton action="delete" label={`Inactivar ${user.name}`} disabled={pending || !user.isActive} onClick={() => onDisable(user.id)} />
     </div>
   );
 }

@@ -44,10 +44,10 @@ describe("user components", () => {
     await user.click(screen.getByRole("button", { name: "Reintentar" }));
     expect(retry).toHaveBeenCalled();
     view.rerender(<UserList {...props} loading={false} users={[managed]} />);
-    const editButton = screen.getByRole("button", { name: "Editar" });
-    const disableButton = screen.getByRole("button", { name: "Inactivar" });
-    expect(editButton).toHaveClass("button", "secondary");
-    expect(disableButton).toHaveClass("button", "danger");
+    const editButton = screen.getByRole("button", { name: "Editar Ana" });
+    const disableButton = screen.getByRole("button", { name: "Inactivar Ana" });
+    expect(editButton).toHaveClass("icon-button");
+    expect(disableButton).toHaveClass("icon-button", "danger");
     await user.click(editButton);
     await user.click(disableButton);
     expect(edit).toHaveBeenCalledWith(managed);
@@ -56,7 +56,7 @@ describe("user components", () => {
 
   it("bloquea acciones pendientes o sobre usuarios inactivos", () => {
     render(<UserStatusActions user={{ ...managed, isActive: false }} pending={true} onEdit={vi.fn()} onDisable={vi.fn()} />);
-    expect(screen.getByRole("button", { name: "Editar" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Procesando" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Editar Ana" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Inactivar Ana" })).toBeDisabled();
   });
 });
