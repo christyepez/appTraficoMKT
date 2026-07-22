@@ -16,7 +16,8 @@
 | H9 Agenda técnica | Completado | CRUD, reservas derivadas, jornadas, filtros y reglas de fechas modularizados. |
 | H10 Calendario técnico | Completado | Navegación, filtros, cuatro vistas y eventos reutilizan Agenda sin duplicar reservas. |
 | H11 Métricas de Agenda | Completado | Indicadores, capacidad, carga técnica y filtros desacoplados sobre datos de Agenda. |
-| H12-H14 Requerimientos y analitica | Pendiente | Ver `codex/prompts/04-requirements-analytics.md`; H12 es el siguiente hito. |
+| H12 Requerimientos y Dashboard | Completado | Formulario, filtros, workflow, permisos visibles y servicio tipado desacoplados. |
+| H13-H14 Analitica y auditoria | Pendiente | Ver `codex/prompts/04-requirements-analytics.md`; H13 es el siguiente hito. |
 | H15-H16 Administracion | Pendiente | Ver `codex/prompts/05-administration.md`. |
 | H17-H20 Configuracion operativa | Pendiente | Ver `codex/prompts/06-operations.md`. |
 | H21-H23 Acceso y canales publicos | Pendiente | Ver `codex/prompts/07-access-public.md`. |
@@ -195,3 +196,18 @@
 - [x] Probar cálculos, filtros, capacidad, carga, datos incompletos y renderizado.
 - [x] Ejecutar lint, TypeScript, cobertura y build.
 - [x] Publicar commit H11 y detenerse antes de H12.
+
+## Sprint 12 - Requerimientos y Dashboard
+
+- [x] Inventariar formulario, catálogos, filtros, workflow, permisos y endpoints.
+- [x] Reutilizar dialog accesible, paginación, resaltado, sesión y cliente HTTP.
+- [x] Crear modelos, esquema Zod, servicio, utilidades y hook del módulo.
+- [x] Extraer formulario de alta/edición con carreras dependientes de facultad.
+- [x] Extraer filtros, listado, tarjetas, workflow y productos relacionados.
+- [x] Conservar contratos y reglas de finalización del backend.
+- [x] Aplicar carga, error recuperable, vacío, éxito y bloqueo de doble acción.
+- [x] Mantener Auditor en consulta y la autorización efectiva en backend.
+- [x] Reducir `dashboard/page.tsx` a composición sin acceso HTTP.
+- [x] Probar alta, edición, filtros, transiciones, visibilidad, errores y servicios.
+- [x] Ejecutar lint, TypeScript, cobertura y build.
+- [x] Publicar commit H12 y detenerse antes de H13.
