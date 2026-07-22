@@ -7,6 +7,9 @@
 .error { grid-column: 1 / -1; margin: 0; }
 .fieldError { display: block; font-size: .8rem; margin-top: .25rem; }
 .visuallyHidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.relatedTable { min-width: 640px; }
+.relatedTable td:first-child { display: grid; gap: 3px; }
+.relatedTable td span:not(:global(.badge)) { color: var(--muted); overflow-wrap: anywhere; }
 
 @media (max-width: 700px) {
   .wideDialog { width: calc(100vw - 1rem); }

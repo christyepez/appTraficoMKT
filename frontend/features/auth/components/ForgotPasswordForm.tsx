@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { showToast } from "../../../app/lib";
 import { requestPasswordReset } from "../../../core/auth/auth.service";
 import { forgotPasswordSchema, type ForgotPasswordValues } from "../schemas/auth.schemas";
+import accessStyles from "../../../shared/styles/PublicAccess.module.css";
 
 type Props = { requestReset?: typeof requestPasswordReset };
 const neutralSuccess = "Si el correo existe, se envió una clave temporal.";
@@ -35,9 +36,9 @@ export function ForgotPasswordForm({ requestReset = requestPasswordReset }: Prop
   }
 
   return (
-    <main className="login-page">
-      <section className="login-panel">
-        <div className="brand login-brand">
+    <main className={accessStyles.page}>
+      <section className={accessStyles.panel}>
+        <div className={`brand ${accessStyles.brand}`}>
           <strong>Recuperar contraseña</strong>
           <span>Clave temporal por correo configurado</span>
         </div>

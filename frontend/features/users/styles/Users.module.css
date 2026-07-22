@@ -1,0 +1,2 @@
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px; align-items: stretch; }
+.grid :global(.check-field) { justify-content: flex-start; min-height: 38px; padding: 0 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }

@@ -73,6 +73,11 @@
 }
 
 .attachmentPanel {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
   border-color: color-mix(in srgb, var(--primary) 25%, var(--line));
   background: color-mix(in srgb, var(--surface) 94%, var(--primary));
   box-shadow: inset 4px 0 0 var(--accent);
@@ -112,6 +117,8 @@
   color: var(--danger);
   font-weight: 600;
 }
+
+.linkButton { padding: 0; border: 0; background: transparent; color: var(--primary); font-weight: 800; text-decoration: underline; }
 
 .dialogBackdrop {
   backdrop-filter: blur(2px);

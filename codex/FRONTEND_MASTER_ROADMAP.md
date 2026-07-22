@@ -105,7 +105,7 @@ despues de H25 y de una autorizacion explicita.
 
 ## Resultado H25
 
-La automatizacion, cobertura, lint, TypeScript y build estan verdes. El dictamen
-es **NO-GO** hasta resolver H25-R1 a H25-R4 y completar la regresion manual. No se
-recomienda abrir el PR a `main` en el estado actual. Ver
+La automatizacion, cobertura, lint, TypeScript y build estan verdes. H25-R1 a
+H25-R3 estan completos. El dictamen sigue **NO-GO** hasta completar H25-R4 y
+resolver o aceptar H25-R5. No se recomienda abrir el PR a `main`. Ver
 `codex/H25_FRONTEND_CLOSURE.md`.

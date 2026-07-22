@@ -79,3 +79,19 @@ export type Approval = {
   comments: string;
   createdAt?: string;
 };
+
+export type Technician = {
+  id: string;
+  name: string;
+  email: string;
+  roles: string[];
+  isActive: boolean;
+};
+
+export type ExternalEvidencePayload = {
+  activityId: string;
+  fileName: string;
+  contentType: "text/uri-list";
+  storageUrl: string;
+  uploadedBy: string;
+};

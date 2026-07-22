@@ -74,9 +74,18 @@ Cada microservicio tiene su propia base logica en SQL Server: `RequirementsDb`, 
 docker compose up --build
 ```
 
+Para usar el puerto solicitado `3100` sin modificar el compose:
+
+```powershell
+$env:WEB_PORT=3100; docker compose up --build -d
+```
+
+En Bash: `WEB_PORT=3100 docker compose up --build -d`.
+
 URLs locales:
 
 - Frontend: http://localhost:3000
+- Frontend con `WEB_PORT=3100`: http://127.0.0.1:3100/login
 - Frontend HTTPS con Nginx: https://localhost
 - Login con formulario publico y chatbot: https://localhost/login
 - Formulario publico directo: https://localhost/public-requirement

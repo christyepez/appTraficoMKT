@@ -7,12 +7,13 @@ import { DayView, ListView, MonthView, WeekView } from "../../features/agenda-ca
 import { useAgendaCalendar } from "../../features/agenda-calendar/hooks/useAgendaCalendar";
 import { calendarSummary, periodLabel } from "../../features/agenda-calendar/utils/calendar.utils";
 import styles from "../../features/agenda-calendar/styles/Calendar.module.css";
+import calendarPatterns from "../../shared/styles/CalendarPatterns.module.css";
 import { AppNav } from "../nav";
 
 export default function AgendaCalendarPage() {
   const calendar = useAgendaCalendar(); const includeWeekend = calendar.weekScope === "full";
   const view = calendar.mode === "day" ? <DayView date={calendar.cursorDate} items={calendar.items} hours={calendar.hours} onOpen={calendar.setSelectedItem} /> : calendar.mode === "week" ? <WeekView days={calendar.period} items={calendar.items} hours={calendar.hours} onOpen={calendar.setSelectedItem} /> : calendar.mode === "month" ? <MonthView cursorDate={calendar.cursorDate} days={calendar.period} items={calendar.items} onOpen={calendar.setSelectedItem} /> : <ListView items={calendar.items} onOpen={calendar.setSelectedItem} />;
-  return <main className="app-shell"><AppNav /><section className={`content-shell calendar-shell ${styles.shell}`}>
+  return <main className="app-shell"><AppNav /><section className={`content-shell ${calendarPatterns.root} ${styles.shell}`}>
     {calendar.selectedItem && <CalendarEventDialog item={calendar.selectedItem} activity={calendar.activityById.get(calendar.selectedItem.activityId)} requirement={calendar.requirementById.get(calendar.selectedItem.requirementId)} onClose={() => calendar.setSelectedItem(null)} />}
     <section className="calendar-hero"><div className="calendar-page-head"><div><span className="eyebrow">Operación de marketing</span><h2>Calendario técnico</h2><p>Planifica requerimientos, compromisos y capacidad disponible.</p></div></div></section>
     <section className={`panel calendar-command-panel ${styles.commandPanel}`}><CalendarToolbar mode={calendar.mode} cursorDate={calendar.cursorDate} refreshing={calendar.isRefreshing} onMode={calendar.setMode} onDate={calendar.setCursorDate} onMove={calendar.movePeriod} onToday={calendar.today} onRefresh={() => void calendar.refresh().catch(() => undefined)} /><CalendarFilters technicians={calendar.technicians} campuses={calendar.campuses} statuses={calendar.statuses} technician={calendar.selectedTechnician} campus={calendar.selectedCampus} status={calendar.selectedStatus} search={calendar.search} onTechnician={calendar.setSelectedTechnician} onCampus={calendar.setSelectedCampus} onStatus={calendar.setSelectedStatus} onSearch={calendar.setSearch} /></section>

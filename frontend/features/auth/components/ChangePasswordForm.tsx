@@ -10,6 +10,7 @@ import { changePassword } from "../../../core/auth/auth.service";
 import { safeAuthMessage } from "../../../core/auth/auth.utils";
 import { clearSession } from "../../../core/auth/session";
 import { changePasswordSchema, type ChangePasswordValues } from "../schemas/auth.schemas";
+import accessStyles from "../../../shared/styles/PublicAccess.module.css";
 
 type Props = {
   updatePassword?: typeof changePassword;
@@ -48,9 +49,9 @@ export function ChangePasswordForm({ updatePassword = changePassword, onChanged 
   }
 
   return (
-    <main className="login-page">
-      <section className="login-panel">
-        <div className="brand login-brand">
+    <main className={accessStyles.page}>
+      <section className={accessStyles.panel}>
+        <div className={`brand ${accessStyles.brand}`}>
           <strong>Cambiar clave</strong>
           <span>Actualización segura de contraseña</span>
         </div>

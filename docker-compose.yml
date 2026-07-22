@@ -124,7 +124,7 @@ services:
       IDENTITY_API_URL: "http://identity-api:8080"
       ADMINISTRATION_API_URL: "http://administration-api:8080"
     ports:
-      - "0.0.0.0:3000:3000"
+      - "0.0.0.0:${WEB_PORT:-3000}:3000"
     depends_on:
       - requirements-api
       - activities-api

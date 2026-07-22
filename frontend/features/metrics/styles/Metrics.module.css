@@ -4,3 +4,147 @@
 @media (max-width: 700px) {
   .shell :global(.metric-grid) { grid-template-columns: 1fr; }
 }
+
+.shell :global(.metric-grid),
+.shell :global(.metrics-sections) {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 14px;
+}
+
+.shell :global(.metric-card) {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.shell :global(.metric-card) span,
+.shell :global(.metric-row) span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.shell :global(.metric-card) strong {
+  font-size: 28px;
+  overflow-wrap: anywhere;
+}
+
+.shell :global(.metric-row) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(90px, 1.2fr) minmax(42px, auto);
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+}
+
+.shell :global(.metric-row) > div:first-child {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.shell :global(.metric-row) strong,
+.shell :global(.metric-row) span,
+.shell :global(.metric-row) b,
+.shell :global(.detail-item) strong {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+.shell :global(.metric-bar) {
+  height: 9px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #edf2f7;
+}
+
+.shell :global(.metric-bar) span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+}
+
+
+.shell :global(.story-panel) {
+  grid-column: 1 / -1;
+}
+
+.shell :global(.story-stack) {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.shell :global(.story-card) {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.8fr) minmax(280px, 1.2fr);
+  gap: 18px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.shell :global(.story-card) h3 {
+  margin: 0 0 6px;
+  font-size: 1rem;
+}
+
+.shell :global(.story-card) p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.shell :global(.story-bars) {
+  display: grid;
+  gap: 8px;
+}
+
+.shell :global(.story-bar) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(120px, 1fr) 36px;
+  gap: 8px;
+  align-items: center;
+  font-size: 12px;
+}
+
+.shell :global(.story-bar) span {
+  overflow-wrap: anywhere;
+}
+
+.shell :global(.story-bar) div {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #edf2f7;
+}
+
+.shell :global(.story-bar) b {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+}
+
+.shell :global(.story-bar) em {
+  color: var(--muted);
+  font-style: normal;
+  text-align: right;
+}
+
+
+@media (max-width: 980px) {
+  .shell :global(.metric-row) {
+    grid-template-columns: 1fr;
+  }
+
+  .shell :global(.story-card),
+.shell :global(.story-bar) {
+    grid-template-columns: 1fr;
+  }
+
+}

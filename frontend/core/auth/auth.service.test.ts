@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { api } from "../api/api-client";
-import { changePassword, loginLocal, requestPasswordReset } from "./auth.service";
+import { changePassword, exchangeMicrosoftCode, getMicrosoftAuthConfig, loginLocal, requestPasswordReset } from "./auth.service";
 
 vi.mock("../api/api-client", () => ({ api: vi.fn() }));
 
@@ -14,5 +14,9 @@ describe("auth service", () => {
     expect(api).toHaveBeenCalledWith("/api/auth/forgot-password", expect.anything());
     await changePassword("ana@example.com", "actual", "nueva");
     expect(api).toHaveBeenCalledWith("/api/auth/change-password", expect.anything());
+    await getMicrosoftAuthConfig();
+    expect(api).toHaveBeenCalledWith("/api/auth/microsoft/config");
+    await exchangeMicrosoftCode("code", "verifier", "https://app/login");
+    expect(api).toHaveBeenCalledWith("/api/auth/microsoft/code", expect.objectContaining({ method: "POST" }));
   });
 });

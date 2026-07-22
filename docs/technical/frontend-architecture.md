@@ -6,9 +6,10 @@ El frontend de App Trafico MKT usa Next.js 16, React 19 y TypeScript. La
 refactorizacion `feature1.0` conserva `fetch`, los contratos HTTP y las versiones
 del producto. No existe dependencia de ejecucion con `PortalCorporativo`.
 
-El cierre H25 queda en estado **NO-GO para fusionar a `main`** hasta resolver los
-bloqueos registrados en `codex/H25_FRONTEND_CLOSURE.md` y completar la regresion
-manual con servicios y roles reales.
+El cierre H25 queda en estado **NO-GO para fusionar a `main`**. Las remediaciones
+frontend H25-R1 a H25-R3 estan completas; faltan la regresion manual con
+servicios y roles reales y la resolucion o aceptacion formal de los riesgos
+backend registrados en `codex/H25_FRONTEND_CLOSURE.md`.
 
 ## Capas
 
@@ -46,10 +47,10 @@ mensajes asociados.
 
 ## Estilos
 
-`app/globals.css` debe limitarse a tokens y patrones realmente compartidos. Los
-estilos de una ruta o feature pertenecen a su CSS Module. H25 detecto estilos
-historicos de login, calendario, agenda, marca y notificaciones que aun deben
-migrarse por dominio antes del GO.
+`app/globals.css` se limita a tokens y patrones realmente compartidos. Los
+estilos de login, calendario, agenda, marca, notificaciones y demas dominios
+viven en CSS Modules propios. La matriz H25-R4 debe confirmar visualmente las
+rutas despues de esta migracion.
 
 ## Pruebas
 

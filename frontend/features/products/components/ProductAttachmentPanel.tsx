@@ -73,7 +73,7 @@ export function ProductAttachmentPanel({ product, pending, onUploadFile, onUploa
   }
 
   return (
-    <form className={`attachment-panel top-space ${styles.attachmentPanel}`} onSubmit={submit} aria-label={`Adjunto de ${product.productId}`}>
+    <form className={`top-space ${styles.attachmentPanel}`} onSubmit={submit} aria-label={`Adjunto de ${product.productId}`}>
       <div className="card-head">
         <div><h3>Adjunto de producto</h3><p>{product.productId}</p></div>
         <button className="icon-button" type="button" title="Cerrar carga de adjunto" aria-label="Cerrar carga de adjunto" disabled={pending} onClick={onClose}><X size={16} /></button>

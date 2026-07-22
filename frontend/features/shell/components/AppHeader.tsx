@@ -4,6 +4,7 @@ import { Bell, LogOut, ShieldCheck } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import type { BrandSettings } from "../../../core/branding/brand-settings";
+import styles from "../styles/Shell.module.css";
 
 type Props = {
   brand: BrandSettings;
@@ -29,7 +30,7 @@ export function AppHeader({ brand, userName, language, unreadNotifications, onLa
       <div className="session-box" aria-label="Perfil de sesión">
         <ShieldCheck size={16} aria-hidden="true" />
         <span>{userName}</span>
-        <Link className="notification-bubble" href="/my-notifications" title="Ver mis notificaciones" aria-label={`Mis notificaciones${unreadNotifications ? `, ${unreadNotifications} pendientes` : ""}`}>
+        <Link className={styles.notificationBubble} href="/my-notifications" title="Ver mis notificaciones" aria-label={`Mis notificaciones${unreadNotifications ? `, ${unreadNotifications} pendientes` : ""}`}>
           <Bell size={15} aria-hidden="true" />{unreadNotifications > 0 && <b>{unreadNotifications}</b>}
         </Link>
         <label className="sr-only" htmlFor="shell-language">Idioma</label>

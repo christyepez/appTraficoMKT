@@ -47,7 +47,7 @@ export function ProductCard({ product, searchTerm, evidenceCount, pending, onCha
         <div className="detail-item"><span>Entrega</span><strong>{product.productDeliveryDate ?? "Sin fecha"}</strong></div>
         <div className="detail-item">
           <span>Adjuntos</span>
-          <button className="link-button" type="button" title="Ver detalle de adjuntos" onClick={() => onViewEvidence(product.id)}>{evidenceCount}</button>
+          <button className={styles.linkButton} type="button" title="Ver detalle de adjuntos" onClick={() => onViewEvidence(product.id)}>{evidenceCount}</button>
         </div>
       </div>
     </article>

@@ -21,3 +21,21 @@ export function changePassword(email: string, currentPassword: string, newPasswo
     body: JSON.stringify({ email, currentPassword, newPassword })
   });
 }
+
+export type MicrosoftAuthConfig = {
+  tenantId: string;
+  clientId: string;
+  authority: string;
+  scopes: string[];
+};
+
+export function getMicrosoftAuthConfig() {
+  return api<MicrosoftAuthConfig>("/api/auth/microsoft/config");
+}
+
+export function exchangeMicrosoftCode(code: string, codeVerifier: string, redirectUri: string) {
+  return api<AuthSession>("/api/auth/microsoft/code", {
+    method: "POST",
+    body: JSON.stringify({ code, codeVerifier, redirectUri })
+  });
+}

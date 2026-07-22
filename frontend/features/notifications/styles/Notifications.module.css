@@ -1,0 +1,10 @@
+.modal { max-height: calc(100vh - 36px); overscroll-behavior: contain; }
+.modal > :global(.card-head) { position: sticky; top: -18px; z-index: 4; margin: -18px -18px 0; padding: 16px 18px 12px; border-bottom: 1px solid var(--line); background: var(--surface); }
+.modeSwitch { display: inline-grid; grid-template-columns: repeat(3, minmax(110px, 1fr)); width: min(100%, 430px); margin-bottom: 10px; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.modeSwitch button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 38px; padding: 0 12px; border: 0; border-right: 1px solid var(--line); color: var(--foreground); background: var(--surface); }
+.modeSwitch button:last-child { border-right: 0; }
+.modeSwitch button.active { color: var(--button-text); background: var(--button-primary-background, var(--primary)); }
+.htmlEditor { min-height: clamp(180px, 32vh, 280px); max-height: 420px; padding: 14px; overflow: auto; border: 1px solid var(--line); border-radius: 0 0 6px 6px; color: var(--foreground); background: var(--surface); outline: none; }
+.htmlEditor:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(60, 35, 95, 0.12); }
+.preview { min-height: 240px; max-height: 360px; overflow: auto; padding: 14px; border: 1px solid var(--line); border-radius: 6px; background: #fff; }
+@media (max-width: 560px) { .modeSwitch { grid-template-columns: 1fr; width: 100%; } .modeSwitch button { border-right: 0; border-bottom: 1px solid var(--line); } .modeSwitch button:last-child { border-bottom: 0; } }

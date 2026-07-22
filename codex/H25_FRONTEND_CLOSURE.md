@@ -7,24 +7,22 @@ Fecha de auditoria: 22 de julio de 2026.
 **NO-GO para PR o merge `feature1.0 -> main`.**
 
 La suite automatizada y el build estan verdes, las 23 paginas quedaron reducidas
-a composicion y no existe `fetch` directo en TSX. Sin embargo, tres criterios de
-GO no se cumplen completamente:
+a composicion y no existe acceso HTTP directo en TSX. H25-R1, H25-R2 y H25-R3
+fueron implementados y verificados automaticamente. El dictamen permanece
+NO-GO por dos condiciones que requieren un entorno integrado y decisiones fuera
+del refactor frontend:
 
-1. `LoginExperience` mantiene acceso HTTP y el formulario nativo del asistente,
-   sin React Hook Form + Zod ni el dialog compartido.
-2. `globals.css` conserva selectores de paginas concretas.
-3. La regresion manual con APIs, almacenamiento, roles y navegadores reales no se
+1. La regresion manual con APIs, almacenamiento, roles y navegadores reales no se
    ha ejecutado.
-
-Estos hallazgos son transversales. H25 los clasifica y crea remediaciones; no los
-corrige silenciosamente ni agrega funcionalidades.
+2. Los riesgos backend R-010 a R-014 no han sido resueltos o aceptados
+   formalmente.
 
 ## Evidencia automatizada
 
 | Control | Resultado |
 |---|---|
-| `pnpm test` | PASS: 91 archivos, 311 pruebas. |
-| `pnpm test:coverage` | PASS: 98.57% lineas/statements, 84.92% branches, 96.35% funciones. |
+| `pnpm test` | PASS: 95 archivos, 323 pruebas. |
+| `pnpm test:coverage` | PASS: 97.94% lineas/statements, 84.71% branches, 96.12% funciones. |
 | `pnpm lint` | PASS, sin errores ni warnings de ESLint. |
 | `pnpm build` | PASS: 24 rutas generadas; 23 rutas funcionales auditadas y `_not-found`. |
 | TypeScript | PASS dentro de `next build`. |
@@ -43,30 +41,31 @@ Linea base de codigo: `5ce370d`; cierre auditado antes del commit H25: `bd56be1`
 |---|---:|---:|---:|
 | Lineas totales en `page.tsx` | 5,703 | 365 | -93.6% |
 | Mayor `page.tsx` | 610 | 92 | -84.9% |
-| Archivos de prueba frontend | 0 | 91 | +91 |
-| Pruebas automatizadas | 0 | 311 | +311 |
-| Llamadas `api(...)` desde TSX | 109 | 8 | -92.7% |
+| Archivos de prueba frontend | 0 | 95 | +95 |
+| Pruebas automatizadas | 0 | 323 | +323 |
+| Llamadas `api(...)` desde TSX | 109 | 0 | -100% |
 | Lineas de `app/lib.ts` | 426 | 9 | -97.9% |
 | Lineas de `app/nav.tsx` | 209 | 1 | -99.5% |
-| Lineas de `globals.css` | 2,573 | 2,382 | -7.4% |
+| Lineas de `globals.css` | 2,573 | 1,207 | -53.1% |
 
-Las ocho llamadas HTTP restantes estan concentradas en `LoginExperience`. La
-reduccion de CSS es real, pero insuficiente para la politica global/local.
+`LoginExperience` coordina autenticacion y canales publicos mediante un hook,
+servicios tipados, RHF + Zod y dialogs accesibles. Los estilos de dominio se
+movieron a CSS Modules; `globals.css` conserva tokens y patrones compartidos.
 
 ## Auditoria estructural
 
 | Control | Estado | Evidencia o deuda |
 |---|---|---|
 | Paginas como composicion | Cumple | 23 paginas, 365 lineas; maximo 92. |
-| HTTP en presentacion | Parcial | Sin `fetch`; `LoginExperience` conserva ocho usos del cliente `api`. |
-| Modelos duplicados | Parcial | `Technician` y `ExternalEvidencePayload` son identicos en dos features. |
-| Componentes compartidos | Parcial | Quedan dos implementaciones locales equivalentes a `FormField`. |
-| Formularios RHF + Zod | Parcial | Los formularios modularizados cumplen; el asistente del login no. |
-| CSS global/local | No cumple | Selectores concretos de login, calendario, agenda, marca y notificaciones siguen globales. |
+| HTTP en presentacion | Cumple | 0 usos de `api(...)` o `fetch` en componentes TSX. |
+| Modelos duplicados | Cumple | `Technician` y `ExternalEvidencePayload` tienen fuente canonica compartida. |
+| Componentes compartidos | Cumple | Formularios de catalogos y usuarios reutilizan `FormField`. |
+| Formularios RHF + Zod | Cumple | El asistente del login tambien usa esquema Zod y React Hook Form. |
+| CSS global/local | Cumple en codigo | Estilos de dominio migrados a CSS Modules; falta la comprobacion visual incluida en H25-R4. |
 | Imports circulares | Cumple | 0 ciclos en el grafo estatico. |
 | Codigo obsoleto | Cumple con deuda | Sin marcadores TODO/FIXME; permanecen fachadas compatibles con 57 consumidores. |
-| Componentes criticos probados | Parcial | Cada feature tiene pruebas; `LoginExperience` no tiene prueba integral propia. |
-| Teclado, foco y dialogs | Parcial | Dialog compartido probado indirectamente; popup y chatbot del login son legacy. |
+| Componentes criticos probados | Cumple automatizado | Cada feature tiene pruebas; login incluye componente, formulario, hook, SSO y PKCE. |
+| Teclado, foco y dialogs | Cumple automatizado | Popup y chatbot reutilizan `AccessibleDialog`; falta regresion manual. |
 | Estados de pantalla | Cumple automatizado | Hooks/componentes cubren carga, error, vacio y exito por modulo. Falta validacion real. |
 
 ## Matriz de regresion manual pendiente
@@ -105,9 +104,9 @@ global y los demas perfiles dependen de permisos configurables.
 
 | ID | Prioridad | Tarea | Criterio de salida |
 |---|---:|---|---|
-| H25-R1 | Alta | Desacoplar `LoginExperience`: servicio/hook tipado, formulario del chatbot con RHF+Zod y dialogs accesibles. | 0 usos de `api` en componentes, pruebas de SSO/popup/chatbot y estados. |
-| H25-R2 | Alta | Migrar estilos concretos restantes desde `globals.css` a CSS Modules por feature. | Global contiene solo tokens/patrones y regresion visual por ruta aprobada. |
-| H25-R3 | Media | Consolidar `Technician`, `ExternalEvidencePayload` y dos `Field` locales. | Una fuente canonica por contrato/componente y suite verde. |
+| H25-R1 | Completada | Servicio/hook tipado, chatbot RHF+Zod y dialogs accesibles. | 0 usos de `api` en TSX; pruebas de login, hook y formulario verdes. |
+| H25-R2 | Implementada | Estilos concretos migrados desde `globals.css` a CSS Modules por feature. | Codigo conforme; comparacion visual queda incluida en H25-R4. |
+| H25-R3 | Completada | Contratos y campos equivalentes consolidados. | Una fuente canonica y suite verde. |
 | H25-R4 | Alta | Ejecutar y firmar la matriz manual con backend, storage y roles reales. | Todos los casos PASS o defectos aceptados formalmente. |
 | H25-R5 | Alta backend | Resolver R-010 a R-014 de seguridad/protocolo. | Riesgos aceptados o cambios backend desplegados y probados. |
 
@@ -152,6 +151,6 @@ Publicaciones GitHub verificadas al final de la cadena: H21
 
 ## Recomendacion de PR
 
-No abrir aun el PR `feature1.0 -> main`. Resolver H25-R1 a H25-R4, aceptar o
-resolver formalmente H25-R5, repetir esta auditoria y obtener GO explicito.
+No abrir aun el PR `feature1.0 -> main`. Completar H25-R4, aceptar o resolver
+formalmente H25-R5, repetir esta auditoria y obtener GO explicito.
 Incluso con GO, el merge y despliegue requieren autorizacion separada.

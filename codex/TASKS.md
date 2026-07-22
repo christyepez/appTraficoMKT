@@ -400,8 +400,8 @@
 - [x] Preparar matriz manual por rol y pantalla.
 - [x] Actualizar README, arquitectura, roadmap, tareas y riesgos.
 - [x] Emitir dictamen NO-GO y no abrir PR ni hacer merge.
-- [ ] H25-R1: desacoplar por completo `LoginExperience`.
-- [ ] H25-R2: migrar CSS concreto restante a CSS Modules.
-- [ ] H25-R3: consolidar modelos y campos duplicados.
+- [x] H25-R1: desacoplar por completo `LoginExperience`.
+- [x] H25-R2: migrar CSS concreto restante a CSS Modules; validacion visual pendiente en H25-R4.
+- [x] H25-R3: consolidar modelos y campos duplicados.
 - [ ] H25-R4: ejecutar regresion manual con servicios y roles reales.
 - [ ] Repetir H25 y obtener GO antes de recomendar PR a `main`.

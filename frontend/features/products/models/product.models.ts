@@ -1,6 +1,6 @@
-import type { Activity, Approval, EvidenceItem, Requirement } from "../../../shared/models/api.models";
+import type { Activity, Approval, EvidenceItem, Requirement, Technician } from "../../../shared/models/api.models";
 
-export type { Approval, EvidenceItem } from "../../../shared/models/api.models";
+export type { Approval, EvidenceItem, ExternalEvidencePayload, Technician } from "../../../shared/models/api.models";
 
 export type Product = Activity;
 export type ProductStatusAction = "start" | "submit-approval" | "evidence-attached";
@@ -19,14 +19,6 @@ export type ProductCatalogs = {
   productTypes: CatalogItem[];
   diffusionChannels: CatalogItem[];
   mainKpis: CatalogItem[];
-};
-
-export type Technician = {
-  id: string;
-  name: string;
-  email: string;
-  roles: string[];
-  isActive: boolean;
 };
 
 export type ProductWorkspaceData = {
@@ -57,12 +49,4 @@ export type SaveProductPayload = {
   productResponsible: string;
   productDeliveryDate: string | null;
   observations: string;
-};
-
-export type ExternalEvidencePayload = {
-  activityId: string;
-  fileName: string;
-  contentType: "text/uri-list";
-  storageUrl: string;
-  uploadedBy: string;
 };

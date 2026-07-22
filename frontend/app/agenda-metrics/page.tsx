@@ -6,6 +6,7 @@ import { OperationalDetail } from "../../features/agenda-metrics/components/Oper
 import { TechnicianWorkload } from "../../features/agenda-metrics/components/TechnicianWorkload";
 import { useAgendaMetrics } from "../../features/agenda-metrics/hooks/useAgendaMetrics";
 import styles from "../../features/agenda-metrics/styles/Metrics.module.css";
+import calendarPatterns from "../../shared/styles/CalendarPatterns.module.css";
 import { AppNav } from "../nav";
 
 export default function AgendaMetricsPage() {
@@ -14,7 +15,7 @@ export default function AgendaMetricsPage() {
   return (
     <main className="app-shell">
       <AppNav />
-      <section className={`content-shell calendar-shell ${styles.shell}`}>
+      <section className={`content-shell ${calendarPatterns.root} ${styles.shell}`}>
         <section className="calendar-hero">
           <div className="calendar-page-head">
             <div>
