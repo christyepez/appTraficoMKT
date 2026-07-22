@@ -12,7 +12,7 @@
 | H5 UX, CSS y accesibilidad | Completado | CSS modular, responsive, foco visible y dialogs accesibles. |
 | H6 Estabilizacion Productos | Completado | Ver `codex/H6_PRODUCT_CLOSURE.md`: regresion automatizada verde y fusion condicionada a pruebas manuales. |
 | H7 Evidencias | Completado | Página autónoma modularizada con reutilización compartida, 63 pruebas y cobertura crítica completa. |
-| H8 Aprobaciones | Pendiente | Ver `codex/prompts/02-evidence-approvals.md`. |
+| H8 Aprobaciones | Completado | Cola, decisiones validadas, adjuntos, permisos visibles y concurrencia desacoplados. |
 | H9-H11 Agenda | Pendiente | Ver `codex/prompts/03-agenda.md`. |
 | H12-H14 Requerimientos y analitica | Pendiente | Ver `codex/prompts/04-requirements-analytics.md`. |
 | H15-H16 Administracion | Pendiente | Ver `codex/prompts/05-administration.md`. |
@@ -135,3 +135,19 @@
 - [x] Probar permisos visibles, archivos, URL, eliminación, previews, estados y errores.
 - [x] Ejecutar lint, TypeScript, cobertura y build.
 - [x] Publicar commit H7 y detenerse antes de H8.
+
+## Sprint 8 - Aprobaciones
+
+- [x] Reutilizar contratos, dialog accesible y vista previa compartidos.
+- [x] Crear servicio tipado sobre endpoints existentes de aprobaciones.
+- [x] Crear `useApprovalsWorkspace` con filtros, polling y bloqueo por producto.
+- [x] Extraer `ApprovalQueue`, `ApprovalCard`, `ApprovalDecisionForm` y `ApprovalEvidenceDialog`.
+- [x] Reemplazar `window.prompt` con React Hook Form y esquema Zod.
+- [x] Exigir comentario y confirmar aprobar/rechazar de forma explícita.
+- [x] Mantener Auditores en consulta sin presentar acciones de decisión.
+- [x] Mostrar carga, error recuperable, vacío, actualización y resultado.
+- [x] Crear CSS Module exclusivo de Aprobaciones.
+- [x] Reducir `approvals/page.tsx` a composición sin acceso HTTP.
+- [x] Probar decisiones, comentarios, adjuntos, permisos, errores y doble envío.
+- [x] Ejecutar lint, TypeScript, cobertura y build.
+- [x] Publicar commit H8 y detenerse antes de H9.
