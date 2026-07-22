@@ -19,7 +19,8 @@
 | H12 Requerimientos y Dashboard | Completado | Formulario, filtros, workflow, permisos visibles y servicio tipado desacoplados. |
 | H13 Métricas generales | Completado | Fuentes parciales, cálculos, conceptos y secciones analíticas desacoplados. |
 | H14 Auditoria | Completado | Tres fuentes normalizadas, filtros, paginación y detalle seguro desacoplados. |
-| H15-H16 Administracion | Pendiente | Ver `codex/prompts/05-administration.md`. |
+| H15 Administración de catálogos | Completado | Grupos, relaciones, formularios discriminados y CRUD desacoplados. |
+| H16 Usuarios y permisos visibles | Pendiente | Ver `codex/prompts/05-administration.md`; es el siguiente hito. |
 | H17-H20 Configuracion operativa | Pendiente | Ver `codex/prompts/06-operations.md`. |
 | H21-H23 Acceso y canales publicos | Pendiente | Ver `codex/prompts/07-access-public.md`. |
 | H24-H25 Consolidacion y cierre | Pendiente | Ver `codex/prompts/08-consolidation.md`. |
@@ -243,3 +244,17 @@
 - [x] Probar normalización, orden, filtros, detalle, parciales y errores.
 - [x] Ejecutar lint, TypeScript, cobertura y build.
 - [x] Publicar commit H14 y detenerse antes de H15.
+
+## Sprint 15 - Administración de catálogos
+
+- [x] Inventariar grupos, relaciones, variantes y endpoints CRUD.
+- [x] Modelar formularios mediante una unión discriminada tipada.
+- [x] Crear servicio y `useCatalogAdministration` con polling y bloqueos.
+- [x] Extraer selector, lista paginada, formulario de catálogo y aprobador.
+- [x] Validar códigos, relaciones, correo, nivel y tipo dinámico con Zod.
+- [x] Mostrar carga, error, vacío, confirmación y duplicidad del API.
+- [x] Conservar contratos backend, seeds e importación inicial.
+- [x] Reducir `admin/page.tsx` a composición sin acceso HTTP.
+- [x] Probar variantes, relaciones, CRUD, inactivación y errores.
+- [x] Ejecutar lint, TypeScript, cobertura y build.
+- [x] Publicar commit H15 y detenerse antes de H16.

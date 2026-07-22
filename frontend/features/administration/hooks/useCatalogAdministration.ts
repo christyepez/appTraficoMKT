@@ -1,0 +1,20 @@
+"use client";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { getSession, showToast } from "../../../app/lib";
+import type { NamedCatalog } from "../../../shared/models/api.models";
+import { catalogGroups, catalogTypes, type CatalogGroup, type CatalogKind, type CatalogPayload, type CatalogRow } from "../models/administration.models";
+import { disableCatalogRow, getCatalogAdministration, saveCatalogRow } from "../services/administration.service";
+import { groupLabel } from "../utils/administration.utils";
+export function useCatalogAdministration(pollInterval = 10_000) {
+  const [kind, setKind] = useState<CatalogKind>("faculties"), [catalogType, setCatalogType] = useState<string>(catalogTypes[0]), [items, setItems] = useState<CatalogRow[]>([]), [faculties, setFaculties] = useState<NamedCatalog[]>([]);
+  const [isLoading, setIsLoading] = useState(true), [isRefreshing, setIsRefreshing] = useState(false), [loadError, setLoadError] = useState(""), [message, setMessage] = useState("Seleccione un catálogo y administre su información."), [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
+  const active = useRef<Promise<void> | null>(null), pending = useRef(new Set<string>());
+  const load = useCallback((initial = false) => { if (active.current) return active.current; const request = (async () => { initial ? setIsLoading(true) : setIsRefreshing(true); try { const data = await getCatalogAdministration(kind, catalogType); setItems(data.items); setFaculties(data.faculties); setLoadError(""); } catch (error) { const feedback = error instanceof Error ? error.message : "No se pudo cargar la administración."; setLoadError(feedback); if (initial) showToast(feedback, "error"); if (!getSession()) window.location.assign("/login"); throw error; } finally { setIsLoading(false); setIsRefreshing(false); } })(); active.current = request; void request.finally(() => { if (active.current === request) active.current = null; }).catch(() => undefined); return request; }, [kind, catalogType]);
+  useEffect(() => { void load(true).catch(() => undefined); const timer = window.setInterval(() => void load(false).catch(() => undefined), pollInterval); return () => window.clearInterval(timer); }, [load, pollInterval]);
+  const selectGroup = useCallback((group: CatalogGroup) => { setKind(group.kind); if (group.type) setCatalogType(group.type); }, []);
+  const save = useCallback(async (row: CatalogRow | null, payload: CatalogPayload) => { try { await saveCatalogRow(kind, row, payload); const type = payload.variant === "catalogs" ? payload.type : catalogType; if (payload.variant === "catalogs") setCatalogType(type); const feedback = row ? `${groupLabel(kind, type)} editado.` : `${groupLabel(kind, type)} creado.`; setMessage(feedback); showToast(row ? "Registro editado correctamente." : "Registro creado correctamente."); await load(false); } catch (error) { showToast(error instanceof Error ? error.message : "No se pudo guardar el registro.", "error"); throw error; } }, [kind, catalogType, load]);
+  const disable = useCallback(async (id: string) => { if (pending.current.has(id) || !window.confirm("¿Inactivar este registro?")) return false; pending.current.add(id); setPendingIds(new Set(pending.current)); try { await disableCatalogRow(kind, id); showToast("Registro inactivado correctamente."); await load(false); return true; } catch (error) { showToast(error instanceof Error ? error.message : "No se pudo inactivar el registro.", "error"); return false; } finally { pending.current.delete(id); setPendingIds(new Set(pending.current)); } }, [kind, load]);
+  const groups = catalogGroups.some((g) => g.kind === "catalogs" && g.type === catalogType) ? catalogGroups : [...catalogGroups, { kind: "catalogs" as const, label: catalogType, type: catalogType }];
+  return { kind, catalogType, items, faculties, groups, isLoading, isRefreshing, loadError, message, pendingIds, selectGroup, refresh: () => load(false), save, disable };
+}
+export type CatalogAdministrationWorkspace = ReturnType<typeof useCatalogAdministration>;
