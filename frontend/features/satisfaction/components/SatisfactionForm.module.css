@@ -1,0 +1,47 @@
+.ratingGroup {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+
+.ratingGroup legend {
+  padding: 0 6px;
+  font-weight: 700;
+}
+
+.ratingOptions {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(52px, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.ratingOptions label {
+  display: grid;
+  place-items: center;
+  gap: 4px;
+  min-height: 48px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.ratingOptions label:has(input:checked) {
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 10%, white);
+}
+
+.error {
+  display: block;
+  margin-top: 6px;
+  color: var(--danger);
+}
+
+@media (max-width: 560px) {
+  .ratingOptions {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+  }
+}

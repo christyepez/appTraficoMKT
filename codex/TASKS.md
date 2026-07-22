@@ -357,3 +357,18 @@
 - [x] Probar catálogos, límites, validaciones, envío, duplicados y errores.
 - [x] Ejecutar pruebas, cobertura, lint, TypeScript y build.
 - [x] Publicar el commit H22 y detenerse antes de H23.
+
+## Sprint 23 - Encuesta de satisfacción
+
+- [x] Inventariar contexto, payload, endpoints y estados actuales de la encuesta.
+- [x] Mantener el token opaco sin decodificarlo, registrarlo ni mostrarlo.
+- [x] Crear modelos, esquema Zod, servicio con errores tipados y hook del flujo.
+- [x] Diferenciar token válido, inválido, usado, vencido y error de red.
+- [x] Preparar el estado vencido para HTTP 410 sin cambiar el protocolo backend.
+- [x] Implementar escalas accesibles de 1 a 5 con grupos y etiquetas explícitas.
+- [x] Mostrar carga, formulario, envío, error recuperable y confirmación final.
+- [x] Evitar envíos simultáneos mediante estado visual y bloqueo inmediato.
+- [x] Reducir `satisfaction/[token]/page.tsx` a composición.
+- [x] Probar estados del token, validaciones, servicio, envío único y error API.
+- [x] Ejecutar pruebas, cobertura, lint, TypeScript y build.
+- [x] Publicar el commit H23 y detenerse antes de H24.
