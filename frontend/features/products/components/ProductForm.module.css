@@ -1,0 +1,30 @@
+.intro {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.fieldError {
+  color: var(--danger);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.formStatus {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: #eaf6ef;
+  color: var(--success);
+}
+
+.formError {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: #fff0f0;
+  color: var(--danger);
+}

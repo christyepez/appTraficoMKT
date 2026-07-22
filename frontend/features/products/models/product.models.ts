@@ -56,10 +56,10 @@ export type ProductWorkspaceData = {
 
 export type SaveProductPayload = {
   requirementId: string;
-  productId: FormDataEntryValue | null;
+  productId: string | null;
   requirementTypeId: string;
   requirementType: string;
-  strategicObjective: FormDataEntryValue | null;
+  strategicObjective: string;
   targetAudienceId: string;
   targetAudience: string;
   productTypeId: string;
@@ -69,8 +69,8 @@ export type SaveProductPayload = {
   mainKpiId: string;
   mainKpi: string;
   productResponsible: string;
-  productDeliveryDate: FormDataEntryValue | null;
-  observations: FormDataEntryValue | null;
+  productDeliveryDate: string | null;
+  observations: string;
 };
 
 export type ExternalEvidencePayload = {

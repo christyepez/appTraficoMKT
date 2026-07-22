@@ -4,10 +4,11 @@ import { AppNav } from "../nav";
 import { Activity, Requirement, defaultBrandSettings, getSession, showToast } from "../lib";
 import { PaginationControls, paginate, type PaginationState } from "../pagination";
 import { Highlight } from "../search";
-import type { Approval, CatalogItem, EvidenceItem, ProductCatalogs, Technician } from "../../features/products/models/product.models";
+import { ProductForm } from "../../features/products/components/ProductForm";
+import type { Approval, EvidenceItem, ProductCatalogs, Technician } from "../../features/products/models/product.models";
 import { createExternalProductEvidence, deleteProduct, deleteProductEvidence, getProductWorkspace, saveProduct, updateProductStatus, uploadProductEvidence } from "../../features/products/services/product.service";
 import { approvalDecisionLabel, buildNextProductId, filterProductsForSession, filterRequirementsForSession, matchesProductSearch, normalizeProductStatus, productStatusLabel, productStepState, workflowButtonClass } from "../../features/products/utils/product.utils";
-import { Edit3, Eye, FileText, Paperclip, Play, Plus, RefreshCw, Save, Send, Trash2, Upload, X } from "lucide-react";
+import { Edit3, Eye, FileText, Paperclip, Play, Plus, RefreshCw, Send, Trash2, Upload, X } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
 
 export default function ActivitiesPage() {
@@ -21,7 +22,6 @@ export default function ActivitiesPage() {
     diffusionChannels: [],
     mainKpis: []
   });
-  const [requirementId, setRequirementId] = useState("");
   const [editing, setEditing] = useState<Activity | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [evidence, setEvidence] = useState<EvidenceItem[]>([]);
@@ -36,7 +36,6 @@ export default function ActivitiesPage() {
   const [dragging, setDragging] = useState(false);
   const [suggestedProductId, setSuggestedProductId] = useState("PROD-0001");
   const [showProductIdField, setShowProductIdField] = useState(defaultBrandSettings.showProductIdField);
-  const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [message, setMessage] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -60,13 +59,11 @@ export default function ActivitiesPage() {
     setCatalogs(workspace.catalogs);
     setSuggestedProductId(workspace.nextProductId ?? buildNextProductId(workspace.products));
     setShowProductIdField(workspace.showProductIdField);
-    setRequirementId((current) => current && visibleRequirements.some((item) => item.id === current) ? current : "");
   }
 
   async function openEditor(activity: Activity | null = null) {
     await load().catch(() => undefined);
     setEditing(activity);
-    if (activity) setRequirementId(activity.requirementId);
     setIsEditorOpen(true);
   }
 
@@ -78,62 +75,6 @@ export default function ActivitiesPage() {
     });
     return () => window.clearInterval(timer);
   }, []);
-
-  async function save(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (isSaving) return;
-    setIsSaving(true);
-    const form = new FormData(event.currentTarget);
-    try {
-      const requirementTypeId = String(form.get("requirementTypeId") ?? "");
-      const targetAudienceId = String(form.get("targetAudienceId") ?? "");
-      const productTypeId = String(form.get("productTypeId") ?? "");
-      const diffusionChannelId = String(form.get("diffusionChannelId") ?? "");
-      const mainKpiId = String(form.get("mainKpiId") ?? "");
-      const requirementType = catalogs.requirementTypes.find((item) => item.id === requirementTypeId);
-      const targetAudience = catalogs.targetAudiences.find((item) => item.id === targetAudienceId);
-      const productType = catalogs.productTypes.find((item) => item.id === productTypeId);
-      const diffusionChannel = catalogs.diffusionChannels.find((item) => item.id === diffusionChannelId);
-      const mainKpi = catalogs.mainKpis.find((item) => item.id === mainKpiId);
-      const productResponsible = String(form.get("productResponsible") ?? "").trim();
-      if (!requirementId || !requirementType || !targetAudience || !productType || !diffusionChannel || !mainKpi || !productResponsible) {
-        showToast("Complete los combos requeridos y el responsable antes de guardar.", "error");
-        setMessage("Complete los combos requeridos y el responsable antes de guardar.");
-        return;
-      }
-      await saveProduct(editing, {
-          requirementId,
-          productId: form.get("productId"),
-          requirementTypeId,
-          requirementType: requirementType?.name ?? "",
-          strategicObjective: form.get("strategicObjective"),
-          targetAudienceId,
-          targetAudience: targetAudience?.name ?? "",
-          productTypeId,
-          productType: productType?.name ?? "",
-          diffusionChannelId,
-          diffusionChannel: diffusionChannel?.name ?? "",
-          mainKpiId,
-          mainKpi: mainKpi?.name ?? "",
-          productResponsible,
-          productDeliveryDate: form.get("productDeliveryDate") || null,
-          observations: form.get("observations")
-      });
-      event.currentTarget.reset();
-      setEditing(null);
-      setIsEditorOpen(false);
-      const okMessage = editing ? "Producto editado correctamente." : "Producto creado correctamente.";
-      setMessage(okMessage);
-      showToast(okMessage);
-      await load();
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "No se pudo guardar el producto.";
-      setMessage(errorMessage);
-      showToast(errorMessage, "error");
-    } finally {
-      setIsSaving(false);
-    }
-  }
 
   async function changeStatus(id: string, action: "start" | "submit-approval") {
     try {
@@ -233,44 +174,24 @@ export default function ActivitiesPage() {
       <AppNav />
       <section className="content-shell tracking-layout">
         {isEditorOpen && (
-          <div className="modal-backdrop" role="dialog" aria-modal="true">
-            <section className="modal-panel">
-              <div className="card-head">
-                <h2>{editing ? "Editar producto" : "Producto o actividad"}</h2>
-              <button className="icon-button" type="button" title="Cerrar formulario" disabled={isSaving} onClick={() => { setEditing(null); setIsEditorOpen(false); }}><X size={16} /></button>
-              </div>
-          <form className="form" onSubmit={save} key={editing?.id ?? `new-${suggestedProductId}`}>
-            <label className="field">
-              <span>Id requerimiento</span>
-              <select value={requirementId} onChange={(event) => setRequirementId(event.target.value)} required>
-                <option value="">Seleccione...</option>
-                {requirements.map((item) => <option key={item.id} value={item.id}>{item.code} - {item.activityOrEvent}</option>)}
-              </select>
-            </label>
-            {showProductIdField && <label className="field"><span>Id producto</span><input name="productId" required readOnly value={editing?.productId ?? suggestedProductId} title="Código secuencial generado automáticamente" /></label>}
-            <SelectField label="Tipo requerimiento" name="requirementTypeId" items={catalogs.requirementTypes} defaultValue={editing?.requirementTypeId} />
-            <label className="field field-wide"><span>Objetivo estratégico</span><textarea name="strategicObjective" defaultValue={editing?.strategicObjective ?? ""} /></label>
-            <SelectField label="Público objetivo" name="targetAudienceId" items={catalogs.targetAudiences} defaultValue={editing?.targetAudienceId} />
-            <SelectField label="Tipo producto" name="productTypeId" items={catalogs.productTypes} defaultValue={editing?.productTypeId} />
-            <SelectField label="Canal difusión" name="diffusionChannelId" items={catalogs.diffusionChannels} defaultValue={editing?.diffusionChannelId} />
-            <SelectField label="KPI principal" name="mainKpiId" items={catalogs.mainKpis} defaultValue={editing?.mainKpiId} />
-            <label className="field">
-              <span>Responsable producto</span>
-              <select name="productResponsible" required defaultValue={editing?.productResponsible ?? ""}>
-                <option value="">Seleccione...</option>
-                {editing?.productResponsible && !technicians.some((user) => [user.email, user.name].includes(editing.productResponsible)) && <option value={editing.productResponsible}>{editing.productResponsible}</option>}
-                {technicians.map((user) => <option key={user.id} value={user.email}>{user.name} - {user.email}</option>)}
-              </select>
-            </label>
-            <label className="field"><span>Fecha entrega producto</span><input name="productDeliveryDate" type="date" defaultValue={editing?.productDeliveryDate ?? ""} /></label>
-            <label className="field field-wide"><span>Observaciones</span><textarea name="observations" defaultValue={editing?.observations ?? ""} /></label>
-            <div className="form-actions">
-              <button className="button" title={editing ? "Guardar cambios del producto" : "Crear producto para el requerimiento seleccionado"} disabled={!requirementId || isSaving}>{editing ? <Save size={16} /> : <Plus size={16} />} {isSaving ? "Guardando" : editing ? "Guardar" : "Crear producto"}</button>
-              <button className="button secondary" type="button" title="Cancelar edición" disabled={isSaving} onClick={() => { setEditing(null); setIsEditorOpen(false); }}><X size={16} /> Cancelar</button>
-            </div>
-          </form>
-            </section>
-          </div>
+          <ProductForm
+            key={editing?.id ?? `new-${suggestedProductId}`}
+            product={editing}
+            suggestedProductId={suggestedProductId}
+            showProductIdField={showProductIdField}
+            requirements={requirements}
+            catalogs={catalogs}
+            technicians={technicians}
+            onSave={saveProduct}
+            onFeedback={(feedback, type) => showToast(feedback, type === "error" ? "error" : undefined)}
+            onSuccess={async (successMessage) => {
+              setMessage(successMessage);
+              setEditing(null);
+              setIsEditorOpen(false);
+              await load();
+            }}
+            onCancel={() => { setEditing(null); setIsEditorOpen(false); }}
+          />
         )}
         <section className="panel">
           <div className="card-head">
@@ -451,18 +372,6 @@ function EvidencePreview({ item }: { item: EvidenceItem }) {
   if (/\.(png|jpg|jpeg|gif|webp)$/i.test(lowerName)) return <div className="file-preview"><img src={item.storageUrl} alt={item.fileName} /></div>;
   if (lowerName.endsWith(".pdf")) return <div className="file-preview"><iframe src={item.storageUrl} title={item.fileName} /></div>;
   return <div className="inline-facts"><span><FileText size={14} /> Vista previa no disponible para este tipo de archivo.</span></div>;
-}
-
-function SelectField({ label, name, items, defaultValue = "" }: { label: string; name: string; items: CatalogItem[]; defaultValue?: string }) {
-  return (
-    <label className="field">
-      <span>{label}</span>
-      <select name={name} required defaultValue={defaultValue}>
-        <option value="">Seleccione...</option>
-        {items.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
-      </select>
-    </label>
-  );
 }
 
 function highlight(text: string, term: string) {
