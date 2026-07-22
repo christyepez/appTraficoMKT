@@ -13,6 +13,8 @@ Aplicacion base para recopilar requerimientos, asignar actividades al equipo tec
 - [Analytics y Power BI](analytics/README.md)
 - [Operaciones y despliegue](docs/operations/deployment.md)
 - [Git Flow y ambientes](docs/operations/git-flow.md)
+- [Arquitectura frontend del modulo Productos](frontend/features/products/README.md)
+- [Cierre tecnico H6 de Productos](codex/H6_PRODUCT_CLOSURE.md)
 
 ## Pantallas de ejemplo
 

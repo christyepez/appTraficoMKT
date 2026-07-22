@@ -10,7 +10,7 @@
 | H3 Seguimiento y workflow | Completado | Hook de workspace, filtros, listado, tarjetas y acciones probados. |
 | H4 Evidencias y aprobaciones | Completado | Adjuntos, galeria, vista previa y versiones desacoplados y probados. |
 | H5 UX, CSS y accesibilidad | Completado | CSS modular, responsive, foco visible y dialogs accesibles. |
-| H6 Estabilizacion Productos | Pendiente | - |
+| H6 Estabilizacion Productos | Completado | Ver `codex/H6_PRODUCT_CLOSURE.md`: regresion automatizada verde y fusion condicionada a pruebas manuales. |
 | H7-H8 Evidencias y Aprobaciones | Pendiente | Ver `codex/prompts/02-evidence-approvals.md`. |
 | H9-H11 Agenda | Pendiente | Ver `codex/prompts/03-agenda.md`. |
 | H12-H14 Requerimientos y analitica | Pendiente | Ver `codex/prompts/04-requirements-analytics.md`. |
@@ -98,6 +98,20 @@
 - [x] Probar estructura accesible, teclado y estados visuales.
 - [x] Ejecutar lint, TypeScript, pruebas y build.
 - [x] Publicar commit de experiencia de Productos.
+
+## Sprint 6
+
+- [x] Inventariar y trazar los criterios de aceptacion H1-H5.
+- [x] Confirmar que `activities/page.tsx` solo compone y mide 92 lineas.
+- [x] Confirmar una unica fuente de modelos y ausencia de HTTP en presentacion.
+- [x] Cubrir crear, editar, workflow, busqueda, paginacion y eliminacion.
+- [x] Cubrir carga, enlace, eliminacion y consulta de evidencias y versiones.
+- [x] Revisar permisos visibles y documentar el limite de seguridad frontend.
+- [x] Ejecutar 49 pruebas y validar la cobertura critica acordada.
+- [x] Documentar arquitectura, decisiones y patron reutilizable del modulo.
+- [x] Registrar la regresion manual pendiente con servicios reales.
+- [x] Ejecutar lint, TypeScript, cobertura y build final.
+- [ ] Fusionar `feature1.0` solo tras completar la regresion manual y recibir autorizacion explicita.
 
 ## Hitos H7-H25
 
