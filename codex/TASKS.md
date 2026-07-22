@@ -327,3 +327,17 @@
 - [x] Mantener plantillas, parser, semillas y datos sin cambios.
 - [x] Ejecutar cobertura, lint, TypeScript y build.
 - [x] Publicar commit H20 y detenerse antes de H21.
+
+## Sprint 21 - Acceso y sesión
+
+- [x] Inventariar JWT, expiración, almacenamiento local, PKCE, logout y redirecciones.
+- [x] Extraer modelos y adaptador de sesión a `core/auth` sin cambiar el protocolo.
+- [x] Crear servicio de autenticación y utilidades de mensajes y redirección.
+- [x] Modularizar login local con React Hook Form y Zod.
+- [x] Conservar el flujo Microsoft 365, sus claves PKCE y las credenciales demo.
+- [x] Modularizar recuperación con respuesta neutral contra enumeración de usuarios.
+- [x] Modularizar cambio de clave, confirmación, limpieza de sesión y retorno al login.
+- [x] Reducir las tres páginas de acceso a composición.
+- [x] Probar acceso válido/inválido, expiración, logout, recuperación y cambio obligatorio.
+- [x] Ejecutar pruebas, cobertura, lint, TypeScript y build.
+- [x] Publicar los tres commits H21 y detenerse antes de H22.

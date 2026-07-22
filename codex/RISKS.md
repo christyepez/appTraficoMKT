@@ -11,3 +11,5 @@
 | R-007 | Convergencia futura con PortalCorporativo | Medio | ADR-001 y nueva iniciativa antes de cualquier integracion. |
 | R-008 | Paginas legacy incumplen reglas nuevas de hooks de React | Medio | Excepcion limitada a `app/**/*.tsx`; retirar por modulo al migrar cada pagina. Los modulos nuevos mantienen las reglas activas. |
 | R-009 | La regresion de Productos aun no se ejecuto contra backend, almacenamiento y roles reales | Medio | Ejecutar la lista manual de `frontend/features/products/README.md` antes de fusionar a `main`. |
+| R-010 | El JWT de la sesión local permanece accesible desde JavaScript en `localStorage` | Alto | BLOCKED frontend: migrar a cookie `HttpOnly`, `Secure` y `SameSite` requiere contrato y cambios backend; mantener CSP estricta y revisar XSS mientras tanto. |
+| R-011 | Recuperación y login públicos pueden sufrir fuerza bruta o abuso automatizado | Alto | BLOCKED frontend: aplicar rate limit, telemetría, anti-enumeración efectiva y CAPTCHA adaptativo en backend/gateway. |
