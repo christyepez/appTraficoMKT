@@ -7,7 +7,7 @@ export default defineConfig({
     setupFiles: ["./vitest.setup.ts"],
     coverage: {
       provider: "v8",
-      include: ["features/{products,evidence,approvals,agenda,agenda-calendar,agenda-metrics,requirements,metrics,audit,administration,users,branding}/{hooks,schemas,services,utils}/**/*.ts", "core/branding/**/*.ts", "shared/utils/**/*.ts"],
+      include: ["features/{products,evidence,approvals,agenda,agenda-calendar,agenda-metrics,requirements,metrics,audit,administration,users,branding,notifications}/{hooks,schemas,services,utils}/**/*.ts", "core/branding/**/*.ts", "shared/utils/**/*.ts"],
       thresholds: {
         lines: 80,
         functions: 80,
