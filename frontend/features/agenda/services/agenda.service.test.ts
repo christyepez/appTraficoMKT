@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { api, defaultBrandSettings } from "../../../app/lib";
 import { deleteAgendaItem, getAgendaWorkspace, saveAgendaItem } from "./agenda.service";
-vi.mock("../../../app/lib", () => ({ api: vi.fn(), defaultBrandSettings: { workdayStartTime: "08:00", workdayEndTime: "17:00" } }));
+vi.mock("../../../app/lib", () => ({ api: vi.fn(), defaultBrandSettings: { workdayStartTime: "08:00", workdayEndTime: "17:00", replanningWindowDays: 3 } }));
 const apiMock = vi.mocked(api);
 beforeEach(() => vi.clearAllMocks());
 describe("agenda.service", () => {

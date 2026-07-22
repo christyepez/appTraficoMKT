@@ -1,0 +1,7 @@
+.shell { gap: 20px; }
+.commandPanel { overflow: hidden; }
+.visualPanel { overflow-x: auto; }
+.grid { min-width: 0; }
+.feedback { padding: 14px; text-align: center; }
+.dialogBackdrop { backdrop-filter: blur(2px); }
+@media (max-width: 720px) { .visualPanel { margin-inline: -4px; } }

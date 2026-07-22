@@ -8,7 +8,7 @@ export async function getAgendaWorkspace(): Promise<AgendaWorkspaceData> {
     api<Technician[]>("/api/identity/users/technicians").catch(() => []), api<AgendaItem[]>("/api/agenda").catch(() => []),
     api<Partial<BrandSettings>>("/api/identity/brand-settings").catch(() => defaultBrandSettings)
   ]);
-  return { activities, requirements, technicians, items, workdayStartTime: brand.workdayStartTime ?? defaultBrandSettings.workdayStartTime, workdayEndTime: brand.workdayEndTime ?? defaultBrandSettings.workdayEndTime };
+  return { activities, requirements, technicians, items, workdayStartTime: brand.workdayStartTime ?? defaultBrandSettings.workdayStartTime, workdayEndTime: brand.workdayEndTime ?? defaultBrandSettings.workdayEndTime, replanningWindowDays: Number.isFinite(brand.replanningWindowDays) ? Number(brand.replanningWindowDays) : defaultBrandSettings.replanningWindowDays };
 }
 
 export function saveAgendaItem(item: AgendaItem | null, payload: SaveAgendaPayload) {

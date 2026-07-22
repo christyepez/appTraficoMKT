@@ -1,0 +1,12 @@
+import { describe, expect, it } from "vitest";
+import { buildDayHours, calendarSummary, filterCalendarItems, isInPeriod, itemsForDay, monthGrid, moveCalendarPeriod, periodDays, periodLabel, startOfDay, uniqueOptions, weekDays } from "./calendar.utils";
+
+describe("calendar utils", () => {
+  const monday = new Date("2026-01-05T12:00:00");
+  it("navega día, semana y mes", () => { expect(moveCalendarPeriod(monday, "day", 1).getDate()).toBe(6); expect(moveCalendarPeriod(monday, "week", 1).getDate()).toBe(12); expect(moveCalendarPeriod(monday, "month", 1).getMonth()).toBe(1); expect(startOfDay(monday).getHours()).toBe(0); });
+  it("construye semana laboral/completa y grilla mensual", () => { expect(weekDays(monday, false)).toHaveLength(5); expect(weekDays(monday, true)).toHaveLength(7); expect(monthGrid(monday)).toHaveLength(42); expect(periodDays(monday, "day", false)).toHaveLength(1); expect(periodDays(monday, "list", true)).toHaveLength(7); });
+  it("filtra técnico, sede, estado y búsqueda", () => { const activities = new Map([["p1", { status: "InProgress" } as never]]); const requirements = new Map([["r1", { campus: "Centro" } as never]]); expect(filterCalendarItems([item()], "tech@example.com", "Centro", "InProgress", "campaña", activities, requirements)).toHaveLength(1); expect(filterCalendarItems([item()], "otro", "", "", "", activities, requirements)).toEqual([]); });
+  it("ubica eventos en límites y horas de jornada", () => { const values = [item(), item({ id: "a2", startAt: "2026-01-05T07:00:00" })]; expect(itemsForDay(values, monday).map((value) => value.id)).toEqual(["a2", "a1"]); expect(isInPeriod(item(), weekDays(monday))).toBe(true); expect(buildDayHours({ startHour: -2, startMinute: 0, endHour: 30, endMinute: 0 })).toHaveLength(25); });
+  it("resume periodos y opciones únicas", () => { expect(periodLabel(monday, "day", false)).toBeTruthy(); expect(periodLabel(monday, "week", false)).toContain("-"); expect(periodLabel(monday, "month", false)).toBeTruthy(); expect(calendarSummary([item()], "week")).toContain("2.0 horas"); expect(uniqueOptions(["B", "A", "A", ""])).toEqual(["A", "B"]); });
+});
+function item(overrides: Record<string, unknown> = {}) { return { id: "a1", activityId: "p1", requirementId: "r1", productId: "PROD-1", productType: "Video", technicianName: "Tech", technicianEmail: "tech@example.com", startAt: "2026-01-05T08:00:00", endAt: "2026-01-05T10:00:00", title: "Campaña", notes: "Notas", ...overrides }; }

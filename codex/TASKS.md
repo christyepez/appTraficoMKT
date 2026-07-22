@@ -14,7 +14,8 @@
 | H7 Evidencias | Completado | Página autónoma modularizada con reutilización compartida, 63 pruebas y cobertura crítica completa. |
 | H8 Aprobaciones | Completado | Cola, decisiones validadas, adjuntos, permisos visibles y concurrencia desacoplados. |
 | H9 Agenda técnica | Completado | CRUD, reservas derivadas, jornadas, filtros y reglas de fechas modularizados. |
-| H10-H11 Calendario y métricas de Agenda | Pendiente | Ver `codex/prompts/03-agenda.md`. |
+| H10 Calendario técnico | Completado | Navegación, filtros, cuatro vistas y eventos reutilizan Agenda sin duplicar reservas. |
+| H11 Métricas de Agenda | Pendiente | Ver `codex/prompts/03-agenda.md`. |
 | H12-H14 Requerimientos y analitica | Pendiente | Ver `codex/prompts/04-requirements-analytics.md`. |
 | H15-H16 Administracion | Pendiente | Ver `codex/prompts/05-administration.md`. |
 | H17-H20 Configuracion operativa | Pendiente | Ver `codex/prompts/06-operations.md`. |
@@ -167,3 +168,16 @@
 - [x] Probar jornadas, fechas, duración, reservas, filtros, permisos, CRUD y errores.
 - [x] Ejecutar lint, TypeScript, cobertura y build.
 - [x] Publicar commit H9 y detenerse antes de H10.
+
+## Sprint 10 - Calendario técnico
+
+- [x] Reutilizar modelos, servicio, permisos y construcción de reservas de Agenda.
+- [x] Crear `useAgendaCalendar` para navegación, filtros y estado local.
+- [x] Extraer `CalendarToolbar` y `CalendarFilters`.
+- [x] Extraer vistas Día, Semana, Mes y Lista con `CalendarEvent`.
+- [x] Agregar detalle accesible de evento con dialog compartido.
+- [x] Probar navegación, vistas, semana laboral/completa, filtros y límites temporales.
+- [x] Mejorar responsive, etiquetas, carga, error y vacío con CSS local.
+- [x] Reducir `agenda-calendar/page.tsx` a composición sin acceso HTTP.
+- [x] Ejecutar lint, TypeScript, cobertura y build.
+- [x] Publicar commit H10 y detenerse antes de H11.
