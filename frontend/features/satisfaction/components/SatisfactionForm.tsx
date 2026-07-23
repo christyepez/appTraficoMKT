@@ -33,8 +33,8 @@ export function SatisfactionForm({ submitting, onSubmit }: Props) {
       <RatingField name="overallRating" label="Satisfacción general" register={register} error={errors.overallRating?.message} />
       <RatingField name="timelinessRating" label="Cumplimiento de tiempos" register={register} error={errors.timelinessRating?.message} />
       <RatingField name="qualityRating" label="Calidad del resultado" register={register} error={errors.qualityRating?.message} />
-      <label className="check-field field-wide"><input type="checkbox" {...register("wouldRecommend")} /> Recomendaría este servicio</label>
       <label className="field field-wide"><span>Comentarios</span><textarea maxLength={2000} placeholder="Cuéntenos qué podemos mejorar" aria-invalid={Boolean(errors.comments)} {...register("comments")} />{errors.comments && <small className={styles.error} role="alert">{errors.comments.message}</small>}</label>
+      <div className="check-group"><label className="check-field">Recomendaría este servicio<input type="checkbox" {...register("wouldRecommend")} /></label></div>
       <button className="button field-wide" type="submit" disabled={submitting}><Send size={16} /> {submitting ? "Enviando..." : "Enviar respuesta"}</button>
     </form>
   );

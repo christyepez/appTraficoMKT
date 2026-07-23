@@ -20,4 +20,10 @@ describe("responsive visual contract", () => {
     expect(globals).toMatch(/\.button\.secondary\s*{[\s\S]*?border:\s*0;/);
     expect(calendar).toMatch(/\.root :global\(\.segmented-control\)\s*{[\s\S]*?border:\s*0;/);
   });
+
+  it("agrupa checkbox y estabiliza los botones de actualización", () => {
+    expect(globals).toMatch(/\.check-field input\[type="checkbox"\][\s\S]*?order:\s*2;/);
+    expect(globals).toMatch(/\.check-group\s*{[\s\S]*?grid-column:\s*1\s*\/\s*-1;/);
+    expect(globals).toMatch(/\.button:has\(\.lucide-refresh-cw\)\s*{[\s\S]*?min-width:\s*132px;/);
+  });
 });

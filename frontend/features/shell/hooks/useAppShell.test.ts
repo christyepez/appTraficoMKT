@@ -26,6 +26,7 @@ describe("useAppShell", () => {
   it("carga sesión, tema, preferencias y notificaciones", async () => {
     const { result, unmount } = renderHook(() => useAppShell(60_000));
     await waitFor(() => expect(result.current.session?.user.name).toBe("Ana"));
+    await waitFor(() => expect(result.current.isBrandReady).toBe(true));
     await waitFor(() => expect(result.current.unreadNotifications).toBe(2));
     expect(result.current.desktopMenuVisible).toBe(false);
     expect(document.documentElement.style.getPropertyValue("--primary")).toBe("#123456");

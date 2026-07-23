@@ -617,6 +617,10 @@ mark {
   font-size: 13px;
 }
 
+.button:has(.lucide-refresh-cw) {
+  min-width: 132px;
+}
+
 .compact-button {
   width: fit-content;
   min-height: 34px;
@@ -811,9 +815,33 @@ mark {
 .check-field {
   display: inline-flex;
   align-items: center;
+  justify-content: flex-start;
   gap: 8px;
   min-height: 34px;
   color: var(--foreground);
+}
+
+.check-field input[type="checkbox"] {
+  order: 2;
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+}
+
+.check-group {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  width: 100%;
+  padding-top: 4px;
+}
+
+.check-group .check-field {
+  flex: 0 1 auto;
+  min-width: min(100%, 190px);
 }
 
 .toast {

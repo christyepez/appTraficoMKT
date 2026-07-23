@@ -13,6 +13,7 @@ export function useAppShell(notificationInterval = 15_000) {
   const pathname = usePathname();
   const [session, setSession] = useState<AuthSession | null>(null);
   const [brand, setBrand] = useState<BrandSettings>(defaultBrandSettings);
+  const [isBrandReady, setIsBrandReady] = useState(false);
   const [language, setLanguage] = useState("es");
   const [isMobile, setIsMobile] = useState(false);
   const [desktopMenuVisible, setDesktopMenuVisible] = useState(true);
@@ -30,6 +31,8 @@ export function useAppShell(notificationInterval = 15_000) {
       setMobileMenuExpanded(!value.mobileMenuCollapsed);
     } catch {
       applyBrandVariables(defaultBrandSettings);
+    } finally {
+      setIsBrandReady(true);
     }
   }, []);
 
@@ -71,5 +74,5 @@ export function useAppShell(notificationInterval = 15_000) {
 
   function changeLanguage(value: string) { persistLanguage(value); setLanguage(value); }
   function logout() { logoutSession(); window.location.replace("/login"); }
-  return { session, brand, language, pathname, isMobile, desktopMenuVisible, mobileMenuExpanded, unreadNotifications, changeLanguage, logout, toggleDesktopMenu: () => setDesktopMenuVisible((value) => !value), toggleMobileMenu: () => setMobileMenuExpanded((value) => !value) };
+  return { session, brand, isBrandReady, language, pathname, isMobile, desktopMenuVisible, mobileMenuExpanded, unreadNotifications, changeLanguage, logout, toggleDesktopMenu: () => setDesktopMenuVisible((value) => !value), toggleMobileMenu: () => setMobileMenuExpanded((value) => !value) };
 }
