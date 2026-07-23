@@ -77,6 +77,13 @@ button:disabled {
   opacity: 0.65;
 }
 
+fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
 :where(button, a, input, select, textarea, summary):focus-visible {
   outline: 3px solid color-mix(in srgb, var(--accent) 70%, var(--foreground));
   outline-offset: 3px;

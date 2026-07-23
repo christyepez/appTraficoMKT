@@ -22,6 +22,7 @@ describe("responsive visual contract", () => {
   });
 
   it("mantiene los controles principales sin borde visible", () => {
+    expect(globals).toMatch(/fieldset\s*{[^}]*border:\s*0;/);
     expect(globals).toMatch(/\.field input,[\s\S]*?border:\s*0;/);
     expect(globals).toMatch(/\.icon-button\s*{[\s\S]*?border:\s*0;/);
     expect(globals).toMatch(/\.button\.secondary\s*{[\s\S]*?border:\s*0;/);

@@ -2,9 +2,21 @@ import { api } from "../../../core/api/api-client";
 import type { AuthSession } from "../../../core/auth/session";
 import { defaultBrandSettings, type BrandSettings } from "../../../core/branding/brand-settings";
 
-export async function getShellBrand(): Promise<BrandSettings> {
+let cachedShellBrand: BrandSettings | null = null;
+
+export function getCachedShellBrand(): BrandSettings | null {
+  return cachedShellBrand;
+}
+
+export async function getShellBrand({ refresh = false }: { refresh?: boolean } = {}): Promise<BrandSettings> {
+  if (!refresh && cachedShellBrand) return cachedShellBrand;
   const brand = await api<BrandSettings>("/api/identity/brand-settings");
-  return { ...defaultBrandSettings, ...brand };
+  cachedShellBrand = { ...defaultBrandSettings, ...brand };
+  return cachedShellBrand;
+}
+
+export function clearShellBrandCache() {
+  cachedShellBrand = null;
 }
 
 export async function getUnreadNotifications(session: AuthSession) {

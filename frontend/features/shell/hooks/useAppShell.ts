@@ -6,23 +6,32 @@ import { getSession, logoutSession, type AuthSession } from "../../../core/auth/
 import { applyBrandVariables, defaultBrandSettings, type BrandSettings } from "../../../core/branding/brand-settings";
 import { currentLanguage, setLanguage as persistLanguage } from "../../../core/configuration/i18n";
 import { canAccessPath, firstAllowedPath } from "../../../core/permissions/navigation";
-import { getShellBrand, getUnreadNotifications } from "../services/shell.service";
+import { getCachedShellBrand, getShellBrand, getUnreadNotifications } from "../services/shell.service";
+
+let cachedShellSession: AuthSession | null = null;
 
 export function useAppShell(notificationInterval = 15_000) {
   const router = useRouter();
   const pathname = usePathname();
-  const [session, setSession] = useState<AuthSession | null>(null);
-  const [brand, setBrand] = useState<BrandSettings>(defaultBrandSettings);
-  const [isBrandReady, setIsBrandReady] = useState(false);
-  const [language, setLanguage] = useState("es");
+  const [initialSession] = useState<AuthSession | null>(() => cachedShellSession);
+  const [initialBrand] = useState<BrandSettings | null>(() => getCachedShellBrand());
+  const resolvedInitialBrand = initialBrand ?? defaultBrandSettings;
+  const [session, setSession] = useState<AuthSession | null>(initialSession);
+  const [brand, setBrand] = useState<BrandSettings>(resolvedInitialBrand);
+  const [isBrandReady, setIsBrandReady] = useState(Boolean(initialBrand));
+  const [language, setLanguage] = useState(() => currentLanguage());
   const [isMobile, setIsMobile] = useState(false);
-  const [desktopMenuVisible, setDesktopMenuVisible] = useState(true);
-  const [mobileMenuExpanded, setMobileMenuExpanded] = useState(false);
+  const [desktopMenuVisible, setDesktopMenuVisible] = useState(() => {
+    const mode = initialSession?.user.menuMode ?? resolvedInitialBrand.menuMode;
+    const collapsed = Boolean(initialSession?.user.menuCollapsed ?? resolvedInitialBrand.menuCollapsed);
+    return mode === "vertical" ? !collapsed : true;
+  });
+  const [mobileMenuExpanded, setMobileMenuExpanded] = useState(() => !resolvedInitialBrand.mobileMenuCollapsed);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
 
-  const loadBrand = useCallback(async (currentSession: AuthSession) => {
+  const loadBrand = useCallback(async (currentSession: AuthSession, refresh = false) => {
     try {
-      const value = await getShellBrand();
+      const value = await getShellBrand({ refresh });
       applyBrandVariables(value);
       setBrand(value);
       const mode = currentSession.user.menuMode ?? value.menuMode;
@@ -30,7 +39,7 @@ export function useAppShell(notificationInterval = 15_000) {
       setDesktopMenuVisible(mode === "vertical" ? !collapsed : true);
       setMobileMenuExpanded(!value.mobileMenuCollapsed);
     } catch {
-      applyBrandVariables(defaultBrandSettings);
+      if (!getCachedShellBrand()) applyBrandVariables(defaultBrandSettings);
     } finally {
       setIsBrandReady(true);
     }
@@ -43,8 +52,9 @@ export function useAppShell(notificationInterval = 15_000) {
 
   useEffect(() => {
     const currentSession = getSession();
-    if (!currentSession) { router.push("/login"); return; }
+    if (!currentSession) { cachedShellSession = null; queueMicrotask(() => setSession(null)); router.push("/login"); return; }
     if (!canAccessPath(currentSession, pathname)) { router.push(firstAllowedPath(currentSession)); return; }
+    cachedShellSession = currentSession;
     queueMicrotask(() => {
       setSession(currentSession);
       const savedLanguage = currentLanguage();
@@ -61,7 +71,7 @@ export function useAppShell(notificationInterval = 15_000) {
     });
     const timer = window.setInterval(() => void loadUnread(currentSession), notificationInterval);
     const onLanguage = () => setLanguage(currentLanguage());
-    const onBrand = () => void loadBrand(currentSession);
+    const onBrand = () => void loadBrand(currentSession, true);
     window.addEventListener("ui-language-changed", onLanguage);
     window.addEventListener("brand-settings-changed", onBrand);
     return () => {
@@ -73,6 +83,6 @@ export function useAppShell(notificationInterval = 15_000) {
   }, [loadBrand, loadUnread, notificationInterval, pathname, router]);
 
   function changeLanguage(value: string) { persistLanguage(value); setLanguage(value); }
-  function logout() { logoutSession(); window.location.replace("/login"); }
+  function logout() { cachedShellSession = null; logoutSession(); window.location.replace("/login"); }
   return { session, brand, isBrandReady, language, pathname, isMobile, desktopMenuVisible, mobileMenuExpanded, unreadNotifications, changeLanguage, logout, toggleDesktopMenu: () => setDesktopMenuVisible((value) => !value), toggleMobileMenu: () => setMobileMenuExpanded((value) => !value) };
 }
