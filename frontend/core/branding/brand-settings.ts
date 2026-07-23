@@ -52,6 +52,7 @@ export function brandVariables(settings: Partial<BrandSettings>) {
     "--success": settings.success, "--warning": settings.warning, "--danger": settings.danger, "--topbar-text": settings.topbarText, "--font-family": settings.fontFamily,
     "--button-primary-background": settings.useGradient ? `linear-gradient(${settings.gradientDirection ?? defaultBrandSettings.gradientDirection}, ${primary}, ${settings.gradientColor ?? defaultBrandSettings.gradientColor})` : primary,
     "--header-background": settings.headerUseGradient ? `linear-gradient(${settings.headerGradientDirection ?? "135deg"}, ${headerColor}, ${settings.headerGradientColor ?? headerColor})` : headerColor,
+    "--menu-base-color": menuColor,
     "--menu-background": settings.menuUseGradient ? `linear-gradient(${settings.menuGradientDirection ?? "135deg"}, ${menuColor}, ${settings.menuGradientColor ?? menuColor})` : menuColor,
     "--header-title-size": `${settings.headerTitleSize ?? defaultBrandSettings.headerTitleSize}px`, "--header-subtitle-size": `${settings.headerSubtitleSize ?? defaultBrandSettings.headerSubtitleSize}px`,
     "--header-title-weight": settings.headerTitleWeight ?? defaultBrandSettings.headerTitleWeight, "--header-subtitle-weight": settings.headerSubtitleWeight ?? defaultBrandSettings.headerSubtitleWeight,

@@ -399,11 +399,18 @@ button:disabled {
 .navlinks a {
   min-height: 34px;
   padding: 0 10px;
-  border: 1px solid var(--line);
+  border: 1px solid color-mix(in srgb, var(--menu-base-color, var(--primary)) 72%, white);
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.09);
+  background: color-mix(in srgb, var(--menu-base-color, var(--primary)) 88%, white);
   color: var(--topbar-text);
   font-size: 13px;
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.navlinks a:hover,
+.navlinks a[aria-current="page"] {
+  border-color: color-mix(in srgb, var(--menu-base-color, var(--primary)) 60%, white);
+  background: color-mix(in srgb, var(--menu-base-color, var(--primary)) 78%, white);
 }
 
 .session-box {
@@ -695,6 +702,7 @@ mark {
   color: var(--muted);
   line-height: 1.35;
   font-size: 13px;
+  font-weight: 400;
 }
 
 .badge {
@@ -810,6 +818,7 @@ mark {
   margin: 0;
   color: var(--muted);
   font-size: 13px;
+  font-weight: 400;
 }
 
 .check-field {
@@ -906,6 +915,7 @@ mark {
 .detail-item span {
   color: var(--muted);
   font-size: 12px;
+  font-weight: 400;
 }
 
 .compact-detail-grid .detail-item span {
@@ -913,7 +923,10 @@ mark {
 }
 
 .detail-item strong {
+  color: color-mix(in srgb, var(--foreground) 72%, var(--surface));
   font-size: 13px;
+  font-weight: 500;
+  line-height: 1.35;
 }
 
 .compact-detail-grid .detail-item strong {
