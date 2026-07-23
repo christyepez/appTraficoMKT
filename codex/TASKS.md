@@ -407,5 +407,6 @@
 - [x] Hacer shells y controles fluidos a todo el viewport y retirar bordes visuales de controles.
 - [x] Uniformar acciones CRUD con iconos compartidos de crear, editar y eliminar.
 - [x] Recuperar tarjetas y formato enriquecido en Manejo de marca sin revertir su modularizacion.
+- [x] H25-R4a: ejecutar smoke HTTP del build de produccion en seis rutas sobre el puerto 3100.
 - [ ] H25-R4: ejecutar regresion manual con servicios y roles reales.
 - [ ] Repetir H25 y obtener GO antes de recomendar PR a `main`.

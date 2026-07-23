@@ -33,6 +33,17 @@ del refactor frontend:
 `baseline-browser-mapping` informa datos auxiliares desactualizados. No afecta
 lint ni build y no se actualiza porque la decision vigente es conservar versiones.
 
+## Comprobacion local parcial del 23 de julio de 2026
+
+Se arranco temporalmente el build de produccion en `127.0.0.1:3100` y se
+comprobaron por HTTP las rutas `/login`, `/branding`, `/users`, `/activities`,
+`/evidence` y `/agenda`. Las seis respondieron `200` con contenido `text/html`.
+
+La ejecucion completa de H25-R4 sigue pendiente: el entorno de trabajo no dispone
+del comando `docker`, navegador grafico ni servicios backend integrados. Por ello,
+esta comprobacion no valida autenticacion, persistencia, permisos por rol,
+almacenamiento, capturas responsive ni flujos de extremo a extremo.
+
 ## Comparacion con la linea base H0
 
 Linea base de codigo: `5ce370d`; cierre auditado antes del commit H25: `bd56be1`.
@@ -111,7 +122,7 @@ global y los demas perfiles dependen de permisos configurables.
 | H25-R1 | Completada | Servicio/hook tipado, chatbot RHF+Zod y dialogs accesibles. | 0 usos de `api` en TSX; pruebas de login, hook y formulario verdes. |
 | H25-R2 | Implementada | Estilos concretos migrados desde `globals.css` a CSS Modules por feature. | Codigo conforme; comparacion visual queda incluida en H25-R4. |
 | H25-R3 | Completada | Contratos y campos equivalentes consolidados. | Una fuente canonica y suite verde. |
-| H25-R4 | Alta | Ejecutar y firmar la matriz manual con backend, storage y roles reales. | Todos los casos PASS o defectos aceptados formalmente. |
+| H25-R4 | Alta, parcial | Smoke HTTP PASS en seis rutas; falta ejecutar y firmar la matriz manual con backend, storage, navegador y roles reales. | Todos los casos PASS o defectos aceptados formalmente. |
 | H25-R5 | Alta backend | Resolver R-010 a R-014 de seguridad/protocolo. | Riesgos aceptados o cambios backend desplegados y probados. |
 
 ## Commits e hitos
