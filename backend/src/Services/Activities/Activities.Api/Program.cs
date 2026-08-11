@@ -345,7 +345,7 @@ app.MapPost("/activities/{id:guid}/submit-approval", async (Guid id, SubmitAppro
         AuditJson.Build("Notificaciones", "Solicitud de aprobación", activity.ProductResponsible, new { activity.Id, activity.ProductId, approverEmail, requesterEmail, approvalId = approval?.Id }));
     db.NotificationRecords.Add(record);
     await db.SaveChangesAsync();
-    await NotificationDelivery.SafeSendAsync(record, notificationSettings, httpClientFactory, configuration);
+    await NotificationDelivery.SafeSendAsync(record, notificationSettings, httpClientFactory, configuration, db);
 
     return Results.Ok(new SubmitApprovalResponse(activity.Id, approval?.Id ?? Guid.Empty, activity.Status.ToString(), "PendingNotification"));
 });
@@ -401,12 +401,12 @@ app.MapPost("/approvals/{approvalId:guid}/decision", async (Guid approvalId, App
 
     if (approved)
     {
-        await ProductNotification.SendApprovedAsync(activity, new ApproveActivityRequest(ApprovalDecision.Approved, approval.DecidedByEmail, approval.Comments), httpClientFactory, configuration, notificationSettings);
+        await ProductNotification.SendApprovedAsync(activity, new ApproveActivityRequest(ApprovalDecision.Approved, approval.DecidedByEmail, approval.Comments), httpClientFactory, configuration, notificationSettings, db, record);
         await RequirementWorkflowSync.CompleteIfReadyAsync(activity.RequirementId, httpClientFactory);
     }
     else
     {
-        await NotificationDelivery.SafeSendAsync(record, notificationSettings, httpClientFactory, configuration);
+        await NotificationDelivery.SafeSendAsync(record, notificationSettings, httpClientFactory, configuration, db);
     }
 
     return Results.Ok(activity);
@@ -429,10 +429,6 @@ app.MapPost("/activities/{id:guid}/approvals", async (Guid id, ApproveActivityRe
     var notificationSettings = await db.NotificationSettings.Where(x => x.IsActive).OrderByDescending(x => x.UpdatedAt ?? x.CreatedAt).FirstOrDefaultAsync();
     var recipientEmail = await NotificationRecipientResolver.ResolveAsync(activity.ProductResponsible, httpContext, httpClientFactory);
     var approved = request.Decision == ApprovalDecision.Approved;
-    if (approved)
-    {
-        await ProductNotification.SendApprovedAsync(activity, request, httpClientFactory, configuration, notificationSettings);
-    }
 
     var notificationAction = approved ? "Producto aprobado" : "Producto rechazado";
     var record = NotificationRecord.Create(
@@ -448,9 +444,12 @@ app.MapPost("/activities/{id:guid}/approvals", async (Guid id, ApproveActivityRe
     await db.SaveChangesAsync();
 
     if (approved)
+    {
+        await ProductNotification.SendApprovedAsync(activity, request, httpClientFactory, configuration, notificationSettings, db, record);
         await RequirementWorkflowSync.CompleteIfReadyAsync(activity.RequirementId, httpClientFactory);
+    }
     else
-        await NotificationDelivery.SendAsync(record, notificationSettings, httpClientFactory, configuration);
+        await NotificationDelivery.SendAsync(record, notificationSettings, httpClientFactory, configuration, db);
 
     return Results.Ok(activity);
 });
@@ -527,7 +526,7 @@ app.MapPost("/notification-records/system", async (SystemNotificationRequest req
     var record = NotificationRecord.Create(request.EventType, request.Title, request.Message, request.RecipientEmail, request.CreatedBy, request.RequirementId, request.ActivityId, request.PayloadJson);
     db.NotificationRecords.Add(record);
     await db.SaveChangesAsync();
-    await NotificationDelivery.SendAsync(record, settings, httpClientFactory, configuration, request.Html);
+    await NotificationDelivery.SendAsync(record, settings, httpClientFactory, configuration, db, request.Html);
     return Results.Created($"/notification-records/{record.Id}", record);
 });
 
@@ -600,9 +599,13 @@ public sealed record UpsertNotificationSettingsRequest(
     bool TeamsEnabled,
     string TeamsChannel,
     string PowerAutomateWebhookUrl,
+    string? EmailPowerAutomateWebhookUrl,
+    string? TeamsPowerAutomateWebhookUrl,
     string HtmlTemplate,
+    string? EmailHtmlTemplate,
+    string? TeamsHtmlTemplate,
     bool IsActive);
-public sealed record NotificationSettingsDto(Guid Id, string Name, bool EmailEnabled, string EmailTo, bool TeamsEnabled, string TeamsChannel, string PowerAutomateWebhookUrl, string HtmlTemplate, bool IsActive, DateTimeOffset CreatedAt, DateTimeOffset? UpdatedAt)
+public sealed record NotificationSettingsDto(Guid Id, string Name, bool EmailEnabled, string EmailTo, bool TeamsEnabled, string TeamsChannel, string PowerAutomateWebhookUrl, string EmailPowerAutomateWebhookUrl, string TeamsPowerAutomateWebhookUrl, string HtmlTemplate, string EmailHtmlTemplate, string TeamsHtmlTemplate, bool IsActive, DateTimeOffset CreatedAt, DateTimeOffset? UpdatedAt)
 {
     public static NotificationSettingsDto From(NotificationSettings settings) => new(
         settings.Id,
@@ -612,7 +615,11 @@ public sealed record NotificationSettingsDto(Guid Id, string Name, bool EmailEna
         settings.TeamsEnabled,
         settings.TeamsChannel,
         string.IsNullOrWhiteSpace(settings.PowerAutomateWebhookUrl) ? string.Empty : "Configurado",
+        string.IsNullOrWhiteSpace(settings.EmailPowerAutomateWebhookUrl) ? string.Empty : "Configurado",
+        string.IsNullOrWhiteSpace(settings.TeamsPowerAutomateWebhookUrl) ? string.Empty : "Configurado",
         settings.HtmlTemplate,
+        settings.EmailHtmlTemplate,
+        settings.TeamsHtmlTemplate,
         settings.IsActive,
         settings.CreatedAt,
         settings.UpdatedAt);
@@ -719,48 +726,18 @@ public static class ProductNotification
         ApproveActivityRequest approval,
         IHttpClientFactory httpClientFactory,
         IConfiguration configuration,
-        NotificationSettings? settings)
+        NotificationSettings? settings,
+        ActivitiesDbContext db,
+        NotificationRecord record)
     {
-        var webhookUrl = settings?.PowerAutomateWebhookUrl;
-        if (string.IsNullOrWhiteSpace(webhookUrl)) webhookUrl = configuration["Notifications:PowerAutomateWebhookUrl"];
-        if (string.IsNullOrWhiteSpace(webhookUrl)) return;
         var evidence = await httpClientFactory.CreateClient("evidence").GetFromJsonAsync<List<EvidenceItemDto>>($"/evidence?activityId={activity.Id}") ?? [];
 
-        var payload = new
-        {
-            eventType = "ProductoAprobado",
-            subject = $"Producto aprobado: {activity.ProductId}",
-            teamsTitle = "Producto aprobado",
-            html = NotificationTemplate.Render(settings?.HtmlTemplate, activity, approval),
-            data = new
-            {
-                notification = settings is null ? null : new
-                {
-                    settings.EmailEnabled,
-                    settings.EmailTo,
-                    settings.TeamsEnabled,
-                    settings.TeamsChannel
-                },
-                activity.Id,
-                activity.RequirementId,
-                activity.ProductId,
-                activity.RequirementType,
-                activity.StrategicObjective,
-                activity.TargetAudience,
-                activity.ProductType,
-                activity.DiffusionChannel,
-                activity.MainKpi,
-                activity.ProductResponsible,
-                activity.ProductDeliveryDate,
-                activity.Observations,
-                evidence,
-                approval.ApprovedBy,
-                approval.Comments
-            }
-        };
-
-        var client = httpClientFactory.CreateClient("notifications");
-        await client.PostAsJsonAsync(webhookUrl, payload);
+        var baseHtml = NotificationTemplate.Render(settings?.HtmlTemplate, activity, approval);
+        var metadataHtml = $"{baseHtml}<p><strong>Adjuntos:</strong> {evidence.Count}</p>";
+        if (settings?.EmailEnabled != false)
+            await NotificationDelivery.SendChannelAsync("Email", NotificationWebhookResolver.Email(settings, configuration), record, settings, httpClientFactory, db, metadataHtml);
+        if (settings?.TeamsEnabled != false)
+            await NotificationDelivery.SendChannelAsync("Teams", NotificationWebhookResolver.Teams(settings, configuration), record, settings, httpClientFactory, db, metadataHtml);
     }
 }
 
@@ -796,6 +773,7 @@ public sealed class ActivitiesDbContext(DbContextOptions<ActivitiesDbContext> op
     public DbSet<CatalogReference> CatalogReferences => Set<CatalogReference>();
     public DbSet<NotificationSettings> NotificationSettings => Set<NotificationSettings>();
     public DbSet<NotificationRecord> NotificationRecords => Set<NotificationRecord>();
+    public DbSet<NotificationDeliveryAttempt> NotificationDeliveryAttempts => Set<NotificationDeliveryAttempt>();
     public DbSet<ActivityAuditEvent> AuditEvents => Set<ActivityAuditEvent>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -871,7 +849,11 @@ public sealed class ActivitiesDbContext(DbContextOptions<ActivitiesDbContext> op
             entity.Property(x => x.EmailTo).HasMaxLength(500);
             entity.Property(x => x.TeamsChannel).HasMaxLength(300);
             entity.Property(x => x.PowerAutomateWebhookUrl).HasMaxLength(1200);
+            entity.Property(x => x.EmailPowerAutomateWebhookUrl).HasMaxLength(1200);
+            entity.Property(x => x.TeamsPowerAutomateWebhookUrl).HasMaxLength(1200);
             entity.Property(x => x.HtmlTemplate).HasColumnType("nvarchar(max)");
+            entity.Property(x => x.EmailHtmlTemplate).HasColumnType("nvarchar(max)");
+            entity.Property(x => x.TeamsHtmlTemplate).HasColumnType("nvarchar(max)");
         });
 
         modelBuilder.Entity<NotificationRecord>(entity =>
@@ -887,6 +869,17 @@ public sealed class ActivitiesDbContext(DbContextOptions<ActivitiesDbContext> op
             entity.Property(x => x.PayloadJson).HasColumnType("nvarchar(max)");
             entity.HasIndex(x => x.RecipientEmail);
             entity.HasIndex(x => x.CreatedAt);
+        });
+
+        modelBuilder.Entity<NotificationDeliveryAttempt>(entity =>
+        {
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Channel).HasMaxLength(40).IsRequired();
+            entity.Property(x => x.Status).HasMaxLength(40).IsRequired();
+            entity.Property(x => x.Error).HasMaxLength(600);
+            entity.Property(x => x.IdempotencyKey).HasMaxLength(160).IsRequired();
+            entity.HasIndex(x => x.NotificationRecordId);
+            entity.HasIndex(x => x.IdempotencyKey).IsUnique();
         });
     }
 }
@@ -1051,7 +1044,11 @@ public sealed class NotificationSettings
     public bool TeamsEnabled { get; set; } = true;
     public string TeamsChannel { get; set; } = string.Empty;
     public string PowerAutomateWebhookUrl { get; set; } = string.Empty;
+    public string EmailPowerAutomateWebhookUrl { get; set; } = string.Empty;
+    public string TeamsPowerAutomateWebhookUrl { get; set; } = string.Empty;
     public string HtmlTemplate { get; set; } = NotificationTemplate.Default;
+    public string EmailHtmlTemplate { get; set; } = NotificationTemplate.DefaultEmail;
+    public string TeamsHtmlTemplate { get; set; } = NotificationTemplate.DefaultTeams;
     public bool IsActive { get; set; } = true;
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset? UpdatedAt { get; set; }
@@ -1065,7 +1062,13 @@ public sealed class NotificationSettings
         TeamsChannel = request.TeamsChannel.Trim();
         if (!string.IsNullOrWhiteSpace(request.PowerAutomateWebhookUrl) && !request.PowerAutomateWebhookUrl.Equals("Configurado", StringComparison.OrdinalIgnoreCase))
             PowerAutomateWebhookUrl = request.PowerAutomateWebhookUrl.Trim();
+        if (!string.IsNullOrWhiteSpace(request.EmailPowerAutomateWebhookUrl) && !request.EmailPowerAutomateWebhookUrl.Equals("Configurado", StringComparison.OrdinalIgnoreCase))
+            EmailPowerAutomateWebhookUrl = request.EmailPowerAutomateWebhookUrl.Trim();
+        if (!string.IsNullOrWhiteSpace(request.TeamsPowerAutomateWebhookUrl) && !request.TeamsPowerAutomateWebhookUrl.Equals("Configurado", StringComparison.OrdinalIgnoreCase))
+            TeamsPowerAutomateWebhookUrl = request.TeamsPowerAutomateWebhookUrl.Trim();
         HtmlTemplate = string.IsNullOrWhiteSpace(request.HtmlTemplate) ? NotificationTemplate.Default : request.HtmlTemplate.Trim();
+        EmailHtmlTemplate = string.IsNullOrWhiteSpace(request.EmailHtmlTemplate) ? NotificationTemplate.DefaultEmail : request.EmailHtmlTemplate.Trim();
+        TeamsHtmlTemplate = string.IsNullOrWhiteSpace(request.TeamsHtmlTemplate) ? NotificationTemplate.DefaultTeams : request.TeamsHtmlTemplate.Trim();
         IsActive = request.IsActive;
         UpdatedAt = DateTimeOffset.UtcNow;
     }
@@ -1108,13 +1111,51 @@ public sealed class NotificationRecord
     }
 }
 
+public sealed class NotificationDeliveryAttempt
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid NotificationRecordId { get; set; }
+    public Guid? RequirementId { get; set; }
+    public Guid? ActivityId { get; set; }
+    public string EventType { get; set; } = string.Empty;
+    public string Channel { get; set; } = string.Empty;
+    public string Status { get; set; } = "Pending";
+    public int Attempts { get; set; }
+    public string Error { get; set; } = string.Empty;
+    public string IdempotencyKey { get; set; } = string.Empty;
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset? SentAt { get; set; }
+}
+
+public interface IEmailNotificationSender
+{
+    Task SendAsync(NotificationRecord record, NotificationSettings? settings, IHttpClientFactory httpClientFactory, IConfiguration configuration, ActivitiesDbContext db, string html);
+}
+
+public interface ITeamsNotificationSender
+{
+    Task SendAsync(NotificationRecord record, NotificationSettings? settings, IHttpClientFactory httpClientFactory, IConfiguration configuration, ActivitiesDbContext db, string html);
+}
+
+public sealed class PowerAutomateEmailNotificationSender : IEmailNotificationSender
+{
+    public Task SendAsync(NotificationRecord record, NotificationSettings? settings, IHttpClientFactory httpClientFactory, IConfiguration configuration, ActivitiesDbContext db, string html) =>
+        NotificationDelivery.SendChannelAsync("Email", NotificationWebhookResolver.Email(settings, configuration), record, settings, httpClientFactory, db, html);
+}
+
+public sealed class PowerAutomateTeamsNotificationSender : ITeamsNotificationSender
+{
+    public Task SendAsync(NotificationRecord record, NotificationSettings? settings, IHttpClientFactory httpClientFactory, IConfiguration configuration, ActivitiesDbContext db, string html) =>
+        NotificationDelivery.SendChannelAsync("Teams", NotificationWebhookResolver.Teams(settings, configuration), record, settings, httpClientFactory, db, html);
+}
+
 public static class NotificationDelivery
 {
-    public static async Task SafeSendAsync(NotificationRecord record, NotificationSettings? settings, IHttpClientFactory httpClientFactory, IConfiguration configuration, string? customHtml = null)
+    public static async Task SafeSendAsync(NotificationRecord record, NotificationSettings? settings, IHttpClientFactory httpClientFactory, IConfiguration configuration, ActivitiesDbContext db, string? customHtml = null)
     {
         try
         {
-            await SendAsync(record, settings, httpClientFactory, configuration, customHtml);
+            await SendAsync(record, settings, httpClientFactory, configuration, db, customHtml);
         }
         catch
         {
@@ -1122,35 +1163,97 @@ public static class NotificationDelivery
         }
     }
 
-    public static async Task SendAsync(NotificationRecord record, NotificationSettings? settings, IHttpClientFactory httpClientFactory, IConfiguration configuration, string? customHtml = null)
+    public static async Task SendAsync(NotificationRecord record, NotificationSettings? settings, IHttpClientFactory httpClientFactory, IConfiguration configuration, ActivitiesDbContext db, string? customHtml = null)
     {
-        var webhookUrl = settings?.PowerAutomateWebhookUrl;
-        if (string.IsNullOrWhiteSpace(webhookUrl)) webhookUrl = configuration["Notifications:PowerAutomateWebhookUrl"];
-        if (string.IsNullOrWhiteSpace(webhookUrl)) return;
-
-        var payload = new
-        {
-            eventType = record.EventType,
-            subject = record.Title,
-            teamsTitle = record.Title,
-            html = string.IsNullOrWhiteSpace(customHtml) ? $"<h2>{System.Net.WebUtility.HtmlEncode(record.Title)}</h2><p>{System.Net.WebUtility.HtmlEncode(record.Message)}</p>" : customHtml,
-            data = new
-            {
-                record.Id,
-                record.RecipientEmail,
-                record.RequirementId,
-                record.ActivityId,
-                record.PayloadJson
-            }
-        };
-
-        var client = httpClientFactory.CreateClient("notifications");
-        await client.PostAsJsonAsync(webhookUrl, payload);
+        var html = string.IsNullOrWhiteSpace(customHtml) ? $"<h2>{System.Net.WebUtility.HtmlEncode(record.Title)}</h2><p>{System.Net.WebUtility.HtmlEncode(record.Message)}</p>" : customHtml;
+        if (settings?.EmailEnabled != false)
+            await new PowerAutomateEmailNotificationSender().SendAsync(record, settings, httpClientFactory, configuration, db, RenderGeneric(settings?.EmailHtmlTemplate, record, html));
+        if (settings?.TeamsEnabled != false)
+            await new PowerAutomateTeamsNotificationSender().SendAsync(record, settings, httpClientFactory, configuration, db, RenderGeneric(settings?.TeamsHtmlTemplate, record, html));
     }
+
+    public static async Task SendChannelAsync(string channel, string? webhookUrl, NotificationRecord record, NotificationSettings? settings, IHttpClientFactory httpClientFactory, ActivitiesDbContext db, string html)
+    {
+        var idempotencyKey = $"{record.Id}:{channel}";
+        if (await db.NotificationDeliveryAttempts.AnyAsync(x => x.IdempotencyKey == idempotencyKey)) return;
+        var attempt = new NotificationDeliveryAttempt
+        {
+            NotificationRecordId = record.Id,
+            RequirementId = record.RequirementId,
+            ActivityId = record.ActivityId,
+            EventType = record.EventType,
+            Channel = channel,
+            IdempotencyKey = idempotencyKey
+        };
+        db.NotificationDeliveryAttempts.Add(attempt);
+        if (string.IsNullOrWhiteSpace(webhookUrl))
+        {
+            attempt.Status = "Skipped";
+            attempt.Error = "Webhook no configurado.";
+            await db.SaveChangesAsync();
+            return;
+        }
+
+        try
+        {
+            attempt.Attempts++;
+            var payload = new
+            {
+                eventType = record.EventType,
+                channel,
+                subject = record.Title,
+                teamsTitle = record.Title,
+                html,
+                recipientEmail = record.RecipientEmail,
+                teamsChannel = settings?.TeamsChannel,
+                idempotencyKey,
+                data = new { record.Id, record.RecipientEmail, record.RequirementId, record.ActivityId, record.PayloadJson }
+            };
+            await httpClientFactory.CreateClient("notifications").PostAsJsonAsync(webhookUrl, payload);
+            attempt.Status = "Sent";
+            attempt.SentAt = DateTimeOffset.UtcNow;
+        }
+        catch (Exception error)
+        {
+            attempt.Status = "Failed";
+            attempt.Error = SanitizeError(error.Message);
+        }
+        await db.SaveChangesAsync();
+    }
+
+    private static string SanitizeError(string value) => value.Length <= 600 ? value : value[..600];
+    private static string RenderGeneric(string? template, NotificationRecord record, string fallback) => string.IsNullOrWhiteSpace(template)
+        ? fallback
+        : template.Replace("{{subject}}", System.Net.WebUtility.HtmlEncode(record.Title))
+            .Replace("{{message}}", System.Net.WebUtility.HtmlEncode(record.Message))
+            .Replace("{{recipientEmail}}", System.Net.WebUtility.HtmlEncode(record.RecipientEmail));
+}
+
+public static class NotificationWebhookResolver
+{
+    public static string? Email(NotificationSettings? settings, IConfiguration configuration) =>
+        FirstConfigured(settings?.EmailPowerAutomateWebhookUrl, configuration["Notifications:EmailWebhookUrl"], settings?.PowerAutomateWebhookUrl, configuration["Notifications:PowerAutomateWebhookUrl"]);
+
+    public static string? Teams(NotificationSettings? settings, IConfiguration configuration) =>
+        FirstConfigured(settings?.TeamsPowerAutomateWebhookUrl, configuration["Notifications:TeamsWebhookUrl"], settings?.PowerAutomateWebhookUrl, configuration["Notifications:PowerAutomateWebhookUrl"]);
+
+    private static string? FirstConfigured(params string?[] values) => values.FirstOrDefault(value => !string.IsNullOrWhiteSpace(value) && !value.Equals("Configurado", StringComparison.OrdinalIgnoreCase));
 }
 
 public static class NotificationTemplate
 {
+    public const string DefaultEmail = """
+        <h2>{{subject}}</h2>
+        <p>{{message}}</p>
+        <p>Revise la aplicación para consultar el detalle y los adjuntos internos.</p>
+        """;
+
+    public const string DefaultTeams = """
+        <h2>{{subject}}</h2>
+        <p>{{message}}</p>
+        <p>Canal de coordinación de Marketing.</p>
+        """;
+
     public const string Default = """
         <h2>Producto aprobado</h2>
         <table>
@@ -1339,7 +1442,11 @@ public static class ActivitiesSchema
                     [TeamsEnabled] bit NOT NULL,
                     [TeamsChannel] nvarchar(300) NOT NULL,
                     [PowerAutomateWebhookUrl] nvarchar(1200) NOT NULL,
+                    [EmailPowerAutomateWebhookUrl] nvarchar(1200) NOT NULL DEFAULT(''),
+                    [TeamsPowerAutomateWebhookUrl] nvarchar(1200) NOT NULL DEFAULT(''),
                     [HtmlTemplate] nvarchar(max) NOT NULL,
+                    [EmailHtmlTemplate] nvarchar(max) NOT NULL DEFAULT('<h2>Notificación</h2><p>{{message}}</p>'),
+                    [TeamsHtmlTemplate] nvarchar(max) NOT NULL DEFAULT('<h2>Notificación Teams</h2><p>{{message}}</p>'),
                     [IsActive] bit NOT NULL,
                     [CreatedAt] datetimeoffset NOT NULL,
                     [UpdatedAt] datetimeoffset NULL,
@@ -1349,6 +1456,22 @@ public static class ActivitiesSchema
             IF COL_LENGTH('NotificationSettings', 'HtmlTemplate') IS NULL
             BEGIN
                 ALTER TABLE [NotificationSettings] ADD [HtmlTemplate] nvarchar(max) NOT NULL DEFAULT('<h2>Producto aprobado</h2><p>{{productId}}</p>')
+            END
+            IF COL_LENGTH('NotificationSettings', 'EmailPowerAutomateWebhookUrl') IS NULL
+            BEGIN
+                ALTER TABLE [NotificationSettings] ADD [EmailPowerAutomateWebhookUrl] nvarchar(1200) NOT NULL DEFAULT('')
+            END
+            IF COL_LENGTH('NotificationSettings', 'TeamsPowerAutomateWebhookUrl') IS NULL
+            BEGIN
+                ALTER TABLE [NotificationSettings] ADD [TeamsPowerAutomateWebhookUrl] nvarchar(1200) NOT NULL DEFAULT('')
+            END
+            IF COL_LENGTH('NotificationSettings', 'EmailHtmlTemplate') IS NULL
+            BEGIN
+                ALTER TABLE [NotificationSettings] ADD [EmailHtmlTemplate] nvarchar(max) NOT NULL DEFAULT('<h2>Notificación</h2><p>{{message}}</p>')
+            END
+            IF COL_LENGTH('NotificationSettings', 'TeamsHtmlTemplate') IS NULL
+            BEGIN
+                ALTER TABLE [NotificationSettings] ADD [TeamsHtmlTemplate] nvarchar(max) NOT NULL DEFAULT('<h2>Notificación Teams</h2><p>{{message}}</p>')
             END
             """);
 
@@ -1373,6 +1496,29 @@ public static class ActivitiesSchema
                 )
                 CREATE INDEX [IX_NotificationRecords_RecipientEmail] ON [NotificationRecords] ([RecipientEmail])
                 CREATE INDEX [IX_NotificationRecords_CreatedAt] ON [NotificationRecords] ([CreatedAt])
+            END
+            """);
+
+        await db.Database.ExecuteSqlRawAsync("""
+            IF OBJECT_ID('NotificationDeliveryAttempts', 'U') IS NULL
+            BEGIN
+                CREATE TABLE [NotificationDeliveryAttempts] (
+                    [Id] uniqueidentifier NOT NULL,
+                    [NotificationRecordId] uniqueidentifier NOT NULL,
+                    [RequirementId] uniqueidentifier NULL,
+                    [ActivityId] uniqueidentifier NULL,
+                    [EventType] nvarchar(max) NOT NULL,
+                    [Channel] nvarchar(40) NOT NULL,
+                    [Status] nvarchar(40) NOT NULL,
+                    [Attempts] int NOT NULL,
+                    [Error] nvarchar(600) NOT NULL,
+                    [IdempotencyKey] nvarchar(160) NOT NULL,
+                    [CreatedAt] datetimeoffset NOT NULL,
+                    [SentAt] datetimeoffset NULL,
+                    CONSTRAINT [PK_NotificationDeliveryAttempts] PRIMARY KEY ([Id])
+                )
+                CREATE UNIQUE INDEX [IX_NotificationDeliveryAttempts_IdempotencyKey] ON [NotificationDeliveryAttempts] ([IdempotencyKey])
+                CREATE INDEX [IX_NotificationDeliveryAttempts_NotificationRecordId] ON [NotificationDeliveryAttempts] ([NotificationRecordId])
             END
             """);
 
