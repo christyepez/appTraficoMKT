@@ -14,7 +14,7 @@ import { publicRequirementDefaults } from "../../public-requirement/schemas/publ
 type Props = { catalogs: RequirementFormCatalogs | null; onSubmit: (values: RequirementFormValues) => Promise<boolean>; message: string; };
 const emptyCatalogs: RequirementFormCatalogs = { faculties: [], careers: [], campuses: [], eventFormats: [] };
 
-const steps = ["Actividad", "Solicitante", "Ubicación", "Fechas", "Público", "Objetivo", "Formato", "Adjuntos"] as const;
+const steps = ["Actividad", "Solicitante", "Ubicación", "Fechas", "Público", "Objetivo", "Formato", "Adjuntos", "Confirmación"] as const;
 
 export function ChatRequirementForm({ catalogs, onSubmit, message }: Props) {
   const [step, setStep] = useState(0);
@@ -24,8 +24,10 @@ export function ChatRequirementForm({ catalogs, onSubmit, message }: Props) {
   const facultyId = useWatch({ control, name: "facultyId" });
   const eventObjective = useWatch({ control, name: "eventObjective" });
   const activityFormatDescription = useWatch({ control, name: "activityFormatDescription" });
+  const values = useWatch({ control });
   const careers = useMemo(() => activeCatalogs.careers.filter((item) => !item.facultyId || item.facultyId === facultyId), [activeCatalogs, facultyId]);
   const ready = Boolean(activeCatalogs.faculties.length && activeCatalogs.careers.length && activeCatalogs.campuses.length && activeCatalogs.eventFormats.length);
+  const lastStep = steps.length - 1;
 
   async function next() {
     const fields = fieldsByStep(step);
@@ -34,6 +36,7 @@ export function ChatRequirementForm({ catalogs, onSubmit, message }: Props) {
   }
 
   async function submit(data: RequirementFormValues) {
+    if (step !== lastStep) return;
     if (await onSubmit(data)) {
       reset(publicRequirementDefaults);
       setStep(0);
@@ -66,17 +69,43 @@ export function ChatRequirementForm({ catalogs, onSubmit, message }: Props) {
     {step === 5 && <Field label={`Objetivo del evento (${wordCount(eventObjective ?? "")}/${REQUIREMENT_WORD_LIMIT})`} error={errors.eventObjective?.message} wide><textarea autoFocus aria-label="Objetivo del evento" {...register("eventObjective")} /></Field>}
     {step === 6 && <Field label={`Formato o dinámica (${wordCount(activityFormatDescription ?? "")}/${REQUIREMENT_WORD_LIMIT})`} error={errors.activityFormatDescription?.message} wide><textarea autoFocus aria-label="Formato o dinámica" {...register("activityFormatDescription")} /></Field>}
     {step === 7 && <Field label="Adjuntos del requerimiento" error={errors.attachments?.message} wide><input aria-label="Adjuntos del requerimiento" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp" onChange={(event) => setValue("attachments", Array.from(event.target.files ?? []), { shouldValidate: true })} /></Field>}
+    {step === lastStep && <RequirementChatSummary values={values} catalogs={activeCatalogs} />}
     <div className="form-actions">
       <button className="button secondary" type="button" disabled={step === 0 || isSubmitting} onClick={() => setStep((current) => Math.max(current - 1, 0))}><ChevronLeft size={16} /> Anterior</button>
-      {step < steps.length - 1
+      {step < lastStep
         ? <button className="button" type="button" disabled={isSubmitting} onClick={() => void next()}><ChevronRight size={16} /> Siguiente</button>
-        : <button className="button" disabled={isSubmitting}><Send size={16} /> {isSubmitting ? "Creando..." : "Confirmar requerimiento"}</button>}
+        : <button className="button" type="submit" disabled={isSubmitting}><Send size={16} /> {isSubmitting ? "Creando..." : "Enviar requerimiento"}</button>}
     </div>
     {message && <p className="hint" role={message.startsWith("Su requerimiento") ? "status" : "alert"}>{message}</p>}
   </form>;
 }
 
 function option(item: { id: string; name: string }) { return <option key={item.id} value={item.id}>{item.name}</option>; }
+
+function RequirementChatSummary({ values, catalogs }: { values: Partial<RequirementFormValues>; catalogs: RequirementFormCatalogs }) {
+  const attachments = values.attachments ?? [];
+  return <section className="field field-wide" aria-label="Resumen del requerimiento">
+    <span>Revise antes de enviar</span>
+    <dl className="summary-grid">
+      <div><dt>Actividad</dt><dd>{values.activityOrEvent || "Sin registrar"}</dd></div>
+      <div><dt>Solicitante</dt><dd>{values.requesterName || "Sin registrar"}</dd></div>
+      <div><dt>Correo</dt><dd>{values.requesterEmail || "Sin registrar"}</dd></div>
+      <div><dt>Facultad</dt><dd>{findName(catalogs.faculties, values.facultyId)}</dd></div>
+      <div><dt>Carrera</dt><dd>{findName(catalogs.careers, values.careerId)}</dd></div>
+      <div><dt>Sede</dt><dd>{findName(catalogs.campuses, values.campusId)}</dd></div>
+      <div><dt>Lugar</dt><dd>{values.place || "Sin registrar"}</dd></div>
+      <div><dt>Inicio</dt><dd>{values.startAt || "Sin registrar"}</dd></div>
+      <div><dt>Fin</dt><dd>{values.endAt || "Sin registrar"}</dd></div>
+      <div><dt>Formato</dt><dd>{findName(catalogs.eventFormats, values.eventFormatId)}</dd></div>
+      <div><dt>Adjuntos</dt><dd>{attachments.length ? `${attachments.length} archivo(s)` : "Sin adjuntos"}</dd></div>
+    </dl>
+    <small>El requerimiento se grabará solo al presionar Enviar requerimiento.</small>
+  </section>;
+}
+
+function findName(items: { id: string; name: string }[], id?: string) {
+  return items.find((item) => item.id === id)?.name ?? "Sin registrar";
+}
 
 function fieldsByStep(step: number): (keyof RequirementFormValues)[] {
   if (step === 0) return ["activityOrEvent"];

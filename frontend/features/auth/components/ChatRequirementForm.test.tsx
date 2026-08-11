@@ -53,7 +53,11 @@ describe("ChatRequirementForm", () => {
     await user.click(screen.getByRole("button", { name: "Anterior" }));
     expect(screen.getByLabelText("Formato o dinámica")).toHaveValue("Exposición");
     await next(user);
-    await user.click(screen.getByRole("button", { name: "Confirmar requerimiento" }));
+    await next(user);
+    expect(screen.getByText("Revise antes de enviar")).toBeInTheDocument();
+    expect(screen.getByText("Sin adjuntos")).toBeInTheDocument();
+    expect(submit).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "Enviar requerimiento" }));
     expect(submit).toHaveBeenCalledWith(expect.objectContaining({ activityOrEvent: "Feria", requesterName: "Ana Torres", requesterEmail: "ana@example.com", facultyId: "f", careerId: "c", campusId: "s", audienceType: "mixed" }));
     expect(screen.getByText(/REQ-1/)).toBeInTheDocument();
   });
