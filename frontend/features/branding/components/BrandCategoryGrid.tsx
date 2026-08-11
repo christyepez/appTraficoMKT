@@ -36,7 +36,11 @@ function categorySummary(category: BrandCategory, settings: BrandSettings) {
     agenda: `${settings.workdayStartTime}–${settings.workdayEndTime} · ${settings.replanningWindowDays} días`,
     forms: settings.showProductIdField ? "Id de producto visible" : "Id de producto oculto",
     images: settings.logo.startsWith("data:") ? "Logo cargado" : "URL configurada",
-    login: [settings.showPublicRequirementForm ? "Requerimiento" : "", settings.showPublicRequirementFullPage ? "Formulario" : "", settings.showLoginChatbot ? "Robot" : ""].filter(Boolean).join(" · ") || "Opciones ocultas"
+    login: [settings.showPublicRequirementForm ? `Popup ${layoutLabel(settings.publicRequirementFormLayout)}` : "", settings.showPublicRequirementFullPage ? `Página ${layoutLabel(settings.publicRequirementFullPageLayout)}` : "", settings.showLoginChatbot ? `Robot ${layoutLabel(settings.loginChatbotLayout)}` : ""].filter(Boolean).join(" · ") || "Opciones ocultas"
   };
   return summaries[category];
+}
+
+function layoutLabel(layout: "singlePage" | "stepper") {
+  return layout === "stepper" ? "pasos" : "completo";
 }

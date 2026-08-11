@@ -182,7 +182,7 @@ export function PublicRequirementForm({
   return (
     <form className="form top-space" onSubmit={handleSubmit(submit)} noValidate>
       {layout === "stepper" && <p className="hint" role="status">Paso {step + 1} de {publicSteps.length}: {publicSteps[step]}</p>}
-      {showPublicStep(layout, step, 0) && <Field label="Actividad o evento" error={errors.activityOrEvent?.message}><input {...register("activityOrEvent")} /></Field>}
+      {showPublicStep(layout, step, 0) && <Field label="Actividad o evento" error={errors.activityOrEvent?.message} wide><input {...register("activityOrEvent")} /></Field>}
       {showPublicStep(layout, step, 1) && <><Field label="Nombre del solicitante" error={errors.requesterName?.message}><input {...register("requesterName")} /></Field>
       <Field label="Correo del solicitante" error={errors.requesterEmail?.message}><input type="email" placeholder="correo@uti.edu.ec" {...register("requesterEmail")} /></Field></>}
       {showPublicStep(layout, step, 2) && <><Field label="Facultad" error={errors.facultyId?.message}><select {...register("facultyId", { onChange: () => setValue("careerId", "") })}><option value="">Seleccione...</option>{catalogs.faculties.map(option)}</select></Field>
@@ -206,10 +206,6 @@ export function PublicRequirementForm({
       </Field>}
       {!!attachments.length && <p className="hint" role="status">{attachments.length} archivo(s) seleccionado(s).</p>}
       {turnstileSiteKey && <div id="public-requirement-turnstile" className="field-wide" aria-label="Verificación de seguridad" />}
-      {showPublicStep(layout, step, 8) && <div className="summary">
-        <strong>Resumen</strong>
-        <span>El requerimiento se registrará primero y luego se cargarán los adjuntos seleccionados.</span>
-      </div>}
       <div className="form-actions">
         {layout === "stepper" && <button className="button secondary" type="button" disabled={step === 0 || isSubmitting} onClick={() => setStep((current) => Math.max(current - 1, 0))}><ChevronLeft size={16} /> Anterior</button>}
         {layout === "stepper" && step < publicSteps.length - 1
@@ -225,7 +221,7 @@ export function PublicRequirementForm({
 
 function option(item: { id: string; name: string }) { return <option key={item.id} value={item.id}>{item.name}</option>; }
 
-const publicSteps = ["Actividad", "Solicitante", "Ubicación", "Fechas", "Público", "Objetivo", "Formato", "Adjuntos", "Resumen"] as const;
+const publicSteps = ["Actividad", "Solicitante", "Ubicación", "Fechas", "Público", "Objetivo", "Formato", "Adjuntos"] as const;
 
 function showPublicStep(layout: "singlePage" | "stepper", current: number, expected: number) {
   return layout === "singlePage" || current === expected;

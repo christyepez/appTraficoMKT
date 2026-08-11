@@ -26,12 +26,14 @@ export function LoginExperience() {
     </section>
     {value.isPublicFormOpen && <AccessibleDialog labelledBy="public-requirement-title" onClose={() => value.setIsPublicFormOpen(false)} panelClassName={accessStyles.publicDialog}>
       <div className="card-head"><div><h2 id="public-requirement-title">Crear requerimiento</h2><p>Formulario público sin inicio de sesión</p></div><button autoFocus className="icon-button" type="button" aria-label="Cerrar formulario público" onClick={() => value.setIsPublicFormOpen(false)}><X size={16} /></button></div>
-      <PublicRequirementForm availability={value.availability.popup} layout={value.brand.requirementFormLayout} onCancel={() => value.setIsPublicFormOpen(false)} />
+      <PublicRequirementForm availability={value.availability.popup} layout={value.brand.publicRequirementFormLayout} onCancel={() => value.setIsPublicFormOpen(false)} />
     </AccessibleDialog>}
     {value.showChatbot && <button className={accessStyles.chatbotLauncher} type="button" aria-label="Abrir asistente Puma" onClick={() => value.setIsChatOpen(true)}>{value.brand.chatbotIcon ? <Image src={value.brand.chatbotIcon} alt="" width={24} height={24} unoptimized /> : <PawPrint size={24} />}</button>}
     {value.showChatbot && value.isChatOpen && <AccessibleDialog labelledBy="chatbot-title" onClose={() => value.setIsChatOpen(false)} panelClassName={accessStyles.chatbotPanel}>
       <div className="card-head"><div><h2 id="chatbot-title">Asistente Puma</h2><p>Crear requerimiento rápido</p></div><button autoFocus className="icon-button" type="button" aria-label="Cerrar asistente" onClick={() => value.setIsChatOpen(false)}><X size={16} /></button></div>
-      <ChatRequirementForm catalogs={value.catalogs} onSubmit={value.submitChat} message={value.chatMessage} />
+      {value.brand.loginChatbotLayout === "singlePage"
+        ? <PublicRequirementForm availability={value.availability.chatbot} layout="singlePage" onCancel={() => value.setIsChatOpen(false)} />
+        : <ChatRequirementForm catalogs={value.catalogs} onSubmit={value.submitChat} message={value.chatMessage} />}
     </AccessibleDialog>}
   </main>;
 }

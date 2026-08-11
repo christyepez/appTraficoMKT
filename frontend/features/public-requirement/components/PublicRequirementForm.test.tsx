@@ -104,7 +104,7 @@ describe("PublicRequirementForm", () => {
     const user = userEvent.setup();
     render(<PublicRequirementForm availability={enabled} layout="stepper" loadCatalogs={vi.fn().mockResolvedValue(catalogs)} />);
     await screen.findByLabelText("Actividad o evento");
-    expect(screen.getByRole("status")).toHaveTextContent("Paso 1 de 9");
+    expect(screen.getByRole("status")).toHaveTextContent("Paso 1 de 8");
     fireEvent.change(screen.getByLabelText("Actividad o evento"), { target: { value: "Feria" } });
     await user.click(screen.getByRole("button", { name: "Siguiente" }));
     expect(await screen.findByLabelText("Nombre del solicitante")).toBeInTheDocument();

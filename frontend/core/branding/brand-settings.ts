@@ -17,6 +17,7 @@ export type BrandSettings = {
   publicRequirementFullPageActiveFrom?: string | null; publicRequirementFullPageActiveUntil?: string | null;
   loginChatbotActiveFrom?: string | null; loginChatbotActiveUntil?: string | null;
   showDemoCredentials: boolean; showOffice365Login: boolean; showProductIdField: boolean; requirementFormLayout: "singlePage" | "stepper";
+  publicRequirementFormLayout: "singlePage" | "stepper"; publicRequirementFullPageLayout: "singlePage" | "stepper"; loginChatbotLayout: "singlePage" | "stepper";
   workdayStartTime: string; workdayEndTime: string; replanningWindowDays: number; title: string; subtitle: string;
 };
 
@@ -37,6 +38,7 @@ export const defaultBrandSettings: BrandSettings = {
   showPublicRequirementForm: true, showPublicRequirementFullPage: true, showLoginChatbot: true,
   publicRequirementFormActiveFrom: null, publicRequirementFormActiveUntil: null, publicRequirementFullPageActiveFrom: null, publicRequirementFullPageActiveUntil: null,
   loginChatbotActiveFrom: null, loginChatbotActiveUntil: null, showDemoCredentials: true, showOffice365Login: true, showProductIdField: false, requirementFormLayout: "singlePage",
+  publicRequirementFormLayout: "singlePage", publicRequirementFullPageLayout: "singlePage", loginChatbotLayout: "stepper",
   workdayStartTime: "08:00", workdayEndTime: "17:00", replanningWindowDays: 15,
   title: "Creamos conexiones que dejan huella", subtitle: "Universidad Indoamérica"
 };

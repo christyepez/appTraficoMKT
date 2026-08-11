@@ -14,7 +14,7 @@ import { publicRequirementDefaults } from "../../public-requirement/schemas/publ
 type Props = { catalogs: RequirementFormCatalogs | null; onSubmit: (values: RequirementFormValues) => Promise<boolean>; message: string; };
 const emptyCatalogs: RequirementFormCatalogs = { faculties: [], careers: [], campuses: [], eventFormats: [] };
 
-const steps = ["Actividad", "Solicitante", "Ubicación", "Fechas", "Público", "Objetivo", "Formato", "Adjuntos", "Resumen"] as const;
+const steps = ["Actividad", "Solicitante", "Ubicación", "Fechas", "Público", "Objetivo", "Formato", "Adjuntos"] as const;
 
 export function ChatRequirementForm({ catalogs, onSubmit, message }: Props) {
   const [step, setStep] = useState(0);
@@ -24,7 +24,6 @@ export function ChatRequirementForm({ catalogs, onSubmit, message }: Props) {
   const facultyId = useWatch({ control, name: "facultyId" });
   const eventObjective = useWatch({ control, name: "eventObjective" });
   const activityFormatDescription = useWatch({ control, name: "activityFormatDescription" });
-  const values = useWatch({ control });
   const careers = useMemo(() => activeCatalogs.careers.filter((item) => !item.facultyId || item.facultyId === facultyId), [activeCatalogs, facultyId]);
   const ready = Boolean(activeCatalogs.faculties.length && activeCatalogs.careers.length && activeCatalogs.campuses.length && activeCatalogs.eventFormats.length);
 
@@ -45,7 +44,7 @@ export function ChatRequirementForm({ catalogs, onSubmit, message }: Props) {
 
   return <form className="form top-space" onSubmit={handleSubmit(submit)} noValidate>
     <p className="hint" role="status">Paso {step + 1} de {steps.length}: {steps[step]}</p>
-    {step === 0 && <Field label="Actividad o evento" error={errors.activityOrEvent?.message}><input autoFocus {...register("activityOrEvent")} /></Field>}
+    {step === 0 && <Field label="Actividad o evento" error={errors.activityOrEvent?.message} wide><input autoFocus {...register("activityOrEvent")} /></Field>}
     {step === 1 && <>
       <Field label="Nombre del solicitante" error={errors.requesterName?.message}><input autoFocus {...register("requesterName")} /></Field>
       <Field label="Correo del solicitante" error={errors.requesterEmail?.message}><input type="email" placeholder="correo@uti.edu.ec" {...register("requesterEmail")} /></Field>
@@ -67,13 +66,6 @@ export function ChatRequirementForm({ catalogs, onSubmit, message }: Props) {
     {step === 5 && <Field label={`Objetivo del evento (${wordCount(eventObjective ?? "")}/${REQUIREMENT_WORD_LIMIT})`} error={errors.eventObjective?.message} wide><textarea autoFocus aria-label="Objetivo del evento" {...register("eventObjective")} /></Field>}
     {step === 6 && <Field label={`Formato o dinámica (${wordCount(activityFormatDescription ?? "")}/${REQUIREMENT_WORD_LIMIT})`} error={errors.activityFormatDescription?.message} wide><textarea autoFocus aria-label="Formato o dinámica" {...register("activityFormatDescription")} /></Field>}
     {step === 7 && <Field label="Adjuntos del requerimiento" error={errors.attachments?.message} wide><input aria-label="Adjuntos del requerimiento" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp" onChange={(event) => setValue("attachments", Array.from(event.target.files ?? []), { shouldValidate: true })} /></Field>}
-    {step === 8 && <div className="summary" role="group" aria-label="Resumen del requerimiento">
-      <strong>{values.activityOrEvent || "Actividad pendiente"}</strong>
-      <span>{values.requesterName} · {values.requesterEmail}</span>
-      <span>{activeCatalogs.faculties.find((item) => item.id === values.facultyId)?.name} · {activeCatalogs.careers.find((item) => item.id === values.careerId)?.name} · {activeCatalogs.campuses.find((item) => item.id === values.campusId)?.name}</span>
-      <span>{values.startAt} a {values.endAt}</span>
-      <span>{values.eventObjective}</span>
-    </div>}
     <div className="form-actions">
       <button className="button secondary" type="button" disabled={step === 0 || isSubmitting} onClick={() => setStep((current) => Math.max(current - 1, 0))}><ChevronLeft size={16} /> Anterior</button>
       {step < steps.length - 1

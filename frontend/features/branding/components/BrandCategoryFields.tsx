@@ -23,11 +23,17 @@ export function BrandCategoryFields({ category, values, register, setValue }: { 
 }
 
 function LoginFields({ register }: { register: UseFormRegister<BrandFormValues> }) {
-  return <><ActivationPeriod title="Crear requerimiento sin login" enabled="showPublicRequirementForm" from="publicRequirementFormActiveFrom" until="publicRequirementFormActiveUntil" register={register}/><ActivationPeriod title="Formulario público completo" enabled="showPublicRequirementFullPage" from="publicRequirementFullPageActiveFrom" until="publicRequirementFullPageActiveUntil" register={register}/><ActivationPeriod title="Robot Puma" enabled="showLoginChatbot" from="loginChatbotActiveFrom" until="loginChatbotActiveUntil" register={register}/><fieldset className="field field-wide"><legend>Otras opciones</legend><div className="check-group"><label className="check-field">Mostrar credenciales de prueba<input type="checkbox" {...register("showDemoCredentials")}/></label><label className="check-field">Mostrar ingreso Office 365<input type="checkbox" {...register("showOffice365Login")}/></label></div></fieldset></>;
+  return <>
+    <ActivationPeriod title="Formulario popup del login" enabled="showPublicRequirementForm" from="publicRequirementFormActiveFrom" until="publicRequirementFormActiveUntil" layout="publicRequirementFormLayout" register={register}/>
+    <ActivationPeriod title="Página pública completa" enabled="showPublicRequirementFullPage" from="publicRequirementFullPageActiveFrom" until="publicRequirementFullPageActiveUntil" layout="publicRequirementFullPageLayout" register={register}/>
+    <ActivationPeriod title="Robot Puma" enabled="showLoginChatbot" from="loginChatbotActiveFrom" until="loginChatbotActiveUntil" layout="loginChatbotLayout" register={register}/>
+    <fieldset className="field field-wide"><legend>Otras opciones</legend><div className="check-group"><label className="check-field">Mostrar credenciales de prueba<input type="checkbox" {...register("showDemoCredentials")}/></label><label className="check-field">Mostrar ingreso Office 365<input type="checkbox" {...register("showOffice365Login")}/></label></div></fieldset>
+  </>;
 }
 
 type DateName = "publicRequirementFormActiveFrom" | "publicRequirementFormActiveUntil" | "publicRequirementFullPageActiveFrom" | "publicRequirementFullPageActiveUntil" | "loginChatbotActiveFrom" | "loginChatbotActiveUntil";
 type FlagName = "showPublicRequirementForm" | "showPublicRequirementFullPage" | "showLoginChatbot";
-function ActivationPeriod({ title, enabled, from, until, register }: { title: string; enabled: FlagName; from: DateName; until: DateName; register: UseFormRegister<BrandFormValues> }) {
-  return <fieldset className="field field-wide"><legend>{title}</legend><div className="form"><label className="field"><span>Activo desde</span><input type="datetime-local" {...register(from)}/></label><label className="field"><span>Activo hasta</span><input type="datetime-local" {...register(until)}/></label><div className="check-group"><label className="check-field">Mostrar opción<input type="checkbox" {...register(enabled)}/></label></div></div></fieldset>;
+type LayoutName = "publicRequirementFormLayout" | "publicRequirementFullPageLayout" | "loginChatbotLayout";
+function ActivationPeriod({ title, enabled, from, until, layout, register }: { title: string; enabled: FlagName; from: DateName; until: DateName; layout: LayoutName; register: UseFormRegister<BrandFormValues> }) {
+  return <fieldset className="field field-wide"><legend>{title}</legend><div className="form"><label className="field"><span>Activo desde</span><input type="datetime-local" {...register(from)}/></label><label className="field"><span>Activo hasta</span><input type="datetime-local" {...register(until)}/></label><label className="field"><span>Presentación</span><select {...register(layout)}><option value="singlePage">Completo</option><option value="stepper">Paso a paso</option></select></label><div className="check-group"><label className="check-field">Mostrar opción<input type="checkbox" {...register(enabled)}/></label></div></div></fieldset>;
 }
