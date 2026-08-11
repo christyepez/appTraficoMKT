@@ -43,7 +43,7 @@ services:
       ConnectionStrings__ActivitiesDb: "Server=sqlserver;Database=ActivitiesDb;User Id=sa;Password=Passw0rd!Local;TrustServerCertificate=True"
       Services__Evidence: "http://evidence-api:8080"
       Services__Identity: "http://identity-api:8080"
-      Notifications__PowerAutomateWebhookUrl: ""
+      Notifications__PowerAutomateWebhookUrl: "${POWER_AUTOMATE_NOTIFICATION_WEBHOOK_URL:-}"
     ports:
       - "5102:8080"
     depends_on:

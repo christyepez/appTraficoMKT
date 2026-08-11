@@ -581,8 +581,7 @@ public static class EvidenceSchema
             IF OBJECT_ID('Approvals', 'U') IS NOT NULL AND COL_LENGTH('Approvals', 'Status') IS NULL
             BEGIN
                 ALTER TABLE [Approvals] ADD [Status] nvarchar(32) NOT NULL DEFAULT('Pending')
-                UPDATE [Approvals]
-                SET [Status] = CASE [Decision] WHEN 'Approved' THEN 'Approved' WHEN 'Rejected' THEN 'Rejected' ELSE 'Pending' END
+                EXEC('UPDATE [Approvals] SET [Status] = CASE [Decision] WHEN ''Approved'' THEN ''Approved'' WHEN ''Rejected'' THEN ''Rejected'' ELSE ''Pending'' END')
             END
             IF OBJECT_ID('Approvals', 'U') IS NOT NULL AND COL_LENGTH('Approvals', 'SubmittedAt') IS NULL
             BEGIN
@@ -591,7 +590,7 @@ public static class EvidenceSchema
             IF OBJECT_ID('Approvals', 'U') IS NOT NULL AND COL_LENGTH('Approvals', 'DecidedAt') IS NULL
             BEGIN
                 ALTER TABLE [Approvals] ADD [DecidedAt] datetimeoffset NULL
-                UPDATE [Approvals] SET [DecidedAt] = [CreatedAt] WHERE [Decision] IN ('Approved', 'Rejected')
+                EXEC('UPDATE [Approvals] SET [DecidedAt] = [CreatedAt] WHERE [Decision] IN (''Approved'', ''Rejected'')')
             END
             IF OBJECT_ID('Approvals', 'U') IS NOT NULL AND COL_LENGTH('Approvals', 'DecisionSource') IS NULL
             BEGIN
