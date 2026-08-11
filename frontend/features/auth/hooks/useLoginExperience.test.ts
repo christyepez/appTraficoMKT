@@ -2,21 +2,21 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getMicrosoftAuthConfig } from "../../../core/auth/auth.service";
 import { defaultBrandSettings } from "../../../core/branding/brand-settings";
-import { createPublicRequirement, getPublicBrandSettings, getPublicRequirementCatalogs } from "../../public-requirement/services/public-requirement.service";
+import { createPublicRequirement, getPublicBrandSettings, getPublicRequirementCatalogs, uploadPublicRequirementAttachment } from "../../public-requirement/services/public-requirement.service";
 import { useLoginExperience } from "./useLoginExperience";
 
 vi.mock("../../../core/auth/auth.service", () => ({ exchangeMicrosoftCode: vi.fn(), getMicrosoftAuthConfig: vi.fn() }));
 vi.mock("../../../core/auth/session", () => ({ saveSession: vi.fn() }));
 vi.mock("../../../core/configuration/toast", () => ({ showToast: vi.fn() }));
 vi.mock("../../public-requirement/services/public-requirement.service", () => ({
-  createPublicRequirement: vi.fn(), getPublicBrandSettings: vi.fn(), getPublicRequirementCatalogs: vi.fn()
+  createPublicRequirement: vi.fn(), getPublicBrandSettings: vi.fn(), getPublicRequirementCatalogs: vi.fn(), uploadPublicRequirementAttachment: vi.fn()
 }));
 
 const catalogs = {
-  faculties: [{ id: "f", name: "Facultad", isActive: true }], careers: [{ id: "c", name: "Carrera", isActive: true }],
+  faculties: [{ id: "f", name: "Facultad", isActive: true }], careers: [{ id: "c", name: "Carrera", facultyId: "f", isActive: true }],
   campuses: [{ id: "s", name: "Sede", isActive: true }], eventFormats: [{ id: "e", name: "Presencial", isActive: true }]
 };
-const values = { activityOrEvent: "Feria", requestedBy: "ana@example.com", place: "", startDate: "", startTime: "", endDate: "", endTime: "", eventObjective: "Difusión" };
+const values = { activityOrEvent: "Feria", requesterName: "Ana", requesterEmail: "ana@example.com", facultyId: "f", faculty: "", careerId: "c", career: "", campusId: "s", campus: "", place: "Auditorio", startAt: "2026-01-10T09:00", endAt: "2026-01-10T10:00", audienceType: "internal" as const, eventFormatId: "e", eventFormat: "", eventObjective: "Difusión", activityFormatDescription: "Exposición", attachments: [] };
 
 describe("useLoginExperience", () => {
   beforeEach(() => {
@@ -25,15 +25,16 @@ describe("useLoginExperience", () => {
     window.history.replaceState({}, "", "/login");
     vi.mocked(getPublicBrandSettings).mockResolvedValue(defaultBrandSettings);
     vi.mocked(getPublicRequirementCatalogs).mockResolvedValue(catalogs);
-    vi.mocked(createPublicRequirement).mockReset().mockResolvedValue({});
+    vi.mocked(createPublicRequirement).mockReset().mockResolvedValue({ requirementId: "r1", requirementCode: "REQ-1", uploadToken: "token", uploadTokenExpiresAt: "2026-01-10T10:00:00Z", message: "ok" });
+    vi.mocked(uploadPublicRequirementAttachment).mockReset().mockResolvedValue({ attachmentId: "a1", fileName: "brief.pdf", success: true });
   });
 
   it("carga marca y catálogos y crea el requerimiento rápido", async () => {
     const { result } = renderHook(() => useLoginExperience());
     await waitFor(() => expect(result.current.catalogsReady).toBe(true));
     await act(async () => expect(await result.current.submitChat(values)).toBe(true));
-    expect(createPublicRequirement).toHaveBeenCalledWith(expect.objectContaining({ facultyId: "f", place: "Por definir" }));
-    expect(result.current.chatMessage).toMatch(/^Listo/);
+    expect(createPublicRequirement).toHaveBeenCalledWith(expect.objectContaining({ facultyId: "f", careerId: "c", requesterEmail: "ana@example.com", place: "Auditorio" }));
+    expect(result.current.chatMessage).toContain("REQ-1");
   });
 
   it("conserva el formulario ante error de envío", async () => {

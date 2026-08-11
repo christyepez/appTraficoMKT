@@ -6,10 +6,10 @@ import { authenticatedRoute, safeAuthMessage } from "../../../core/auth/auth.uti
 import { saveSession } from "../../../core/auth/session";
 import { defaultBrandSettings, type BrandSettings } from "../../../core/branding/brand-settings";
 import { showToast } from "../../../core/configuration/toast";
-import type { PublicRequirementCatalogs, PublicRequirementPayload } from "../../public-requirement/models/public-requirement.models";
-import { createPublicRequirement, getPublicBrandSettings, getPublicRequirementCatalogs } from "../../public-requirement/services/public-requirement.service";
-import { isPublicFeatureActive } from "../../public-requirement/utils/public-requirement.utils";
-import type { ChatRequirementValues } from "../schemas/auth.schemas";
+import type { PublicRequirementCatalogs } from "../../public-requirement/models/public-requirement.models";
+import { createPublicRequirement, getPublicBrandSettings, getPublicRequirementCatalogs, uploadPublicRequirementAttachment } from "../../public-requirement/services/public-requirement.service";
+import { isPublicFeatureActive, mapPublicRequirementPayload, publicRequirementSuccessMessage } from "../../public-requirement/utils/public-requirement.utils";
+import type { RequirementFormValues } from "../../requirements/domain/requirement-form.types";
 import { microsoftAuthorizeUrl, randomString, sha256Base64Url } from "../utils/pkce.utils";
 
 export function useLoginExperience() {
@@ -47,25 +47,26 @@ export function useLoginExperience() {
     }
   }
 
-  async function submitChat(values: ChatRequirementValues) {
+  async function submitChat(values: RequirementFormValues) {
     if (!catalogs?.faculties[0] || !catalogs.careers[0] || !catalogs.campuses[0] || !catalogs.eventFormats[0]) {
       setChatMessage("No hay catálogos activos suficientes para crear el requerimiento.");
       return false;
     }
-    const startDate = values.startDate || new Date().toISOString().slice(0, 10);
-    const payload: PublicRequirementPayload = {
-      activityOrEvent: values.activityOrEvent.trim(), requestedBy: values.requestedBy.trim(),
-      facultyId: catalogs.faculties[0].id, faculty: catalogs.faculties[0].name, career: catalogs.careers[0].name,
-      campusId: catalogs.campuses[0].id, campus: catalogs.campuses[0].name, place: values.place.trim() || "Por definir",
-      startDate, startTime: values.startTime || null, endDate: values.endDate || startDate, endTime: values.endTime || null,
-      eventObjective: values.eventObjective.trim(), eventFormatId: catalogs.eventFormats[0].id,
-      eventFormat: catalogs.eventFormats[0].name, requestDate: new Date().toISOString().slice(0, 10)
-    };
     try {
-      await createPublicRequirement(payload);
-      setChatMessage("Listo, el requerimiento fue creado. El equipo lo revisará en seguimiento.");
+      const creation = await createPublicRequirement(mapPublicRequirementPayload(values, catalogs));
+      const failedFiles: string[] = [];
+      for (const file of values.attachments) {
+        try {
+          await uploadPublicRequirementAttachment(creation.requirementId, creation.uploadToken, file);
+        } catch {
+          failedFiles.push(file.name);
+        }
+      }
+      setChatMessage(failedFiles.length
+        ? `${publicRequirementSuccessMessage(creation.requirementCode)} No se cargaron: ${failedFiles.join(", ")}.`
+        : publicRequirementSuccessMessage(creation.requirementCode));
       showToast("Requerimiento creado desde chatbot.");
-      return true;
+      return failedFiles.length === 0;
     } catch (error) {
       setChatMessage(error instanceof Error ? error.message : "No se pudo crear el requerimiento.");
       return false;
@@ -73,7 +74,7 @@ export function useLoginExperience() {
   }
 
   return {
-    message, brand, availability, isChatOpen, setIsChatOpen, isPublicFormOpen, setIsPublicFormOpen, chatMessage, microsoftLogin, submitChat,
+    message, brand, catalogs, availability, isChatOpen, setIsChatOpen, isPublicFormOpen, setIsPublicFormOpen, chatMessage, microsoftLogin, submitChat,
     catalogsReady: Boolean(catalogs?.faculties[0] && catalogs.careers[0] && catalogs.campuses[0] && catalogs.eventFormats[0]),
     showPublicPopup: isPublicFeatureActive(availability.popup),
     showPublicFullPage: isPublicFeatureActive(availability.fullPage),
