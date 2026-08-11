@@ -93,12 +93,16 @@ public sealed class Requirement : Entity
         Code = string.Empty;
         ActivityOrEvent = string.Empty;
         RequestedBy = string.Empty;
+        RequesterName = string.Empty;
+        RequesterEmail = string.Empty;
         Faculty = string.Empty;
         Career = string.Empty;
         Campus = string.Empty;
         Place = string.Empty;
         EventObjective = string.Empty;
         EventFormat = string.Empty;
+        AudienceType = "internal";
+        ActivityFormatDescription = string.Empty;
         StatusId = WorkflowCatalogIds.RequirementDraft;
     }
 
@@ -118,7 +122,12 @@ public sealed class Requirement : Entity
         string eventObjective,
         Guid eventFormatId,
         string eventFormat,
-        DateOnly requestDate)
+        DateOnly requestDate,
+        Guid? careerId = null,
+        string? requesterName = null,
+        string? requesterEmail = null,
+        string? audienceType = null,
+        string? activityFormatDescription = null)
     {
         if (string.IsNullOrWhiteSpace(activityOrEvent)) throw new ArgumentException("Actividad o evento es requerido.", nameof(activityOrEvent));
         if (string.IsNullOrWhiteSpace(requestedBy)) throw new ArgumentException("Solicitante es requerido.", nameof(requestedBy));
@@ -130,8 +139,11 @@ public sealed class Requirement : Entity
         Code = $"REQ-{DateTimeOffset.UtcNow:yyyyMMddHHmmss}";
         ActivityOrEvent = activityOrEvent.Trim();
         RequestedBy = requestedBy.Trim();
+        RequesterEmail = string.IsNullOrWhiteSpace(requesterEmail) ? RequestedBy : requesterEmail.Trim().ToLowerInvariant();
+        RequesterName = string.IsNullOrWhiteSpace(requesterName) ? RequesterEmail : requesterName.Trim();
         FacultyId = facultyId;
         Faculty = faculty.Trim();
+        CareerId = careerId;
         Career = career.Trim();
         CampusId = campusId;
         Campus = campus.Trim();
@@ -143,6 +155,8 @@ public sealed class Requirement : Entity
         EventObjective = eventObjective.Trim();
         EventFormatId = eventFormatId;
         EventFormat = eventFormat.Trim();
+        AudienceType = NormalizeAudienceType(audienceType);
+        ActivityFormatDescription = (activityFormatDescription ?? string.Empty).Trim();
         RequestDate = requestDate;
         Status = RequirementStatus.Draft;
         StatusId = WorkflowCatalogIds.ForRequirement(Status);
@@ -151,8 +165,11 @@ public sealed class Requirement : Entity
     public string Code { get; private set; }
     public string ActivityOrEvent { get; private set; }
     public string RequestedBy { get; private set; }
+    public string RequesterName { get; private set; }
+    public string RequesterEmail { get; private set; }
     public Guid FacultyId { get; private set; }
     public string Faculty { get; private set; }
+    public Guid? CareerId { get; private set; }
     public string Career { get; private set; }
     public Guid CampusId { get; private set; }
     public string Campus { get; private set; }
@@ -164,9 +181,12 @@ public sealed class Requirement : Entity
     public string EventObjective { get; private set; }
     public Guid EventFormatId { get; private set; }
     public string EventFormat { get; private set; }
+    public string AudienceType { get; private set; }
+    public string ActivityFormatDescription { get; private set; }
     public DateOnly RequestDate { get; private set; }
     public RequirementStatus Status { get; private set; }
     public Guid StatusId { get; private set; }
+    public bool CanEdit => Status == RequirementStatus.Draft;
 
     public void Update(
         string activityOrEvent,
@@ -184,8 +204,14 @@ public sealed class Requirement : Entity
         string eventObjective,
         Guid eventFormatId,
         string eventFormat,
-        DateOnly requestDate)
+        DateOnly requestDate,
+        Guid? careerId = null,
+        string? requesterName = null,
+        string? requesterEmail = null,
+        string? audienceType = null,
+        string? activityFormatDescription = null)
     {
+        if (!CanEdit) throw new InvalidOperationException("Solo se pueden editar requerimientos en borrador.");
         if (string.IsNullOrWhiteSpace(activityOrEvent)) throw new ArgumentException("Actividad o evento es requerido.", nameof(activityOrEvent));
         if (string.IsNullOrWhiteSpace(requestedBy)) throw new ArgumentException("Solicitante es requerido.", nameof(requestedBy));
         if (facultyId == Guid.Empty) throw new ArgumentException("Facultad es requerida.", nameof(facultyId));
@@ -195,8 +221,11 @@ public sealed class Requirement : Entity
 
         ActivityOrEvent = activityOrEvent.Trim();
         RequestedBy = requestedBy.Trim();
+        RequesterEmail = string.IsNullOrWhiteSpace(requesterEmail) ? RequestedBy : requesterEmail.Trim().ToLowerInvariant();
+        RequesterName = string.IsNullOrWhiteSpace(requesterName) ? RequesterEmail : requesterName.Trim();
         FacultyId = facultyId;
         Faculty = faculty.Trim();
+        CareerId = careerId;
         Career = career.Trim();
         CampusId = campusId;
         Campus = campus.Trim();
@@ -208,6 +237,8 @@ public sealed class Requirement : Entity
         EventObjective = eventObjective.Trim();
         EventFormatId = eventFormatId;
         EventFormat = eventFormat.Trim();
+        AudienceType = NormalizeAudienceType(audienceType);
+        ActivityFormatDescription = (activityFormatDescription ?? string.Empty).Trim();
         RequestDate = requestDate;
         Touch();
     }
@@ -254,6 +285,13 @@ public sealed class Requirement : Entity
     }
 
     public void Delete(string deletedBy) => DeleteLogically(deletedBy);
+
+    private static string NormalizeAudienceType(string? value) => value?.Trim().ToLowerInvariant() switch
+    {
+        "external" => "external",
+        "mixed" => "mixed",
+        _ => "internal"
+    };
 }
 
 public sealed class TechnicalActivity : Entity

@@ -1,9 +1,12 @@
 using BuildingBlocks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.RateLimiting;
 using System.Text.Json;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,8 +24,24 @@ builder.Services.AddHttpClient("notifications", client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["Services:Activities"] ?? "http://activities-api:8080");
 });
+builder.Services.Configure<FormOptions>(options => options.MultipartBodyLengthLimit = 5 * 1024 * 1024);
 builder.Services.AddDbContext<RequirementsDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("RequirementsDb")));
+builder.Services.AddScoped<IRequirementAttachmentRepository, RequirementAttachmentRepository>();
+builder.Services.AddScoped<IRequirementFileValidator, RequirementFileValidator>();
+builder.Services.AddScoped<IRequirementFileStorageProvider, LocalRequirementFileStorageProvider>();
+builder.Services.AddScoped<IRequirementAttachmentService, RequirementAttachmentService>();
+builder.Services.AddSingleton<IRequirementUploadTokenService, RequirementUploadTokenService>();
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter("public-requirements", limiter =>
+    {
+        limiter.PermitLimit = 20;
+        limiter.Window = TimeSpan.FromMinutes(1);
+        limiter.QueueLimit = 0;
+        limiter.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+    });
+});
 
 builder.Services.AddCors(options =>
 {
@@ -34,6 +53,7 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseCors();
+app.UseRateLimiter();
 
 using (var scope = app.Services.CreateScope())
 {
@@ -87,6 +107,9 @@ app.MapGet("/requirements/{id:guid}/audit", async (Guid id, RequirementsDbContex
 app.MapGet("/requirements/{id:guid}", async (Guid id, RequirementsDbContext db) =>
     await db.Requirements.FindAsync(id) is { IsDeleted: false } requirement ? Results.Ok(requirement) : Results.NotFound());
 
+app.MapRequirementPublicEndpoints();
+app.MapRequirementAttachmentEndpoints();
+
 app.MapGet("/requirements/satisfaction/{token}", async (string token, RequirementsDbContext db, IConfiguration configuration) =>
 {
     if (!SatisfactionLinks.TryReadToken(token, configuration, out var requirementId)) return Results.NotFound();
@@ -132,7 +155,12 @@ app.MapPost("/requirements", async (CreateRequirementRequest request, Requiremen
         request.EventObjective,
         request.EventFormatId,
         request.EventFormat,
-        request.RequestDate);
+        request.RequestDate,
+        request.CareerId,
+        request.RequesterName,
+        request.RequesterEmail,
+        request.AudienceType,
+        request.ActivityFormatDescription);
     requirement.SetStatusReference(request.StatusId ?? WorkflowCatalogIds.ForRequirement(requirement.Status));
     db.Requirements.Add(requirement);
     db.AuditEvents.Add(RequirementAuditEvent.Created(requirement.Id, null, requirement.Status.ToString(), "Creación del requerimiento", request.RequestedBy, AuditJson.Build("Requerimientos", "Crear", request.RequestedBy, request)));
@@ -153,8 +181,8 @@ app.MapPut("/requirements/{id:guid}", async (Guid id, CreateRequirementRequest r
 {
     var requirement = await db.Requirements.FindAsync(id);
     if (requirement is null || requirement.IsDeleted) return Results.NotFound();
-    if (requirement.Status is RequirementStatus.Completed or RequirementStatus.Rejected)
-        return Results.Conflict(new { message = "No se puede editar un requerimiento finalizado." });
+    if (!requirement.CanEdit)
+        return Results.Conflict(new { message = "Solo se puede editar un requerimiento en borrador." });
 
     CatalogReferenceWriter.UpsertReferences(db, request);
     var previousStatus = requirement.Status.ToString();
@@ -174,7 +202,12 @@ app.MapPut("/requirements/{id:guid}", async (Guid id, CreateRequirementRequest r
         request.EventObjective,
         request.EventFormatId,
         request.EventFormat,
-        request.RequestDate);
+        request.RequestDate,
+        request.CareerId,
+        request.RequesterName,
+        request.RequesterEmail,
+        request.AudienceType,
+        request.ActivityFormatDescription);
     requirement.SetStatusReference(request.StatusId ?? WorkflowCatalogIds.ForRequirement(requirement.Status));
     db.AuditEvents.Add(RequirementAuditEvent.Changed(requirement.Id, previousStatus, requirement.Status.ToString(), "Actualización de datos del requerimiento", request.RequestedBy, AuditJson.Build("Requerimientos", "Editar", request.RequestedBy, request)));
     await db.SaveChangesAsync();
@@ -268,7 +301,13 @@ public sealed record CreateRequirementRequest(
     Guid EventFormatId,
     string EventFormat,
     DateOnly RequestDate,
-    Guid? StatusId = null);
+    Guid? StatusId = null,
+    Guid? CareerId = null,
+    string? RequesterName = null,
+    string? RequesterEmail = null,
+    string? AudienceType = null,
+    string? ActivityFormatDescription = null,
+    string? IdempotencyKey = null);
 public sealed record SubmitSatisfactionRequest(int OverallRating, int TimelinessRating, int QualityRating, bool WouldRecommend, string? Comments);
 public sealed record SatisfactionFormResponse(string RequirementCode, string ActivityOrEvent, string RequestedBy, bool AlreadySubmitted, DateTimeOffset? SubmittedAt);
 public sealed record ActivitySummary(int Total, int Approved, int Pending);
@@ -291,6 +330,8 @@ public sealed class RequirementsDbContext(DbContextOptions<RequirementsDbContext
 {
     public DbSet<Requirement> Requirements => Set<Requirement>();
     public DbSet<CatalogReference> CatalogReferences => Set<CatalogReference>();
+    public DbSet<RequirementAttachment> RequirementAttachments => Set<RequirementAttachment>();
+    public DbSet<RequirementPublicCreation> RequirementPublicCreations => Set<RequirementPublicCreation>();
     public DbSet<RequirementAuditEvent> AuditEvents => Set<RequirementAuditEvent>();
     public DbSet<SatisfactionResponse> SatisfactionResponses => Set<SatisfactionResponse>();
 
@@ -312,21 +353,53 @@ public sealed class RequirementsDbContext(DbContextOptions<RequirementsDbContext
             entity.Property(x => x.Code).HasMaxLength(32).IsRequired();
             entity.Property(x => x.ActivityOrEvent).HasMaxLength(240).IsRequired();
             entity.Property(x => x.RequestedBy).HasMaxLength(120).IsRequired();
+            entity.Property(x => x.RequesterName).HasMaxLength(160).IsRequired();
+            entity.Property(x => x.RequesterEmail).HasMaxLength(180).IsRequired();
             entity.Property(x => x.Faculty).HasMaxLength(160).IsRequired();
+            entity.Property(x => x.CareerId);
             entity.Property(x => x.Career).HasMaxLength(160).IsRequired();
             entity.Property(x => x.Campus).HasMaxLength(120).IsRequired();
             entity.Property(x => x.Place).HasMaxLength(180).IsRequired();
             entity.Property(x => x.EventObjective).HasMaxLength(4000).IsRequired();
             entity.Property(x => x.EventFormat).HasMaxLength(80).IsRequired();
+            entity.Property(x => x.AudienceType).HasMaxLength(20).IsRequired();
+            entity.Property(x => x.ActivityFormatDescription).HasMaxLength(4000).IsRequired();
             entity.Property(x => x.StartTime).HasColumnType("time");
             entity.Property(x => x.EndTime).HasColumnType("time");
             entity.Property(x => x.Status).HasConversion<string>().HasMaxLength(32);
             entity.Property(x => x.DeletedBy).HasMaxLength(160);
             entity.HasIndex(x => x.Code).IsUnique();
             entity.HasOne<CatalogReference>().WithMany().HasForeignKey(x => x.FacultyId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<CatalogReference>().WithMany().HasForeignKey(x => x.CareerId).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne<CatalogReference>().WithMany().HasForeignKey(x => x.CampusId).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne<CatalogReference>().WithMany().HasForeignKey(x => x.EventFormatId).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne<CatalogReference>().WithMany().HasForeignKey(x => x.StatusId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<RequirementAttachment>(entity =>
+        {
+            entity.ToTable("RequirementAttachments");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.OriginalFileName).HasMaxLength(240).IsRequired();
+            entity.Property(x => x.StoredFileName).HasMaxLength(260).IsRequired();
+            entity.Property(x => x.ContentType).HasMaxLength(120).IsRequired();
+            entity.Property(x => x.StorageKey).HasMaxLength(800).IsRequired();
+            entity.Property(x => x.Status).HasMaxLength(32).IsRequired();
+            entity.Property(x => x.UploadedBy).HasMaxLength(180).IsRequired();
+            entity.Property(x => x.DeletedBy).HasMaxLength(160);
+            entity.HasIndex(x => x.RequirementId);
+            entity.HasOne<Requirement>().WithMany().HasForeignKey(x => x.RequirementId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<RequirementPublicCreation>(entity =>
+        {
+            entity.ToTable("RequirementPublicCreations");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.IdempotencyKeyHash).HasMaxLength(128).IsRequired();
+            entity.Property(x => x.UploadTokenHash).HasMaxLength(128).IsRequired();
+            entity.Property(x => x.UploadTokenValue).HasMaxLength(160).IsRequired();
+            entity.HasIndex(x => x.IdempotencyKeyHash).IsUnique();
+            entity.HasIndex(x => x.UploadTokenHash).IsUnique();
         });
 
         modelBuilder.Entity<RequirementAuditEvent>(entity =>
@@ -540,6 +613,8 @@ public static class CatalogReferenceWriter
     public static void UpsertReferences(RequirementsDbContext db, CreateRequirementRequest request)
     {
         UpsertReference(db, request.FacultyId, "Faculty", request.Faculty, request.Faculty);
+        if (request.CareerId.HasValue)
+            UpsertReference(db, request.CareerId.Value, "Career", request.Career, request.Career);
         UpsertReference(db, request.CampusId, "Campus", request.Campus, request.Campus);
         UpsertReference(db, request.EventFormatId, "FormatoEvento", request.EventFormat, request.EventFormat);
         UpsertReference(db, request.StatusId ?? WorkflowCatalogIds.RequirementDraft, "EstadoRequerimiento", "Draft", "Borrador");
@@ -620,8 +695,11 @@ public static class RequirementsSchema
         var columns = new Dictionary<string, string>
         {
             ["ActivityOrEvent"] = "nvarchar(240) NOT NULL DEFAULT('Sin nombre')",
+            ["RequesterName"] = "nvarchar(160) NOT NULL DEFAULT('')",
+            ["RequesterEmail"] = "nvarchar(180) NOT NULL DEFAULT('')",
             ["FacultyId"] = "uniqueidentifier NULL",
             ["Faculty"] = "nvarchar(160) NOT NULL DEFAULT('No definida')",
+            ["CareerId"] = "uniqueidentifier NULL",
             ["Career"] = "nvarchar(160) NOT NULL DEFAULT('No definida')",
             ["CampusId"] = "uniqueidentifier NULL",
             ["Campus"] = "nvarchar(120) NOT NULL DEFAULT('No definida')",
@@ -633,6 +711,8 @@ public static class RequirementsSchema
             ["EventObjective"] = "nvarchar(4000) NOT NULL DEFAULT('No definido')",
             ["EventFormatId"] = "uniqueidentifier NULL",
             ["EventFormat"] = "nvarchar(80) NOT NULL DEFAULT('Presencial')",
+            ["AudienceType"] = "nvarchar(20) NOT NULL DEFAULT('internal')",
+            ["ActivityFormatDescription"] = "nvarchar(4000) NOT NULL DEFAULT('')",
             ["StatusId"] = "uniqueidentifier NULL",
             ["RequestDate"] = "date NOT NULL DEFAULT(CONVERT(date, GETUTCDATE()))",
             ["IsDeleted"] = "bit NOT NULL DEFAULT(0)",
@@ -655,6 +735,8 @@ public static class RequirementsSchema
             IF COL_LENGTH('Requirements', 'Title') IS NOT NULL ALTER TABLE [Requirements] ALTER COLUMN [Title] nvarchar(180) NULL;
             IF COL_LENGTH('Requirements', 'Description') IS NOT NULL ALTER TABLE [Requirements] ALTER COLUMN [Description] nvarchar(4000) NULL;
             IF COL_LENGTH('Requirements', 'Priority') IS NOT NULL ALTER TABLE [Requirements] ALTER COLUMN [Priority] nvarchar(32) NULL;
+            UPDATE [Requirements] SET [RequesterEmail] = [RequestedBy] WHERE [RequesterEmail] = '';
+            UPDATE [Requirements] SET [RequesterName] = [RequestedBy] WHERE [RequesterName] = '';
             IF COL_LENGTH('RequirementAuditEvents', 'Comments') IS NOT NULL ALTER TABLE [RequirementAuditEvents] ALTER COLUMN [Comments] nvarchar(max) NOT NULL;
             """);
 
@@ -756,6 +838,22 @@ public static class RequirementsSchema
                 WHERE r.[EventFormatId] IS NULL
             END
 
+            IF EXISTS (SELECT 1 FROM [Requirements] WHERE [CareerId] IS NULL)
+            BEGIN
+                INSERT INTO [CatalogReferences] ([Id], [Type], [Code], [Name], [IsActive], [CreatedAt])
+                SELECT NEWID(), 'Career', LEFT([Career], 80), [Career], 1, SYSDATETIMEOFFSET()
+                FROM [Requirements] r
+                WHERE [CareerId] IS NULL
+                  AND NOT EXISTS (SELECT 1 FROM [CatalogReferences] c WHERE c.[Type] = 'Career' AND c.[Name] = r.[Career])
+                GROUP BY [Career]
+
+                UPDATE r
+                SET [CareerId] = c.[Id]
+                FROM [Requirements] r
+                INNER JOIN [CatalogReferences] c ON c.[Type] = 'Career' AND c.[Name] = r.[Career]
+                WHERE r.[CareerId] IS NULL
+            END
+
             UPDATE [Requirements]
             SET [StatusId] = CASE [Status]
                 WHEN 'Draft' THEN '33333333-3333-3333-3333-333333333391'
@@ -775,12 +873,56 @@ public static class RequirementsSchema
 
             IF OBJECT_ID('FK_Requirements_CatalogReferences_FacultyId', 'F') IS NULL
                 ALTER TABLE [Requirements] ADD CONSTRAINT [FK_Requirements_CatalogReferences_FacultyId] FOREIGN KEY ([FacultyId]) REFERENCES [CatalogReferences] ([Id]);
+            IF OBJECT_ID('FK_Requirements_CatalogReferences_CareerId', 'F') IS NULL
+                ALTER TABLE [Requirements] ADD CONSTRAINT [FK_Requirements_CatalogReferences_CareerId] FOREIGN KEY ([CareerId]) REFERENCES [CatalogReferences] ([Id]);
             IF OBJECT_ID('FK_Requirements_CatalogReferences_CampusId', 'F') IS NULL
                 ALTER TABLE [Requirements] ADD CONSTRAINT [FK_Requirements_CatalogReferences_CampusId] FOREIGN KEY ([CampusId]) REFERENCES [CatalogReferences] ([Id]);
             IF OBJECT_ID('FK_Requirements_CatalogReferences_EventFormatId', 'F') IS NULL
                 ALTER TABLE [Requirements] ADD CONSTRAINT [FK_Requirements_CatalogReferences_EventFormatId] FOREIGN KEY ([EventFormatId]) REFERENCES [CatalogReferences] ([Id]);
             IF OBJECT_ID('FK_Requirements_CatalogReferences_StatusId', 'F') IS NULL
                 ALTER TABLE [Requirements] ADD CONSTRAINT [FK_Requirements_CatalogReferences_StatusId] FOREIGN KEY ([StatusId]) REFERENCES [CatalogReferences] ([Id]);
+            """);
+
+        await db.Database.ExecuteSqlRawAsync("""
+            IF OBJECT_ID('RequirementAttachments', 'U') IS NULL
+            BEGIN
+                CREATE TABLE [RequirementAttachments] (
+                    [Id] uniqueidentifier NOT NULL,
+                    [RequirementId] uniqueidentifier NOT NULL,
+                    [OriginalFileName] nvarchar(240) NOT NULL,
+                    [StoredFileName] nvarchar(260) NOT NULL,
+                    [ContentType] nvarchar(120) NOT NULL,
+                    [SizeBytes] bigint NOT NULL,
+                    [StorageKey] nvarchar(800) NOT NULL,
+                    [Status] nvarchar(32) NOT NULL,
+                    [UploadedBy] nvarchar(180) NOT NULL,
+                    [CreatedAt] datetimeoffset NOT NULL,
+                    [UpdatedAt] datetimeoffset NULL,
+                    [IsDeleted] bit NOT NULL DEFAULT(0),
+                    [DeletedAt] datetimeoffset NULL,
+                    [DeletedBy] nvarchar(160) NOT NULL DEFAULT(''),
+                    CONSTRAINT [PK_RequirementAttachments] PRIMARY KEY ([Id]),
+                    CONSTRAINT [FK_RequirementAttachments_Requirements_RequirementId] FOREIGN KEY ([RequirementId]) REFERENCES [Requirements] ([Id])
+                );
+                CREATE INDEX [IX_RequirementAttachments_RequirementId] ON [RequirementAttachments] ([RequirementId]);
+            END
+
+            IF OBJECT_ID('RequirementPublicCreations', 'U') IS NULL
+            BEGIN
+                CREATE TABLE [RequirementPublicCreations] (
+                    [Id] uniqueidentifier NOT NULL,
+                    [RequirementId] uniqueidentifier NOT NULL,
+                    [IdempotencyKeyHash] nvarchar(128) NOT NULL,
+                    [UploadTokenHash] nvarchar(128) NOT NULL,
+                    [UploadTokenValue] nvarchar(160) NOT NULL,
+                    [ExpiresAt] datetimeoffset NOT NULL,
+                    [CreatedAt] datetimeoffset NOT NULL,
+                    CONSTRAINT [PK_RequirementPublicCreations] PRIMARY KEY ([Id]),
+                    CONSTRAINT [FK_RequirementPublicCreations_Requirements_RequirementId] FOREIGN KEY ([RequirementId]) REFERENCES [Requirements] ([Id])
+                );
+                CREATE UNIQUE INDEX [IX_RequirementPublicCreations_IdempotencyKeyHash] ON [RequirementPublicCreations] ([IdempotencyKeyHash]);
+                CREATE UNIQUE INDEX [IX_RequirementPublicCreations_UploadTokenHash] ON [RequirementPublicCreations] ([UploadTokenHash]);
+            END
             """);
 
         await db.Database.ExecuteSqlRawAsync("""
