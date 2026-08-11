@@ -138,30 +138,30 @@ app.MapPost("/requirements/satisfaction/{token}", async (string token, SubmitSat
 
 app.MapPost("/requirements", async (CreateRequirementRequest request, RequirementsDbContext db, IHttpClientFactory httpClientFactory) =>
 {
-    CatalogReferenceWriter.UpsertReferences(db, request);
+    var resolvedRequest = CatalogReferenceWriter.ResolveReferences(db, request);
     var requirement = new Requirement(
-        request.ActivityOrEvent,
-        request.RequestedBy,
-        request.FacultyId,
-        request.Faculty,
-        request.Career,
-        request.CampusId,
-        request.Campus,
-        request.Place,
-        request.StartDate,
-        request.StartTime,
-        request.EndDate,
-        request.EndTime,
-        request.EventObjective,
-        request.EventFormatId,
-        request.EventFormat,
-        request.RequestDate,
-        request.CareerId,
-        request.RequesterName,
-        request.RequesterEmail,
-        request.AudienceType,
-        request.ActivityFormatDescription);
-    requirement.SetStatusReference(request.StatusId ?? WorkflowCatalogIds.ForRequirement(requirement.Status));
+        resolvedRequest.ActivityOrEvent,
+        resolvedRequest.RequestedBy,
+        resolvedRequest.FacultyId,
+        resolvedRequest.Faculty,
+        resolvedRequest.Career,
+        resolvedRequest.CampusId,
+        resolvedRequest.Campus,
+        resolvedRequest.Place,
+        resolvedRequest.StartDate,
+        resolvedRequest.StartTime,
+        resolvedRequest.EndDate,
+        resolvedRequest.EndTime,
+        resolvedRequest.EventObjective,
+        resolvedRequest.EventFormatId,
+        resolvedRequest.EventFormat,
+        resolvedRequest.RequestDate,
+        resolvedRequest.CareerId,
+        resolvedRequest.RequesterName,
+        resolvedRequest.RequesterEmail,
+        resolvedRequest.AudienceType,
+        resolvedRequest.ActivityFormatDescription);
+    requirement.SetStatusReference(resolvedRequest.StatusId ?? WorkflowCatalogIds.ForRequirement(requirement.Status));
     db.Requirements.Add(requirement);
     db.AuditEvents.Add(RequirementAuditEvent.Created(requirement.Id, null, requirement.Status.ToString(), "Creación del requerimiento", request.RequestedBy, AuditJson.Build("Requerimientos", "Crear", request.RequestedBy, request)));
     await db.SaveChangesAsync();
@@ -184,31 +184,31 @@ app.MapPut("/requirements/{id:guid}", async (Guid id, CreateRequirementRequest r
     if (!requirement.CanEdit)
         return Results.Conflict(new { message = "Solo se puede editar un requerimiento en borrador." });
 
-    CatalogReferenceWriter.UpsertReferences(db, request);
+    var resolvedRequest = CatalogReferenceWriter.ResolveReferences(db, request);
     var previousStatus = requirement.Status.ToString();
     requirement.Update(
-        request.ActivityOrEvent,
-        request.RequestedBy,
-        request.FacultyId,
-        request.Faculty,
-        request.Career,
-        request.CampusId,
-        request.Campus,
-        request.Place,
-        request.StartDate,
-        request.StartTime,
-        request.EndDate,
-        request.EndTime,
-        request.EventObjective,
-        request.EventFormatId,
-        request.EventFormat,
-        request.RequestDate,
-        request.CareerId,
-        request.RequesterName,
-        request.RequesterEmail,
-        request.AudienceType,
-        request.ActivityFormatDescription);
-    requirement.SetStatusReference(request.StatusId ?? WorkflowCatalogIds.ForRequirement(requirement.Status));
+        resolvedRequest.ActivityOrEvent,
+        resolvedRequest.RequestedBy,
+        resolvedRequest.FacultyId,
+        resolvedRequest.Faculty,
+        resolvedRequest.Career,
+        resolvedRequest.CampusId,
+        resolvedRequest.Campus,
+        resolvedRequest.Place,
+        resolvedRequest.StartDate,
+        resolvedRequest.StartTime,
+        resolvedRequest.EndDate,
+        resolvedRequest.EndTime,
+        resolvedRequest.EventObjective,
+        resolvedRequest.EventFormatId,
+        resolvedRequest.EventFormat,
+        resolvedRequest.RequestDate,
+        resolvedRequest.CareerId,
+        resolvedRequest.RequesterName,
+        resolvedRequest.RequesterEmail,
+        resolvedRequest.AudienceType,
+        resolvedRequest.ActivityFormatDescription);
+    requirement.SetStatusReference(resolvedRequest.StatusId ?? WorkflowCatalogIds.ForRequirement(requirement.Status));
     db.AuditEvents.Add(RequirementAuditEvent.Changed(requirement.Id, previousStatus, requirement.Status.ToString(), "Actualización de datos del requerimiento", request.RequestedBy, AuditJson.Build("Requerimientos", "Editar", request.RequestedBy, request)));
     await db.SaveChangesAsync();
     return Results.Ok(requirement);
@@ -656,31 +656,52 @@ public static class CatalogReferenceWriter
 
     public static void UpsertReferences(RequirementsDbContext db, CreateRequirementRequest request)
     {
-        UpsertReference(db, request.FacultyId, "Faculty", request.Faculty, request.Faculty);
+        _ = ResolveReferences(db, request);
+    }
+
+    public static CreateRequirementRequest ResolveReferences(RequirementsDbContext db, CreateRequirementRequest request)
+    {
+        var facultyId = UpsertReference(db, request.FacultyId, "Faculty", request.Faculty, request.Faculty);
+        Guid? careerId = null;
         if (request.CareerId.HasValue)
-            UpsertReference(db, request.CareerId.Value, "Career", request.Career, request.Career);
-        UpsertReference(db, request.CampusId, "Campus", request.Campus, request.Campus);
-        UpsertReference(db, request.EventFormatId, "FormatoEvento", request.EventFormat, request.EventFormat);
-        UpsertReference(db, request.StatusId ?? WorkflowCatalogIds.RequirementDraft, "EstadoRequerimiento", "Draft", "Borrador");
+            careerId = UpsertReference(db, request.CareerId.Value, "Career", request.Career, request.Career);
+        var campusId = UpsertReference(db, request.CampusId, "Campus", request.Campus, request.Campus);
+        var eventFormatId = UpsertReference(db, request.EventFormatId, "FormatoEvento", request.EventFormat, request.EventFormat);
+        var statusId = UpsertReference(db, request.StatusId ?? WorkflowCatalogIds.RequirementDraft, "EstadoRequerimiento", "Draft", "Borrador");
+
+        return request with
+        {
+            FacultyId = facultyId,
+            CareerId = careerId,
+            CampusId = campusId,
+            EventFormatId = eventFormatId,
+            StatusId = statusId
+        };
     }
 
     public static void UpsertStatusReference(RequirementsDbContext db, RequirementStatus status) =>
         UpsertReference(db, WorkflowCatalogIds.ForRequirement(status), "EstadoRequerimiento", status.ToString(), StatusName(status));
 
-    private static void UpsertReference(RequirementsDbContext db, Guid id, string type, string code, string name)
+    private static Guid UpsertReference(RequirementsDbContext db, Guid id, string type, string code, string name)
     {
+        var normalizedCode = NormalizeCode(code, id);
         var current = db.CatalogReferences.Local.FirstOrDefault(x => x.Id == id)
             ?? db.CatalogReferences.Find(id);
-        if (current is null)
+        if (current is not null) return current.Id;
+
+        current = db.CatalogReferences.Local.FirstOrDefault(x => x.Type == type && x.Code == normalizedCode)
+            ?? db.CatalogReferences.FirstOrDefault(x => x.Type == type && x.Code == normalizedCode);
+        if (current is not null) return current.Id;
+
+        var normalizedName = string.IsNullOrWhiteSpace(name) ? normalizedCode : name.Trim();
+        db.CatalogReferences.Add(new CatalogReference
         {
-            db.CatalogReferences.Add(new CatalogReference
-            {
-                Id = id,
-                Type = type,
-                Code = NormalizeCode(code, id),
-                Name = name.Trim()
-            });
-        }
+            Id = id,
+            Type = type,
+            Code = normalizedCode,
+            Name = normalizedName
+        });
+        return id;
     }
 
     public static string NormalizeCode(string? code, Guid id)

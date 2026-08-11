@@ -1,6 +1,7 @@
 using BuildingBlocks;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace Requirements.UnitTests;
 
@@ -141,6 +142,46 @@ public sealed class RequirementWorkflowTests
         normalized.Should().HaveLength(CatalogReferenceWriter.CodeMaxLength);
         normalized.Should().Be(longCode[..CatalogReferenceWriter.CodeMaxLength]);
         CatalogReferenceWriter.NormalizeCode("", id).Should().HaveLength(12);
+    }
+
+    [Fact]
+    public void Catalog_reference_resolution_reuses_existing_type_and_code()
+    {
+        var existingFacultyId = Guid.NewGuid();
+        using var db = new RequirementsDbContext(new DbContextOptionsBuilder<RequirementsDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .Options);
+        db.CatalogReferences.Add(new CatalogReference
+        {
+            Id = existingFacultyId,
+            Type = "Faculty",
+            Code = "Arquitectura, Artes y Diseño",
+            Name = "Arquitectura, Artes y Diseño"
+        });
+        db.SaveChanges();
+
+        var request = new CreateRequirementRequest(
+            "Casa abierta",
+            "marketing@uti.edu.ec",
+            Guid.NewGuid(),
+            "Arquitectura, Artes y Diseño",
+            "Diseño Gráfico",
+            Guid.NewGuid(),
+            "Quito",
+            "Auditorio",
+            DateOnly.FromDateTime(DateTime.UtcNow),
+            null,
+            DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1)),
+            null,
+            "Difundir oferta academica",
+            Guid.NewGuid(),
+            "Presencial",
+            DateOnly.FromDateTime(DateTime.UtcNow));
+
+        var resolved = CatalogReferenceWriter.ResolveReferences(db, request);
+
+        resolved.FacultyId.Should().Be(existingFacultyId);
+        db.CatalogReferences.Count(x => x.Type == "Faculty" && x.Code == "Arquitectura, Artes y Diseño").Should().Be(1);
     }
 
     [Fact]

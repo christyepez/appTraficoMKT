@@ -32,9 +32,9 @@ public static class RequirementEndpoints
             if (!validation.IsValid) return Results.BadRequest(new { message = validation.Message });
 
             await using var transaction = await db.Database.BeginTransactionAsync();
-            CatalogReferenceWriter.UpsertReferences(db, request);
-            var requirement = RequirementFactory.Create(request);
-            requirement.SetStatusReference(request.StatusId ?? WorkflowCatalogIds.ForRequirement(requirement.Status));
+            var resolvedRequest = CatalogReferenceWriter.ResolveReferences(db, request);
+            var requirement = RequirementFactory.Create(resolvedRequest);
+            requirement.SetStatusReference(resolvedRequest.StatusId ?? WorkflowCatalogIds.ForRequirement(requirement.Status));
             db.Requirements.Add(requirement);
             db.AuditEvents.Add(RequirementAuditEvent.Created(requirement.Id, null, requirement.Status.ToString(), "Creación pública del requerimiento", requirement.RequesterEmail, AuditJson.Build("Requerimientos", "Crear público", requirement.RequesterEmail, new { requirement.Id, requirement.Code })));
             await db.SaveChangesAsync();
