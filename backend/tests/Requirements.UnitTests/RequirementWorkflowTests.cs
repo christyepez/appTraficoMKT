@@ -109,10 +109,14 @@ public sealed class RequirementWorkflowTests
     {
         var validator = new RequirementFileValidator();
 
-        validator.Validate(new FormFile(new MemoryStream([1, 2, 3]), 0, 3, "file", "brief.pdf") { Headers = new HeaderDictionary(), ContentType = "application/pdf" }).IsValid.Should().BeTrue();
+        validator.Validate(File("brief.pdf", "application/pdf", [0x25, 0x50, 0x44, 0x46, 0x2D])).IsValid.Should().BeTrue();
+        validator.Validate(File("photo.jpg", "image/jpeg", [0xFF, 0xD8, 0xFF, 0xE0])).IsValid.Should().BeTrue();
+        validator.Validate(File("image.png", "image/png", [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])).IsValid.Should().BeTrue();
+        validator.Validate(File("image.webp", "image/webp", [0x52, 0x49, 0x46, 0x46, 0, 0, 0, 0, 0x57, 0x45, 0x42, 0x50])).IsValid.Should().BeTrue();
+        validator.Validate(File("fake.pdf", "application/pdf", [1, 2, 3, 4])).IsValid.Should().BeFalse();
         validator.Validate(new FormFile(new MemoryStream([1]), 0, RequirementFileValidator.MaxBytes + 1, "file", "large.pdf") { Headers = new HeaderDictionary(), ContentType = "application/pdf" }).IsValid.Should().BeFalse();
-        validator.Validate(new FormFile(new MemoryStream([1]), 0, 1, "file", "vector.svg") { Headers = new HeaderDictionary(), ContentType = "image/svg+xml" }).IsValid.Should().BeFalse();
-        validator.Validate(new FormFile(new MemoryStream([1]), 0, 1, "file", "setup.exe") { Headers = new HeaderDictionary(), ContentType = "application/x-msdownload" }).IsValid.Should().BeFalse();
+        validator.Validate(File("vector.svg", "image/svg+xml", [1])).IsValid.Should().BeFalse();
+        validator.Validate(File("setup.exe", "application/x-msdownload", [1])).IsValid.Should().BeFalse();
     }
 
     [Fact]
@@ -124,6 +128,88 @@ public sealed class RequirementWorkflowTests
         token.Should().NotBeNullOrWhiteSpace();
         service.Hash(token).Should().Be(service.Hash(token));
         service.Hash(token).Should().NotBe(token);
+    }
+
+    [Fact]
+    public void Catalog_reference_codes_are_limited_to_database_size()
+    {
+        var id = Guid.NewGuid();
+        var longCode = new string('A', CatalogReferenceWriter.CodeMaxLength + 20);
+
+        var normalized = CatalogReferenceWriter.NormalizeCode(longCode, id);
+
+        normalized.Should().HaveLength(CatalogReferenceWriter.CodeMaxLength);
+        normalized.Should().Be(longCode[..CatalogReferenceWriter.CodeMaxLength]);
+        CatalogReferenceWriter.NormalizeCode("", id).Should().HaveLength(12);
+    }
+
+    [Fact]
+    public void Requirement_trims_text_fields_to_database_size()
+    {
+        var requirement = new Requirement(
+            new string('A', Requirement.ActivityOrEventMaxLength + 10),
+            new string('B', Requirement.RequestedByMaxLength + 10),
+            Guid.NewGuid(),
+            new string('C', Requirement.FacultyMaxLength + 10),
+            new string('D', Requirement.CareerMaxLength + 10),
+            Guid.NewGuid(),
+            new string('E', Requirement.CampusMaxLength + 10),
+            new string('F', Requirement.PlaceMaxLength + 10),
+            DateOnly.FromDateTime(DateTime.UtcNow),
+            null,
+            DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1)),
+            null,
+            "Difundir oferta academica",
+            Guid.NewGuid(),
+            new string('G', Requirement.EventFormatMaxLength + 10),
+            DateOnly.FromDateTime(DateTime.UtcNow),
+            Guid.NewGuid(),
+            new string('H', Requirement.RequesterNameMaxLength + 10),
+            new string('I', Requirement.RequesterEmailMaxLength + 10),
+            "mixed",
+            "Charla con activacion institucional");
+
+        requirement.ActivityOrEvent.Should().HaveLength(Requirement.ActivityOrEventMaxLength);
+        requirement.RequestedBy.Should().HaveLength(Requirement.RequestedByMaxLength);
+        requirement.Faculty.Should().HaveLength(Requirement.FacultyMaxLength);
+        requirement.Career.Should().HaveLength(Requirement.CareerMaxLength);
+        requirement.Campus.Should().HaveLength(Requirement.CampusMaxLength);
+        requirement.Place.Should().HaveLength(Requirement.PlaceMaxLength);
+        requirement.EventFormat.Should().HaveLength(Requirement.EventFormatMaxLength);
+        requirement.RequesterName.Should().HaveLength(Requirement.RequesterNameMaxLength);
+        requirement.RequesterEmail.Should().HaveLength(Requirement.RequesterEmailMaxLength);
+    }
+
+    [Fact]
+    public void Completion_recipient_prefers_requester_email_and_falls_back_to_requested_by_email()
+    {
+        var requirement = CreateRequirement();
+        CompletionRecipient.Resolve(requirement).Should().Be("marketing@uti.edu.ec");
+
+        var historical = new Requirement(
+            "Casa abierta",
+            "historico@uti.edu.ec",
+            Guid.NewGuid(),
+            "Ingenieria",
+            "Software",
+            Guid.NewGuid(),
+            "Ambato",
+            "Auditorio",
+            DateOnly.FromDateTime(DateTime.UtcNow),
+            null,
+            DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1)),
+            null,
+            "Difundir oferta academica",
+            Guid.NewGuid(),
+            "Presencial",
+            DateOnly.FromDateTime(DateTime.UtcNow),
+            Guid.NewGuid(),
+            "Solicitante historico",
+            "",
+            "mixed",
+            "Charla con activacion institucional");
+
+        CompletionRecipient.Resolve(historical).Should().Be("historico@uti.edu.ec");
     }
 
     private static Requirement CreateRequirement() => new(
@@ -166,4 +252,11 @@ public sealed class RequirementWorkflowTests
         "Disenador",
         DateOnly.FromDateTime(DateTime.UtcNow.AddDays(2)),
         "Sin observaciones");
+
+    private static FormFile File(string fileName, string contentType, byte[] content) =>
+        new(new MemoryStream(content), 0, content.Length, "file", fileName)
+        {
+            Headers = new HeaderDictionary(),
+            ContentType = contentType
+        };
 }

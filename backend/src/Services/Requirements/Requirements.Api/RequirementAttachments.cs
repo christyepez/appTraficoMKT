@@ -109,7 +109,23 @@ public sealed class RequirementFileValidator : IRequirementFileValidator
         if (!AllowedExtensions.Contains(extension)) return new(false, "Extensión de archivo no permitida.");
         if (!AllowedMimeTypes.Contains(file.ContentType)) return new(false, "Tipo de archivo no permitido.");
         if (extension == ".svg" || file.ContentType.Contains("svg", StringComparison.OrdinalIgnoreCase)) return new(false, "SVG no permitido.");
+        if (!HasExpectedSignature(file, extension)) return new(false, "El contenido del archivo no coincide con su tipo.");
         return new(true, string.Empty);
+    }
+
+    private static bool HasExpectedSignature(IFormFile file, string extension)
+    {
+        Span<byte> buffer = stackalloc byte[12];
+        using var stream = file.OpenReadStream();
+        var read = stream.Read(buffer);
+        return extension switch
+        {
+            ".pdf" => read >= 4 && buffer[0] == 0x25 && buffer[1] == 0x50 && buffer[2] == 0x44 && buffer[3] == 0x46,
+            ".jpg" or ".jpeg" => read >= 3 && buffer[0] == 0xFF && buffer[1] == 0xD8 && buffer[2] == 0xFF,
+            ".png" => read >= 8 && buffer[0] == 0x89 && buffer[1] == 0x50 && buffer[2] == 0x4E && buffer[3] == 0x47 && buffer[4] == 0x0D && buffer[5] == 0x0A && buffer[6] == 0x1A && buffer[7] == 0x0A,
+            ".webp" => read >= 12 && buffer[0] == 0x52 && buffer[1] == 0x49 && buffer[2] == 0x46 && buffer[3] == 0x46 && buffer[8] == 0x57 && buffer[9] == 0x45 && buffer[10] == 0x42 && buffer[11] == 0x50,
+            _ => false
+        };
     }
 }
 

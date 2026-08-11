@@ -31,10 +31,13 @@ public static class RequirementEndpoints
             var validation = RequirementRequestValidator.Validate(request);
             if (!validation.IsValid) return Results.BadRequest(new { message = validation.Message });
 
+            await using var transaction = await db.Database.BeginTransactionAsync();
             CatalogReferenceWriter.UpsertReferences(db, request);
             var requirement = RequirementFactory.Create(request);
             requirement.SetStatusReference(request.StatusId ?? WorkflowCatalogIds.ForRequirement(requirement.Status));
             db.Requirements.Add(requirement);
+            db.AuditEvents.Add(RequirementAuditEvent.Created(requirement.Id, null, requirement.Status.ToString(), "Creación pública del requerimiento", requirement.RequesterEmail, AuditJson.Build("Requerimientos", "Crear público", requirement.RequesterEmail, new { requirement.Id, requirement.Code })));
+            await db.SaveChangesAsync();
 
             var uploadToken = tokenService.CreateToken();
             db.RequirementPublicCreations.Add(new RequirementPublicCreation
@@ -45,8 +48,8 @@ public static class RequirementEndpoints
                 UploadTokenValue = uploadToken,
                 ExpiresAt = DateTimeOffset.UtcNow.AddMinutes(30)
             });
-            db.AuditEvents.Add(RequirementAuditEvent.Created(requirement.Id, null, requirement.Status.ToString(), "Creación pública del requerimiento", requirement.RequesterEmail, AuditJson.Build("Requerimientos", "Crear público", requirement.RequesterEmail, new { requirement.Id, requirement.Code })));
             await db.SaveChangesAsync();
+            await transaction.CommitAsync();
 
             await RequirementNotifications.NotifyAsync(httpClientFactory, new SystemNotificationRequest(
                 "RequirementCreated",
@@ -73,12 +76,21 @@ public static class RequirementEndpoints
         {
             if (!request.HasFormContentType) return Results.BadRequest(new { message = "La solicitud debe ser multipart/form-data." });
             if (!await IsAuthorizedUploadAsync(requirementId, request, db, tokenService)) return Results.Unauthorized();
-            var form = await request.ReadFormAsync();
+            IFormCollection form;
+            try
+            {
+                form = await request.ReadFormAsync();
+            }
+            catch (InvalidDataException)
+            {
+                return Results.BadRequest(new { message = "El archivo no puede superar 5 MB." });
+            }
             if (form.Files.Count == 0) return Results.BadRequest(new { message = "Adjunte al menos un archivo." });
             var uploadedBy = form["uploadedBy"].FirstOrDefault() ?? "Sistema";
             try
             {
                 var result = await service.UploadAsync(requirementId, form.Files, uploadedBy);
+                if (result.Uploaded.Count == 0 && result.FailedFiles.Count > 0) return Results.BadRequest(result);
                 return Results.Created($"/requirements/{requirementId}/attachments", result);
             }
             catch (InvalidOperationException error)

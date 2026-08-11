@@ -290,65 +290,11 @@ app.MapPatch("/activities/{id:guid}/evidence-attached", async (Guid id, Activiti
     return Results.Ok(activity);
 });
 
-app.MapPatch("/activities/{id:guid}/submit-approval", async (Guid id, ActivitiesDbContext db) =>
-{
-    var activity = await db.Activities.FindAsync(id);
-    if (activity is null || activity.IsDeleted) return Results.NotFound();
-
-    var previousStatus = activity.Status.ToString();
-    activity.SendToApproval();
-    CatalogReferenceWriter.UpsertStatusReference(db, activity.Status);
-    db.AuditEvents.Add(ActivityAuditEvent.Changed(activity.Id, activity.RequirementId, previousStatus, activity.Status.ToString(), "Producto enviado a aprobación", activity.ProductResponsible, AuditJson.Build("Productos", "Enviar aprobación", activity.ProductResponsible, new { id })));
-    await db.SaveChangesAsync();
-    return Results.Ok(activity);
-});
+app.MapPatch("/activities/{id:guid}/submit-approval", (Guid id, ActivitiesDbContext db, IHttpClientFactory httpClientFactory, IConfiguration configuration, HttpContext httpContext) =>
+    ProductApprovalWorkflow.SubmitAsync(id, new SubmitApprovalRequest(null, null, null, "web"), db, httpClientFactory, configuration, httpContext));
 
 app.MapPost("/activities/{id:guid}/submit-approval", async (Guid id, SubmitApprovalRequest request, ActivitiesDbContext db, IHttpClientFactory httpClientFactory, IConfiguration configuration, HttpContext httpContext) =>
-{
-    var activity = await db.Activities.FindAsync(id);
-    if (activity is null || activity.IsDeleted) return Results.NotFound();
-    if (activity.Status == ActivityStatus.PendingApproval)
-        return Results.Conflict(new { message = "El producto ya fue enviado a aprobación." });
-    if (activity.Status == ActivityStatus.Approved)
-        return Results.Conflict(new { message = "El producto ya está aprobado." });
-
-    var notificationSettings = await db.NotificationSettings.Where(x => x.IsActive).OrderByDescending(x => x.UpdatedAt ?? x.CreatedAt).FirstOrDefaultAsync();
-    var approverEmail = ApprovalRecipient.ResolveApprover(request.ApproverEmail, notificationSettings, configuration);
-    if (string.IsNullOrWhiteSpace(approverEmail)) return Results.BadRequest("Configure un aprobador o correo destino para solicitar aprobación.");
-
-    var requesterEmail = string.IsNullOrWhiteSpace(request.RequesterEmail)
-        ? await NotificationRecipientResolver.ResolveAsync(activity.ProductResponsible, httpContext, httpClientFactory)
-        : request.RequesterEmail.Trim().ToLowerInvariant();
-
-    var evidenceClient = httpClientFactory.CreateClient("evidence");
-    var approvalResponse = await evidenceClient.PostAsJsonAsync("/approvals/requests", new SubmitApprovalRequestToEvidence(activity.Id, approverEmail, requesterEmail, request.Comments, request.Source ?? "web", "PendingNotification", null));
-    if (!approvalResponse.IsSuccessStatusCode)
-    {
-        var errorText = await approvalResponse.Content.ReadAsStringAsync();
-        return Results.Json(new { message = string.IsNullOrWhiteSpace(errorText) ? "No se pudo crear la solicitud de aprobación." : errorText }, statusCode: (int)approvalResponse.StatusCode);
-    }
-
-    var approval = await approvalResponse.Content.ReadFromJsonAsync<ActivityApprovalDto>();
-    var previousStatus = activity.Status.ToString();
-    activity.SendToApproval();
-    CatalogReferenceWriter.UpsertStatusReference(db, activity.Status);
-    db.AuditEvents.Add(ActivityAuditEvent.Changed(activity.Id, activity.RequirementId, previousStatus, activity.Status.ToString(), "Producto enviado a aprobación", activity.ProductResponsible, AuditJson.Build("Productos", "Enviar aprobación", activity.ProductResponsible, new { activity.Id, activity.ProductId, approvalId = approval?.Id, approverEmail, requesterEmail })));
-
-    var record = NotificationRecord.Create(
-        "ProductApprovalRequested",
-        $"Aprobación producto {activity.ProductId}",
-        $"El producto {activity.ProductId} requiere aprobación.",
-        approverEmail,
-        activity.ProductResponsible,
-        activity.RequirementId,
-        activity.Id,
-        AuditJson.Build("Notificaciones", "Solicitud de aprobación", activity.ProductResponsible, new { activity.Id, activity.ProductId, approverEmail, requesterEmail, approvalId = approval?.Id }));
-    db.NotificationRecords.Add(record);
-    await db.SaveChangesAsync();
-    await NotificationDelivery.SafeSendAsync(record, notificationSettings, httpClientFactory, configuration, db);
-
-    return Results.Ok(new SubmitApprovalResponse(activity.Id, approval?.Id ?? Guid.Empty, activity.Status.ToString(), "PendingNotification"));
-});
+    await ProductApprovalWorkflow.SubmitAsync(id, request, db, httpClientFactory, configuration, httpContext));
 
 app.MapGet("/activities/{id:guid}/approvals", async (Guid id, IHttpClientFactory httpClientFactory) =>
 {
@@ -717,6 +663,62 @@ public static class ApprovalCallbackSecurity
 {
     public static bool RequiresCallbackKey(string? source) =>
         source is not null && source.Equals("powerautomate", StringComparison.OrdinalIgnoreCase);
+}
+
+public static class ProductApprovalWorkflow
+{
+    public static async Task<IResult> SubmitAsync(
+        Guid id,
+        SubmitApprovalRequest request,
+        ActivitiesDbContext db,
+        IHttpClientFactory httpClientFactory,
+        IConfiguration configuration,
+        HttpContext httpContext)
+    {
+        var activity = await db.Activities.FindAsync(id);
+        if (activity is null || activity.IsDeleted) return Results.NotFound();
+        if (activity.Status == ActivityStatus.PendingApproval)
+            return Results.Conflict(new { message = "El producto ya fue enviado a aprobación." });
+        if (activity.Status == ActivityStatus.Approved)
+            return Results.Conflict(new { message = "El producto ya está aprobado." });
+
+        var notificationSettings = await db.NotificationSettings.Where(x => x.IsActive).OrderByDescending(x => x.UpdatedAt ?? x.CreatedAt).FirstOrDefaultAsync();
+        var approverEmail = ApprovalRecipient.ResolveApprover(request.ApproverEmail, notificationSettings, configuration);
+        if (string.IsNullOrWhiteSpace(approverEmail)) return Results.BadRequest("Configure un aprobador o correo destino para solicitar aprobación.");
+
+        var requesterEmail = string.IsNullOrWhiteSpace(request.RequesterEmail)
+            ? await NotificationRecipientResolver.ResolveAsync(activity.ProductResponsible, httpContext, httpClientFactory)
+            : request.RequesterEmail.Trim().ToLowerInvariant();
+
+        var evidenceClient = httpClientFactory.CreateClient("evidence");
+        var approvalResponse = await evidenceClient.PostAsJsonAsync("/approvals/requests", new SubmitApprovalRequestToEvidence(activity.Id, approverEmail, requesterEmail, request.Comments, request.Source ?? "web", "PendingNotification", null));
+        if (!approvalResponse.IsSuccessStatusCode)
+        {
+            var errorText = await approvalResponse.Content.ReadAsStringAsync();
+            return Results.Json(new { message = string.IsNullOrWhiteSpace(errorText) ? "No se pudo crear la solicitud de aprobación." : errorText }, statusCode: (int)approvalResponse.StatusCode);
+        }
+
+        var approval = await approvalResponse.Content.ReadFromJsonAsync<ActivityApprovalDto>();
+        var previousStatus = activity.Status.ToString();
+        activity.SendToApproval();
+        CatalogReferenceWriter.UpsertStatusReference(db, activity.Status);
+        db.AuditEvents.Add(ActivityAuditEvent.Changed(activity.Id, activity.RequirementId, previousStatus, activity.Status.ToString(), "Producto enviado a aprobación", activity.ProductResponsible, AuditJson.Build("Productos", "Enviar aprobación", activity.ProductResponsible, new { activity.Id, activity.ProductId, approvalId = approval?.Id, approverEmail, requesterEmail })));
+
+        var record = NotificationRecord.Create(
+            "ProductApprovalRequested",
+            $"Aprobación producto {activity.ProductId}",
+            $"El producto {activity.ProductId} requiere aprobación.",
+            approverEmail,
+            activity.ProductResponsible,
+            activity.RequirementId,
+            activity.Id,
+            AuditJson.Build("Notificaciones", "Solicitud de aprobación", activity.ProductResponsible, new { activity.Id, activity.ProductId, approverEmail, requesterEmail, approvalId = approval?.Id }));
+        db.NotificationRecords.Add(record);
+        await db.SaveChangesAsync();
+        await NotificationDelivery.SafeSendAsync(record, notificationSettings, httpClientFactory, configuration, db);
+
+        return Results.Ok(new SubmitApprovalResponse(activity.Id, approval?.Id ?? Guid.Empty, activity.Status.ToString(), "PendingNotification"));
+    }
 }
 
 public static class ProductNotification

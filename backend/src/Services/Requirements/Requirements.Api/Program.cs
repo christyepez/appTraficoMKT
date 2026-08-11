@@ -268,6 +268,7 @@ app.MapPatch("/requirements/{id:guid}/complete", async (Guid id, RequirementsDbC
 {
     var requirement = await db.Requirements.FindAsync(id);
     if (requirement is null || requirement.IsDeleted) return Results.NotFound();
+    if (requirement.Status == RequirementStatus.Completed) return Results.Ok(requirement);
 
     var client = httpClientFactory.CreateClient("activities");
     var summary = await client.GetFromJsonAsync<ActivitySummary>($"/activities/summary/{id}");
@@ -509,13 +510,53 @@ public static class RequirementNotifications
     public static Task NotifyCompletedAsync(IHttpClientFactory httpClientFactory, IConfiguration configuration, Requirement requirement)
     {
         var satisfactionUrl = SatisfactionLinks.CreateUrl(requirement.Id, configuration);
-        var title = $"Requerimiento {requirement.Code} finalizado";
+        var recipient = CompletionRecipient.Resolve(requirement);
+        if (string.IsNullOrWhiteSpace(recipient))
+        {
+            return NotifyAsync(httpClientFactory, new SystemNotificationRequest(
+                "RequirementCompletedNotSendable",
+                $"Requerimiento {requirement.Code} finalizado sin correo",
+                "No se pudo determinar un correo válido del solicitante para enviar la encuesta de satisfacción.",
+                "administrador",
+                "Sistema",
+                requirement.Id,
+                null,
+                AuditJson.Build("Notificaciones", "Requerimiento finalizado sin correo", "Sistema", new { requirement.Id, requirement.Code })));
+        }
+
+        var title = $"Su requerimiento {requirement.Code} ha sido completado";
         var message = $"El requerimiento {requirement.Code}: {requirement.ActivityOrEvent} fue completado. Por favor registre su satisfacción.";
-        var html = $"<h2>{System.Net.WebUtility.HtmlEncode(title)}</h2><p>{System.Net.WebUtility.HtmlEncode(message)}</p><p><a href=\"{System.Net.WebUtility.HtmlEncode(satisfactionUrl)}\" style=\"display:inline-block;padding:12px 18px;background:#3c235f;color:#fff;text-decoration:none;border-radius:4px\">Completar encuesta de satisfacción</a></p>";
+        var requesterName = string.IsNullOrWhiteSpace(requirement.RequesterName) ? "Solicitante" : requirement.RequesterName;
+        var body = $"""
+            Hola {System.Net.WebUtility.HtmlEncode(requesterName)}:
+
+            Le informamos que el requerimiento {System.Net.WebUtility.HtmlEncode(requirement.Code)}, correspondiente a "{System.Net.WebUtility.HtmlEncode(requirement.ActivityOrEvent)}", ha sido completado.
+
+            Queremos conocer su experiencia con la atención recibida. Por favor, complete la siguiente encuesta de satisfacción:
+
+            {System.Net.WebUtility.HtmlEncode(satisfactionUrl)}
+
+            Su opinión nos ayudará a mejorar continuamente nuestros servicios.
+
+            Área de Marketing
+            """;
+        var html = $"<h2>{System.Net.WebUtility.HtmlEncode(title)}</h2><p>{body.Replace("\r\n", "<br>").Replace("\n", "<br>")}</p><p><a href=\"{System.Net.WebUtility.HtmlEncode(satisfactionUrl)}\" style=\"display:inline-block;padding:12px 18px;background:#3c235f;color:#fff;text-decoration:none;border-radius:4px\">Completar encuesta de satisfacción</a></p>";
         return NotifyAsync(httpClientFactory, new SystemNotificationRequest(
-            "RequirementCompleted", title, message, requirement.RequestedBy, "Sistema", requirement.Id, null,
-            AuditJson.Build("Notificaciones", "Requerimiento finalizado", "Sistema", new { requirement.Id, requirement.Code, requirement.ActivityOrEvent, requirement.RequestedBy, satisfactionUrl }), html));
+            "RequirementCompleted", title, message, recipient, "Sistema", requirement.Id, null,
+            AuditJson.Build("Notificaciones", "Requerimiento finalizado", "Sistema", new { requirement.Id, requirement.Code, requirement.ActivityOrEvent, requesterEmail = recipient, satisfactionUrl }), html));
     }
+}
+
+public static class CompletionRecipient
+{
+    public static string Resolve(Requirement requirement)
+    {
+        if (IsEmail(requirement.RequesterEmail)) return requirement.RequesterEmail.Trim().ToLowerInvariant();
+        return IsEmail(requirement.RequestedBy) ? requirement.RequestedBy.Trim().ToLowerInvariant() : string.Empty;
+    }
+
+    private static bool IsEmail(string? value) =>
+        !string.IsNullOrWhiteSpace(value) && value.Contains('@') && value.Contains('.');
 }
 
 public static class SatisfactionLinks
@@ -611,6 +652,8 @@ public static class AssignmentKeys
 
 public static class CatalogReferenceWriter
 {
+    public const int CodeMaxLength = 80;
+
     public static void UpsertReferences(RequirementsDbContext db, CreateRequirementRequest request)
     {
         UpsertReference(db, request.FacultyId, "Faculty", request.Faculty, request.Faculty);
@@ -634,16 +677,16 @@ public static class CatalogReferenceWriter
             {
                 Id = id,
                 Type = type,
-                Code = string.IsNullOrWhiteSpace(code) ? id.ToString("N")[..12] : code.Trim(),
+                Code = NormalizeCode(code, id),
                 Name = name.Trim()
             });
-            return;
         }
+    }
 
-        current.Type = type;
-        current.Code = string.IsNullOrWhiteSpace(code) ? current.Code : code.Trim();
-        current.Name = name.Trim();
-        current.IsActive = true;
+    public static string NormalizeCode(string? code, Guid id)
+    {
+        var value = string.IsNullOrWhiteSpace(code) ? id.ToString("N")[..12] : code.Trim();
+        return value.Length <= CodeMaxLength ? value : value[..CodeMaxLength];
     }
 
     private static string StatusName(RequirementStatus status) => status switch

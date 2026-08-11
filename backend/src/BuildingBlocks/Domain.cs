@@ -88,6 +88,16 @@ public static class WorkflowCatalogIds
 
 public sealed class Requirement : Entity
 {
+    public const int ActivityOrEventMaxLength = 240;
+    public const int RequestedByMaxLength = 120;
+    public const int RequesterNameMaxLength = 160;
+    public const int RequesterEmailMaxLength = 180;
+    public const int FacultyMaxLength = 160;
+    public const int CareerMaxLength = 160;
+    public const int CampusMaxLength = 120;
+    public const int PlaceMaxLength = 180;
+    public const int EventFormatMaxLength = 80;
+
     private Requirement()
     {
         Code = string.Empty;
@@ -137,24 +147,24 @@ public sealed class Requirement : Entity
         if (endDate < startDate) throw new ArgumentException("La fecha de fin no puede ser menor a la fecha de inicio.", nameof(endDate));
 
         Code = $"REQ-{DateTimeOffset.UtcNow:yyyyMMddHHmmss}";
-        ActivityOrEvent = activityOrEvent.Trim();
-        RequestedBy = requestedBy.Trim();
-        RequesterEmail = string.IsNullOrWhiteSpace(requesterEmail) ? RequestedBy : requesterEmail.Trim().ToLowerInvariant();
-        RequesterName = string.IsNullOrWhiteSpace(requesterName) ? RequesterEmail : requesterName.Trim();
+        ActivityOrEvent = Limit(activityOrEvent, ActivityOrEventMaxLength);
+        RequestedBy = Limit(requestedBy, RequestedByMaxLength);
+        RequesterEmail = Limit(string.IsNullOrWhiteSpace(requesterEmail) ? RequestedBy : requesterEmail.Trim().ToLowerInvariant(), RequesterEmailMaxLength);
+        RequesterName = Limit(string.IsNullOrWhiteSpace(requesterName) ? RequesterEmail : requesterName, RequesterNameMaxLength);
         FacultyId = facultyId;
-        Faculty = faculty.Trim();
+        Faculty = Limit(faculty, FacultyMaxLength);
         CareerId = careerId;
-        Career = career.Trim();
+        Career = Limit(career, CareerMaxLength);
         CampusId = campusId;
-        Campus = campus.Trim();
-        Place = place.Trim();
+        Campus = Limit(campus, CampusMaxLength);
+        Place = Limit(place, PlaceMaxLength);
         StartDate = startDate;
         StartTime = startTime;
         EndDate = endDate;
         EndTime = endTime;
         EventObjective = eventObjective.Trim();
         EventFormatId = eventFormatId;
-        EventFormat = eventFormat.Trim();
+        EventFormat = Limit(eventFormat, EventFormatMaxLength);
         AudienceType = NormalizeAudienceType(audienceType);
         ActivityFormatDescription = (activityFormatDescription ?? string.Empty).Trim();
         RequestDate = requestDate;
@@ -219,24 +229,24 @@ public sealed class Requirement : Entity
         if (eventFormatId == Guid.Empty) throw new ArgumentException("Formato del evento es requerido.", nameof(eventFormatId));
         if (endDate < startDate) throw new ArgumentException("La fecha de fin no puede ser menor a la fecha de inicio.", nameof(endDate));
 
-        ActivityOrEvent = activityOrEvent.Trim();
-        RequestedBy = requestedBy.Trim();
-        RequesterEmail = string.IsNullOrWhiteSpace(requesterEmail) ? RequestedBy : requesterEmail.Trim().ToLowerInvariant();
-        RequesterName = string.IsNullOrWhiteSpace(requesterName) ? RequesterEmail : requesterName.Trim();
+        ActivityOrEvent = Limit(activityOrEvent, ActivityOrEventMaxLength);
+        RequestedBy = Limit(requestedBy, RequestedByMaxLength);
+        RequesterEmail = Limit(string.IsNullOrWhiteSpace(requesterEmail) ? RequestedBy : requesterEmail.Trim().ToLowerInvariant(), RequesterEmailMaxLength);
+        RequesterName = Limit(string.IsNullOrWhiteSpace(requesterName) ? RequesterEmail : requesterName, RequesterNameMaxLength);
         FacultyId = facultyId;
-        Faculty = faculty.Trim();
+        Faculty = Limit(faculty, FacultyMaxLength);
         CareerId = careerId;
-        Career = career.Trim();
+        Career = Limit(career, CareerMaxLength);
         CampusId = campusId;
-        Campus = campus.Trim();
-        Place = place.Trim();
+        Campus = Limit(campus, CampusMaxLength);
+        Place = Limit(place, PlaceMaxLength);
         StartDate = startDate;
         StartTime = startTime;
         EndDate = endDate;
         EndTime = endTime;
         EventObjective = eventObjective.Trim();
         EventFormatId = eventFormatId;
-        EventFormat = eventFormat.Trim();
+        EventFormat = Limit(eventFormat, EventFormatMaxLength);
         AudienceType = NormalizeAudienceType(audienceType);
         ActivityFormatDescription = (activityFormatDescription ?? string.Empty).Trim();
         RequestDate = requestDate;
@@ -292,6 +302,12 @@ public sealed class Requirement : Entity
         "mixed" => "mixed",
         _ => "internal"
     };
+
+    private static string Limit(string value, int maxLength)
+    {
+        var normalized = value.Trim();
+        return normalized.Length <= maxLength ? normalized : normalized[..maxLength];
+    }
 }
 
 public sealed class TechnicalActivity : Entity
