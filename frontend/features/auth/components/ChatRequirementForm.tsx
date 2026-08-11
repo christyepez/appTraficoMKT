@@ -12,19 +12,21 @@ import { wordCount } from "../../requirements/domain/requirement-form.utils";
 import { publicRequirementDefaults } from "../../public-requirement/schemas/public-requirement.schema";
 
 type Props = { catalogs: RequirementFormCatalogs | null; onSubmit: (values: RequirementFormValues) => Promise<boolean>; message: string; };
+const emptyCatalogs: RequirementFormCatalogs = { faculties: [], careers: [], campuses: [], eventFormats: [] };
 
 const steps = ["Actividad", "Solicitante", "Ubicación", "Fechas", "Público", "Objetivo", "Formato", "Adjuntos", "Resumen"] as const;
 
 export function ChatRequirementForm({ catalogs, onSubmit, message }: Props) {
   const [step, setStep] = useState(0);
-  const schema = useMemo(() => buildRequirementFormSchema(catalogs ?? { faculties: [], careers: [], campuses: [], eventFormats: [] }), [catalogs]);
+  const activeCatalogs = useMemo(() => catalogs ?? emptyCatalogs, [catalogs]);
+  const schema = useMemo(() => buildRequirementFormSchema(activeCatalogs), [activeCatalogs]);
   const { register, handleSubmit, setValue, control, trigger, reset, formState: { errors, isSubmitting } } = useForm<RequirementFormValues>({ resolver: zodResolver(schema), defaultValues: publicRequirementDefaults });
   const facultyId = useWatch({ control, name: "facultyId" });
   const eventObjective = useWatch({ control, name: "eventObjective" });
   const activityFormatDescription = useWatch({ control, name: "activityFormatDescription" });
   const values = useWatch({ control });
-  const careers = useMemo(() => catalogs?.careers.filter((item) => !item.facultyId || item.facultyId === facultyId) ?? [], [catalogs, facultyId]);
-  const ready = Boolean(catalogs?.faculties.length && catalogs.careers.length && catalogs.campuses.length && catalogs.eventFormats.length);
+  const careers = useMemo(() => activeCatalogs.careers.filter((item) => !item.facultyId || item.facultyId === facultyId), [activeCatalogs, facultyId]);
+  const ready = Boolean(activeCatalogs.faculties.length && activeCatalogs.careers.length && activeCatalogs.campuses.length && activeCatalogs.eventFormats.length);
 
   async function next() {
     const fields = fieldsByStep(step);
@@ -49,9 +51,9 @@ export function ChatRequirementForm({ catalogs, onSubmit, message }: Props) {
       <Field label="Correo del solicitante" error={errors.requesterEmail?.message}><input type="email" placeholder="correo@uti.edu.ec" {...register("requesterEmail")} /></Field>
     </>}
     {step === 2 && <>
-      <Field label="Facultad" error={errors.facultyId?.message}><select autoFocus {...register("facultyId", { onChange: () => setValue("careerId", "") })}><option value="">Seleccione...</option>{catalogs.faculties.map(option)}</select></Field>
+      <Field label="Facultad" error={errors.facultyId?.message}><select autoFocus {...register("facultyId", { onChange: () => setValue("careerId", "") })}><option value="">Seleccione...</option>{activeCatalogs.faculties.map(option)}</select></Field>
       <Field label="Carrera" error={errors.careerId?.message}><select disabled={!facultyId} {...register("careerId")}><option value="">Seleccione...</option>{careers.map(option)}</select></Field>
-      <Field label="Sede" error={errors.campusId?.message}><select {...register("campusId")}><option value="">Seleccione...</option>{catalogs.campuses.map(option)}</select></Field>
+      <Field label="Sede" error={errors.campusId?.message}><select {...register("campusId")}><option value="">Seleccione...</option>{activeCatalogs.campuses.map(option)}</select></Field>
       <Field label="Lugar" error={errors.place?.message}><input {...register("place")} /></Field>
     </>}
     {step === 3 && <>
@@ -60,7 +62,7 @@ export function ChatRequirementForm({ catalogs, onSubmit, message }: Props) {
     </>}
     {step === 4 && <>
       <Field label="Público objetivo" error={errors.audienceType?.message}><select autoFocus {...register("audienceType")}><option value="internal">Interno</option><option value="external">Externo</option><option value="mixed">Mixto</option></select></Field>
-      <Field label="Formato" error={errors.eventFormatId?.message}><select {...register("eventFormatId")}><option value="">Seleccione...</option>{catalogs.eventFormats.map(option)}</select></Field>
+      <Field label="Formato" error={errors.eventFormatId?.message}><select {...register("eventFormatId")}><option value="">Seleccione...</option>{activeCatalogs.eventFormats.map(option)}</select></Field>
     </>}
     {step === 5 && <Field label={`Objetivo del evento (${wordCount(eventObjective ?? "")}/${REQUIREMENT_WORD_LIMIT})`} error={errors.eventObjective?.message} wide><textarea autoFocus aria-label="Objetivo del evento" {...register("eventObjective")} /></Field>}
     {step === 6 && <Field label={`Formato o dinámica (${wordCount(activityFormatDescription ?? "")}/${REQUIREMENT_WORD_LIMIT})`} error={errors.activityFormatDescription?.message} wide><textarea autoFocus aria-label="Formato o dinámica" {...register("activityFormatDescription")} /></Field>}
@@ -68,7 +70,7 @@ export function ChatRequirementForm({ catalogs, onSubmit, message }: Props) {
     {step === 8 && <div className="summary" role="group" aria-label="Resumen del requerimiento">
       <strong>{values.activityOrEvent || "Actividad pendiente"}</strong>
       <span>{values.requesterName} · {values.requesterEmail}</span>
-      <span>{catalogs.faculties.find((item) => item.id === values.facultyId)?.name} · {catalogs.careers.find((item) => item.id === values.careerId)?.name} · {catalogs.campuses.find((item) => item.id === values.campusId)?.name}</span>
+      <span>{activeCatalogs.faculties.find((item) => item.id === values.facultyId)?.name} · {activeCatalogs.careers.find((item) => item.id === values.careerId)?.name} · {activeCatalogs.campuses.find((item) => item.id === values.campusId)?.name}</span>
       <span>{values.startAt} a {values.endAt}</span>
       <span>{values.eventObjective}</span>
     </div>}

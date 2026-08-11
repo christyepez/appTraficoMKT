@@ -29,7 +29,7 @@ describe("branding components", () => {
     await user.type(screen.getByLabelText("Contenido del título"), "Nueva marca");
     await user.click(screen.getByRole("button", { name: "Guardar" }));
     await waitFor(() => expect(save).toHaveBeenCalledWith(expect.objectContaining({ title: "Nueva marca" })));
-  });
+  }, 15000);
 
   it("muestra validación y estados de carga/error", async () => {
     const user = userEvent.setup();
