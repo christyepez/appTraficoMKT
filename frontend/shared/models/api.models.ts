@@ -78,6 +78,16 @@ export type Approval = {
   approvedBy: string;
   comments: string;
   createdAt?: string;
+  approverEmail?: string;
+  requesterEmail?: string;
+  status?: string;
+  submittedAt?: string;
+  decidedAt?: string;
+  decisionSource?: string;
+  correlationId?: string;
+  powerAutomateRunId?: string;
+  notificationStatus?: string;
+  decidedByEmail?: string;
 };
 
 export type Technician = {

@@ -46,7 +46,7 @@ describe("responsive visual contract", () => {
       expect.stringContaining('placeholder="Producto, título, técnico, notas..."'),
       expect.stringContaining('placeholder="Producto, requerimiento, técnico, sede, estado..."'),
       expect.stringContaining('placeholder="Título, mensaje, evento, remitente, estado..."'),
-      expect.stringContaining('placeholder="Nombre, correo, Teams, webhook, estado..."'),
+      expect.stringContaining('placeholder="Nombre, correo, Teams, Power Automate, estado..."'),
       expect.stringContaining('placeholder="Nombre, proveedor, ruta, contenedor, estado..."'),
     ]));
   });

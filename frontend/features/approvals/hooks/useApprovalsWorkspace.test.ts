@@ -33,7 +33,7 @@ describe("useApprovalsWorkspace", () => {
     const { result, unmount } = renderHook(() => useApprovalsWorkspace(60_000));
     await waitFor(() => expect(result.current.isInitialLoading).toBe(false));
     await act(async () => { expect(await result.current.decide("p1", "Approved", "Correcto")).toBe(true); });
-    expect(submitMock).toHaveBeenCalledWith("p1", { decision: "Approved", approvedBy: "Aprobador", comments: "Correcto" });
+    expect(submitMock).toHaveBeenCalledWith("a1", { decision: "approved", decidedByEmail: "a@x", comments: "Correcto", source: "web" });
     expect(showToast).toHaveBeenCalledWith("Producto aprobado correctamente.");
     await act(async () => { expect(await result.current.decide("p1", "Rejected", "Cambios")).toBe(true); });
     expect(result.current.message).toBe("Producto rechazado correctamente.");
@@ -74,7 +74,7 @@ describe("useApprovalsWorkspace", () => {
     const { result, unmount } = renderHook(() => useApprovalsWorkspace(60_000));
     await waitFor(() => expect(result.current.isInitialLoading).toBe(false));
     await act(async () => { await result.current.decide("p1", "Approved", "Correcto"); });
-    expect(submitMock).toHaveBeenCalledWith("p1", expect.objectContaining({ approvedBy: "aprobador@example.com" }));
+    expect(submitMock).toHaveBeenCalledWith("a1", expect.objectContaining({ decidedByEmail: "aprobador@example.com" }));
     unmount();
   });
 });
@@ -82,5 +82,12 @@ describe("useApprovalsWorkspace", () => {
 function session(roles: string[]) { return { accessToken: "t", expiresAt: "x", user: { id: "u", name: "Aprobador", email: "a@x", roles, screenPermissions: ["approvals"] } }; }
 function workspace() {
   const activity = (id: string, status: string) => ({ id, requirementId: "r", productId: id, requirementTypeId: "r", requirementType: "Diseño", strategicObjective: "Marca", targetAudienceId: "t", targetAudience: "Todos", productTypeId: "p", productType: "Video", diffusionChannelId: "d", diffusionChannel: "Web", mainKpiId: "k", mainKpi: "Alcance", productResponsible: "tech@example.com", observations: "", status, statusId: "s" });
-  return { activities: [activity("p1", "PendingApproval"), activity("p2", "Approved")], evidence: [{ id: "e1", activityId: "p1", fileName: "a.pdf", storageUrl: "/a", uploadedBy: "Equipo" }], approvals: [{ id: "a1", activityId: "p2", decision: "Approved", approvedBy: "A", comments: "Ok" }] };
+  return {
+    activities: [activity("p1", "PendingApproval"), activity("p2", "Approved")],
+    evidence: [{ id: "e1", activityId: "p1", fileName: "a.pdf", storageUrl: "/a", uploadedBy: "Equipo" }],
+    approvals: [
+      { id: "a1", activityId: "p1", decision: "Pending", approvedBy: "aprobador@example.com", comments: "", status: "Pending" },
+      { id: "a2", activityId: "p2", decision: "Approved", approvedBy: "A", comments: "Ok", status: "Approved" }
+    ]
+  };
 }

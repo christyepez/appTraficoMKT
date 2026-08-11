@@ -11,7 +11,8 @@ export type ApprovalWorkspaceData = {
 };
 
 export type ApprovalDecisionPayload = {
-  decision: ApprovalDecision;
-  approvedBy: string;
+  decision: "approved" | "rejected";
+  decidedByEmail: string;
   comments: string;
+  source: "web";
 };

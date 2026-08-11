@@ -303,6 +303,115 @@ app.MapPatch("/activities/{id:guid}/submit-approval", async (Guid id, Activities
     return Results.Ok(activity);
 });
 
+app.MapPost("/activities/{id:guid}/submit-approval", async (Guid id, SubmitApprovalRequest request, ActivitiesDbContext db, IHttpClientFactory httpClientFactory, IConfiguration configuration, HttpContext httpContext) =>
+{
+    var activity = await db.Activities.FindAsync(id);
+    if (activity is null || activity.IsDeleted) return Results.NotFound();
+    if (activity.Status == ActivityStatus.PendingApproval)
+        return Results.Conflict(new { message = "El producto ya fue enviado a aprobación." });
+    if (activity.Status == ActivityStatus.Approved)
+        return Results.Conflict(new { message = "El producto ya está aprobado." });
+
+    var notificationSettings = await db.NotificationSettings.Where(x => x.IsActive).OrderByDescending(x => x.UpdatedAt ?? x.CreatedAt).FirstOrDefaultAsync();
+    var approverEmail = ApprovalRecipient.ResolveApprover(request.ApproverEmail, notificationSettings, configuration);
+    if (string.IsNullOrWhiteSpace(approverEmail)) return Results.BadRequest("Configure un aprobador o correo destino para solicitar aprobación.");
+
+    var requesterEmail = string.IsNullOrWhiteSpace(request.RequesterEmail)
+        ? await NotificationRecipientResolver.ResolveAsync(activity.ProductResponsible, httpContext, httpClientFactory)
+        : request.RequesterEmail.Trim().ToLowerInvariant();
+
+    var evidenceClient = httpClientFactory.CreateClient("evidence");
+    var approvalResponse = await evidenceClient.PostAsJsonAsync("/approvals/requests", new SubmitApprovalRequestToEvidence(activity.Id, approverEmail, requesterEmail, request.Comments, request.Source ?? "web", "PendingNotification", null));
+    if (!approvalResponse.IsSuccessStatusCode)
+    {
+        var errorText = await approvalResponse.Content.ReadAsStringAsync();
+        return Results.Json(new { message = string.IsNullOrWhiteSpace(errorText) ? "No se pudo crear la solicitud de aprobación." : errorText }, statusCode: (int)approvalResponse.StatusCode);
+    }
+
+    var approval = await approvalResponse.Content.ReadFromJsonAsync<ActivityApprovalDto>();
+    var previousStatus = activity.Status.ToString();
+    activity.SendToApproval();
+    CatalogReferenceWriter.UpsertStatusReference(db, activity.Status);
+    db.AuditEvents.Add(ActivityAuditEvent.Changed(activity.Id, activity.RequirementId, previousStatus, activity.Status.ToString(), "Producto enviado a aprobación", activity.ProductResponsible, AuditJson.Build("Productos", "Enviar aprobación", activity.ProductResponsible, new { activity.Id, activity.ProductId, approvalId = approval?.Id, approverEmail, requesterEmail })));
+
+    var record = NotificationRecord.Create(
+        "ProductApprovalRequested",
+        $"Aprobación producto {activity.ProductId}",
+        $"El producto {activity.ProductId} requiere aprobación.",
+        approverEmail,
+        activity.ProductResponsible,
+        activity.RequirementId,
+        activity.Id,
+        AuditJson.Build("Notificaciones", "Solicitud de aprobación", activity.ProductResponsible, new { activity.Id, activity.ProductId, approverEmail, requesterEmail, approvalId = approval?.Id }));
+    db.NotificationRecords.Add(record);
+    await db.SaveChangesAsync();
+    await NotificationDelivery.SafeSendAsync(record, notificationSettings, httpClientFactory, configuration);
+
+    return Results.Ok(new SubmitApprovalResponse(activity.Id, approval?.Id ?? Guid.Empty, activity.Status.ToString(), "PendingNotification"));
+});
+
+app.MapGet("/activities/{id:guid}/approvals", async (Guid id, IHttpClientFactory httpClientFactory) =>
+{
+    var approvals = await httpClientFactory.CreateClient("evidence").GetFromJsonAsync<List<ActivityApprovalDto>>($"/approvals?activityId={id}") ?? [];
+    return Results.Ok(approvals);
+});
+
+app.MapPost("/approvals/{approvalId:guid}/decision", async (Guid approvalId, ApprovalDecisionCallbackRequest request, ActivitiesDbContext db, IHttpClientFactory httpClientFactory, IConfiguration configuration, HttpContext httpContext) =>
+{
+    var evidenceClient = httpClientFactory.CreateClient("evidence");
+    if (ApprovalCallbackSecurity.RequiresCallbackKey(request.Source) && httpContext.Request.Headers.TryGetValue("x-api-key", out var apiKey))
+        evidenceClient.DefaultRequestHeaders.Add("x-api-key", apiKey.ToString());
+
+    var evidenceResponse = await evidenceClient.PostAsJsonAsync($"/approvals/{approvalId}/decision", request);
+    if (!evidenceResponse.IsSuccessStatusCode)
+    {
+        var errorText = await evidenceResponse.Content.ReadAsStringAsync();
+        return Results.Json(new { message = string.IsNullOrWhiteSpace(errorText) ? "No se pudo registrar la decisión." : errorText }, statusCode: (int)evidenceResponse.StatusCode);
+    }
+
+    var approval = await evidenceResponse.Content.ReadFromJsonAsync<ActivityApprovalDto>();
+    if (approval is null) return Results.Problem("La aprobación se registró sin respuesta válida.", statusCode: 502);
+
+    var activity = await db.Activities.FindAsync(approval.ActivityId);
+    if (activity is null || activity.IsDeleted) return Results.NotFound();
+
+    var previousStatus = activity.Status.ToString();
+    var decision = approval.Decision.Equals("Approved", StringComparison.OrdinalIgnoreCase) ? ApprovalDecision.Approved : ApprovalDecision.Rejected;
+    activity.Decide(decision);
+    CatalogReferenceWriter.UpsertStatusReference(db, activity.Status);
+    db.AuditEvents.Add(ActivityAuditEvent.Changed(activity.Id, activity.RequirementId, previousStatus, activity.Status.ToString(), $"Producto {decision}", approval.DecidedByEmail, AuditJson.Build("Productos", $"Decisión {decision}", approval.DecidedByEmail, new { approvalId, approval })));
+
+    var notificationSettings = await db.NotificationSettings.Where(x => x.IsActive).OrderByDescending(x => x.UpdatedAt ?? x.CreatedAt).FirstOrDefaultAsync();
+    var recipientEmail = string.IsNullOrWhiteSpace(approval.RequesterEmail)
+        ? await NotificationRecipientResolver.ResolveAsync(activity.ProductResponsible, httpContext, httpClientFactory)
+        : approval.RequesterEmail;
+    var approved = decision == ApprovalDecision.Approved;
+    var notificationAction = approved ? "Producto aprobado" : "Producto rechazado";
+    var record = NotificationRecord.Create(
+        approved ? "ProductApproved" : "ProductRejected",
+        notificationAction,
+        $"El producto {activity.ProductId} fue {(approved ? "aprobado" : "rechazado y devuelto a proceso")}. {approval.Comments}".Trim(),
+        recipientEmail,
+        approval.DecidedByEmail,
+        activity.RequirementId,
+        activity.Id,
+        AuditJson.Build("Notificaciones", notificationAction, approval.DecidedByEmail, new { activity.Id, activity.ProductId, recipientEmail, approval.Comments, approvalId }));
+    db.NotificationRecords.Add(record);
+    await db.SaveChangesAsync();
+
+    if (approved)
+    {
+        await ProductNotification.SendApprovedAsync(activity, new ApproveActivityRequest(ApprovalDecision.Approved, approval.DecidedByEmail, approval.Comments), httpClientFactory, configuration, notificationSettings);
+        await RequirementWorkflowSync.CompleteIfReadyAsync(activity.RequirementId, httpClientFactory);
+    }
+    else
+    {
+        await NotificationDelivery.SafeSendAsync(record, notificationSettings, httpClientFactory, configuration);
+    }
+
+    return Results.Ok(activity);
+});
+
 app.MapPost("/activities/{id:guid}/approvals", async (Guid id, ApproveActivityRequest request, ActivitiesDbContext db, IHttpClientFactory httpClientFactory, IConfiguration configuration, HttpContext httpContext) =>
 {
     var activity = await db.Activities.FindAsync(id);
@@ -347,7 +456,10 @@ app.MapPost("/activities/{id:guid}/approvals", async (Guid id, ApproveActivityRe
 });
 
 app.MapGet("/notification-settings", async (ActivitiesDbContext db) =>
-    await db.NotificationSettings.OrderByDescending(x => x.UpdatedAt ?? x.CreatedAt).ToListAsync());
+{
+    var settings = await db.NotificationSettings.OrderByDescending(x => x.UpdatedAt ?? x.CreatedAt).ToListAsync();
+    return settings.Select(NotificationSettingsDto.From).ToList();
+});
 
 app.MapPost("/notification-settings", async (UpsertNotificationSettingsRequest request, ActivitiesDbContext db) =>
 {
@@ -460,6 +572,27 @@ public sealed record ProductMetricsResponse(
     IReadOnlyList<MetricSlice> ByMainKpi,
     IReadOnlyList<MetricSlice> ByTargetAudience,
     IReadOnlyList<StageMetric> AverageHoursByStage);
+public sealed record SubmitApprovalRequest(string? ApproverEmail, string? RequesterEmail, string? Comments, string? Source);
+public sealed record SubmitApprovalRequestToEvidence(Guid ActivityId, string ApproverEmail, string RequesterEmail, string? Comments, string? Source, string? NotificationStatus, string? PowerAutomateRunId);
+public sealed record SubmitApprovalResponse(Guid ActivityId, Guid ApprovalId, string ProductStatus, string NotificationStatus);
+public sealed record ApprovalDecisionCallbackRequest(string Decision, string DecidedByEmail, string? Comments, string? Source, string? CorrelationId);
+public sealed record ActivityApprovalDto(
+    Guid Id,
+    Guid ActivityId,
+    string Decision,
+    string ApprovedBy,
+    string Comments,
+    DateTimeOffset CreatedAt,
+    string ApproverEmail,
+    string RequesterEmail,
+    string Status,
+    DateTimeOffset SubmittedAt,
+    DateTimeOffset? DecidedAt,
+    string DecisionSource,
+    string CorrelationId,
+    string PowerAutomateRunId,
+    string NotificationStatus,
+    string DecidedByEmail);
 public sealed record UpsertNotificationSettingsRequest(
     string Name,
     bool EmailEnabled,
@@ -469,6 +602,21 @@ public sealed record UpsertNotificationSettingsRequest(
     string PowerAutomateWebhookUrl,
     string HtmlTemplate,
     bool IsActive);
+public sealed record NotificationSettingsDto(Guid Id, string Name, bool EmailEnabled, string EmailTo, bool TeamsEnabled, string TeamsChannel, string PowerAutomateWebhookUrl, string HtmlTemplate, bool IsActive, DateTimeOffset CreatedAt, DateTimeOffset? UpdatedAt)
+{
+    public static NotificationSettingsDto From(NotificationSettings settings) => new(
+        settings.Id,
+        settings.Name,
+        settings.EmailEnabled,
+        settings.EmailTo,
+        settings.TeamsEnabled,
+        settings.TeamsChannel,
+        string.IsNullOrWhiteSpace(settings.PowerAutomateWebhookUrl) ? string.Empty : "Configurado",
+        settings.HtmlTemplate,
+        settings.IsActive,
+        settings.CreatedAt,
+        settings.UpdatedAt);
+}
 public sealed record SystemNotificationRequest(string EventType, string Title, string Message, string RecipientEmail, string CreatedBy, Guid? RequirementId, Guid? ActivityId, string PayloadJson, string? Html = null);
 public sealed record NotificationCountResponse(int Count);
 public sealed record AcknowledgeNotificationRequest(string AcknowledgedBy);
@@ -542,6 +690,26 @@ public static class NotificationRecipientResolver
 
         return normalized.ToLowerInvariant();
     }
+}
+
+public static class ApprovalRecipient
+{
+    public static string ResolveApprover(string? requestedApprover, NotificationSettings? settings, IConfiguration configuration)
+    {
+        if (!string.IsNullOrWhiteSpace(requestedApprover)) return requestedApprover.Trim().ToLowerInvariant();
+        var settingsEmail = settings?.EmailTo
+            .Split([',', ';'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .FirstOrDefault(email => email.Contains('@'));
+        if (!string.IsNullOrWhiteSpace(settingsEmail)) return settingsEmail.Trim().ToLowerInvariant();
+        var configuredEmail = configuration["Notifications:DefaultApproverEmail"] ?? configuration["Approvals:DefaultApproverEmail"];
+        return string.IsNullOrWhiteSpace(configuredEmail) ? string.Empty : configuredEmail.Trim().ToLowerInvariant();
+    }
+}
+
+public static class ApprovalCallbackSecurity
+{
+    public static bool RequiresCallbackKey(string? source) =>
+        source is not null && source.Equals("powerautomate", StringComparison.OrdinalIgnoreCase);
 }
 
 public static class ProductNotification
@@ -895,7 +1063,8 @@ public sealed class NotificationSettings
         EmailTo = request.EmailTo.Trim();
         TeamsEnabled = request.TeamsEnabled;
         TeamsChannel = request.TeamsChannel.Trim();
-        PowerAutomateWebhookUrl = request.PowerAutomateWebhookUrl.Trim();
+        if (!string.IsNullOrWhiteSpace(request.PowerAutomateWebhookUrl) && !request.PowerAutomateWebhookUrl.Equals("Configurado", StringComparison.OrdinalIgnoreCase))
+            PowerAutomateWebhookUrl = request.PowerAutomateWebhookUrl.Trim();
         HtmlTemplate = string.IsNullOrWhiteSpace(request.HtmlTemplate) ? NotificationTemplate.Default : request.HtmlTemplate.Trim();
         IsActive = request.IsActive;
         UpdatedAt = DateTimeOffset.UtcNow;
@@ -941,6 +1110,18 @@ public sealed class NotificationRecord
 
 public static class NotificationDelivery
 {
+    public static async Task SafeSendAsync(NotificationRecord record, NotificationSettings? settings, IHttpClientFactory httpClientFactory, IConfiguration configuration, string? customHtml = null)
+    {
+        try
+        {
+            await SendAsync(record, settings, httpClientFactory, configuration, customHtml);
+        }
+        catch
+        {
+            // La gestión interna no debe fallar si el canal externo está temporalmente indisponible.
+        }
+    }
+
     public static async Task SendAsync(NotificationRecord record, NotificationSettings? settings, IHttpClientFactory httpClientFactory, IConfiguration configuration, string? customHtml = null)
     {
         var webhookUrl = settings?.PowerAutomateWebhookUrl;

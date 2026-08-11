@@ -101,7 +101,14 @@ app.MapGet("/approvals", async (Guid? activityId, EvidenceDbContext db) =>
 {
     var query = db.Approvals.AsQueryable();
     if (activityId.HasValue) query = query.Where(x => x.ActivityId == activityId.Value);
-    return await query.OrderByDescending(x => x.CreatedAt).ToListAsync();
+    var approvals = await query.OrderByDescending(x => x.CreatedAt).ToListAsync();
+    return approvals.Select(ApprovalDto.From).ToList();
+});
+
+app.MapGet("/activities/{id:guid}/approvals", async (Guid id, EvidenceDbContext db) =>
+{
+    var approvals = await db.Approvals.Where(x => x.ActivityId == id).OrderByDescending(x => x.CreatedAt).ToListAsync();
+    return approvals.Select(ApprovalDto.From).ToList();
 });
 
 app.MapGet("/approvals/audit", async (EvidenceDbContext db) =>
@@ -123,7 +130,62 @@ app.MapGet("/approvals/metrics", async (EvidenceDbContext db) =>
 });
 
 app.MapGet("/approvals/pending", async (EvidenceDbContext db) =>
-    await db.Approvals.Where(x => x.Decision == ApprovalDecision.Rejected).OrderByDescending(x => x.CreatedAt).ToListAsync());
+{
+    var approvals = await db.Approvals.Where(x => x.Status == "Pending").OrderByDescending(x => x.CreatedAt).ToListAsync();
+    return approvals.Select(ApprovalDto.From).ToList();
+});
+
+app.MapPost("/approvals/requests", async (SubmitApprovalRequest request, EvidenceDbContext db) =>
+{
+    if (request.ActivityId == Guid.Empty) return Results.BadRequest("Producto requerido.");
+    if (string.IsNullOrWhiteSpace(request.ApproverEmail)) return Results.BadRequest("Aprobador requerido.");
+    var exists = await db.Approvals.AnyAsync(x => x.ActivityId == request.ActivityId && x.Status == "Pending");
+    if (exists) return Results.Conflict(new { message = "El producto ya tiene una solicitud de aprobación pendiente." });
+
+    var approval = ActivityApproval.Request(request.ActivityId, request.ApproverEmail, request.RequesterEmail ?? string.Empty, request.Comments ?? string.Empty, request.Source ?? "web");
+    approval.MarkNotification(request.NotificationStatus ?? "PendingNotification", request.PowerAutomateRunId);
+    db.Approvals.Add(approval);
+    db.ApprovalAuditEvents.Add(ApprovalAuditEvent.Created(
+        request.ActivityId,
+        approval.Status,
+        "Solicitud de aprobación",
+        request.RequesterEmail ?? "Sistema",
+        AuditJson.Build("Aprobaciones", "Solicitar aprobación", request.RequesterEmail ?? "Sistema", request)));
+    await db.SaveChangesAsync();
+    return Results.Created($"/approvals/{approval.Id}", ApprovalDto.From(approval));
+});
+
+app.MapPost("/approvals/{approvalId:guid}/decision", async (Guid approvalId, ApprovalDecisionRequest request, HttpRequest httpRequest, EvidenceDbContext db, IConfiguration configuration) =>
+{
+    if (ApprovalEndpointSecurity.RequiresCallbackKey(request.Source) && !ApprovalEndpointSecurity.IsCallbackKeyValid(httpRequest, configuration))
+        return Results.Unauthorized();
+
+    var approval = await db.Approvals.FindAsync(approvalId);
+    if (approval is null) return Results.NotFound();
+    if (approval.Status != "Pending") return Results.Conflict(new { message = "La aprobación ya fue respondida." });
+
+    if (!ApprovalEndpointSecurity.TryParseDecision(request.Decision, out var decision)) return Results.BadRequest("Decisión no válida.");
+    if (decision == ApprovalDecision.Rejected && string.IsNullOrWhiteSpace(request.Comments))
+        return Results.BadRequest("Ingrese un comentario para rechazar.");
+
+    try
+    {
+        approval.Decide(decision, request.DecidedByEmail, request.Comments ?? string.Empty, request.Source ?? "web");
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Results.Conflict(new { message = ex.Message });
+    }
+
+    db.ApprovalAuditEvents.Add(ApprovalAuditEvent.Created(
+        approval.ActivityId,
+        approval.Decision.ToString(),
+        "Decisión de aprobación",
+        request.DecidedByEmail,
+        AuditJson.Build("Aprobaciones", $"Decisión {approval.Decision}", request.DecidedByEmail, new { approvalId, request })));
+    await db.SaveChangesAsync();
+    return Results.Ok(ApprovalDto.From(approval));
+});
 
 app.MapPost("/approvals", async (CreateApprovalRequest request, EvidenceDbContext db) =>
 {
@@ -188,6 +250,44 @@ app.Run();
 
 public sealed record CreateEvidenceRequest(Guid ActivityId, string FileName, string ContentType, string StorageUrl, string UploadedBy);
 public sealed record CreateApprovalRequest(Guid ActivityId, ApprovalDecision Decision, string ApprovedBy, string Comments);
+public sealed record SubmitApprovalRequest(Guid ActivityId, string ApproverEmail, string? RequesterEmail, string? Comments, string? Source, string? NotificationStatus, string? PowerAutomateRunId);
+public sealed record ApprovalDecisionRequest(string Decision, string DecidedByEmail, string? Comments, string? Source, string? CorrelationId);
+public sealed record ApprovalDto(
+    Guid Id,
+    Guid ActivityId,
+    string Decision,
+    string ApprovedBy,
+    string Comments,
+    DateTimeOffset CreatedAt,
+    string ApproverEmail,
+    string RequesterEmail,
+    string Status,
+    DateTimeOffset SubmittedAt,
+    DateTimeOffset? DecidedAt,
+    string DecisionSource,
+    string CorrelationId,
+    string PowerAutomateRunId,
+    string NotificationStatus,
+    string DecidedByEmail)
+{
+    public static ApprovalDto From(ActivityApproval approval) => new(
+        approval.Id,
+        approval.ActivityId,
+        approval.Decision.ToString(),
+        approval.ApprovedBy,
+        approval.Comments,
+        approval.CreatedAt,
+        approval.ApproverEmail,
+        approval.RequesterEmail,
+        approval.Status,
+        approval.SubmittedAt,
+        approval.DecidedAt,
+        approval.DecisionSource,
+        approval.CorrelationId,
+        approval.PowerAutomateRunId,
+        approval.NotificationStatus,
+        approval.DecidedByEmail);
+}
 public sealed record MetricSlice(string Name, int Count, decimal Percentage);
 public sealed record ApprovalMetrics(int TotalApprovals, int ApprovedApprovals, int RejectedApprovals, int AuditEvents, IReadOnlyList<MetricSlice> ByDecision, DateTimeOffset? LastAuditAt);
 public sealed record UpdateStorageSettingsRequest(
@@ -228,6 +328,38 @@ public static class AuditJson
             descripcion = $"{action} en {process}",
             datos = data
         });
+}
+
+public static class ApprovalEndpointSecurity
+{
+    public static bool TryParseDecision(string value, out ApprovalDecision decision)
+    {
+        decision = ApprovalDecision.Pending;
+        if (value.Equals("approved", StringComparison.OrdinalIgnoreCase) || value.Equals("aprobado", StringComparison.OrdinalIgnoreCase))
+        {
+            decision = ApprovalDecision.Approved;
+            return true;
+        }
+
+        if (value.Equals("rejected", StringComparison.OrdinalIgnoreCase) || value.Equals("rechazado", StringComparison.OrdinalIgnoreCase))
+        {
+            decision = ApprovalDecision.Rejected;
+            return true;
+        }
+
+        return Enum.TryParse(value, ignoreCase: true, out decision) && decision != ApprovalDecision.Pending;
+    }
+
+    public static bool RequiresCallbackKey(string? source) =>
+        source is not null && source.Equals("powerautomate", StringComparison.OrdinalIgnoreCase);
+
+    public static bool IsCallbackKeyValid(HttpRequest request, IConfiguration configuration)
+    {
+        var configuredKey = configuration["Approvals:CallbackApiKey"];
+        if (string.IsNullOrWhiteSpace(configuredKey)) return true;
+        var provided = request.Headers["x-api-key"].FirstOrDefault();
+        return string.Equals(provided, configuredKey, StringComparison.Ordinal);
+    }
 }
 
 public static class EvidenceMetricsMath
@@ -303,7 +435,17 @@ public sealed class EvidenceDbContext(DbContextOptions<EvidenceDbContext> option
             entity.Property(x => x.Decision).HasConversion<string>().HasMaxLength(32);
             entity.Property(x => x.ApprovedBy).HasMaxLength(120).IsRequired();
             entity.Property(x => x.Comments).HasMaxLength(1000);
+            entity.Property(x => x.ApproverEmail).HasMaxLength(180);
+            entity.Property(x => x.RequesterEmail).HasMaxLength(180);
+            entity.Property(x => x.Status).HasMaxLength(32);
+            entity.Property(x => x.DecisionSource).HasMaxLength(80);
+            entity.Property(x => x.CorrelationId).HasMaxLength(80);
+            entity.Property(x => x.PowerAutomateRunId).HasMaxLength(160);
+            entity.Property(x => x.NotificationStatus).HasMaxLength(80);
+            entity.Property(x => x.DecidedByEmail).HasMaxLength(180);
             entity.HasIndex(x => x.ActivityId);
+            entity.HasIndex(x => x.Status);
+            entity.HasIndex(x => x.CorrelationId);
         });
 
         modelBuilder.Entity<ApprovalAuditEvent>(entity =>
@@ -427,6 +569,49 @@ public static class EvidenceSchema
             IF OBJECT_ID('Approvals', 'U') IS NOT NULL AND COL_LENGTH('Approvals', 'UpdatedAt') IS NULL
             BEGIN
                 ALTER TABLE [Approvals] ADD [UpdatedAt] datetimeoffset NULL
+            END
+            IF OBJECT_ID('Approvals', 'U') IS NOT NULL AND COL_LENGTH('Approvals', 'ApproverEmail') IS NULL
+            BEGIN
+                ALTER TABLE [Approvals] ADD [ApproverEmail] nvarchar(180) NOT NULL DEFAULT('')
+            END
+            IF OBJECT_ID('Approvals', 'U') IS NOT NULL AND COL_LENGTH('Approvals', 'RequesterEmail') IS NULL
+            BEGIN
+                ALTER TABLE [Approvals] ADD [RequesterEmail] nvarchar(180) NOT NULL DEFAULT('')
+            END
+            IF OBJECT_ID('Approvals', 'U') IS NOT NULL AND COL_LENGTH('Approvals', 'Status') IS NULL
+            BEGIN
+                ALTER TABLE [Approvals] ADD [Status] nvarchar(32) NOT NULL DEFAULT('Pending')
+                UPDATE [Approvals]
+                SET [Status] = CASE [Decision] WHEN 'Approved' THEN 'Approved' WHEN 'Rejected' THEN 'Rejected' ELSE 'Pending' END
+            END
+            IF OBJECT_ID('Approvals', 'U') IS NOT NULL AND COL_LENGTH('Approvals', 'SubmittedAt') IS NULL
+            BEGIN
+                ALTER TABLE [Approvals] ADD [SubmittedAt] datetimeoffset NOT NULL DEFAULT(SYSDATETIMEOFFSET())
+            END
+            IF OBJECT_ID('Approvals', 'U') IS NOT NULL AND COL_LENGTH('Approvals', 'DecidedAt') IS NULL
+            BEGIN
+                ALTER TABLE [Approvals] ADD [DecidedAt] datetimeoffset NULL
+                UPDATE [Approvals] SET [DecidedAt] = [CreatedAt] WHERE [Decision] IN ('Approved', 'Rejected')
+            END
+            IF OBJECT_ID('Approvals', 'U') IS NOT NULL AND COL_LENGTH('Approvals', 'DecisionSource') IS NULL
+            BEGIN
+                ALTER TABLE [Approvals] ADD [DecisionSource] nvarchar(80) NOT NULL DEFAULT('legacy')
+            END
+            IF OBJECT_ID('Approvals', 'U') IS NOT NULL AND COL_LENGTH('Approvals', 'CorrelationId') IS NULL
+            BEGIN
+                ALTER TABLE [Approvals] ADD [CorrelationId] nvarchar(80) NOT NULL DEFAULT('')
+            END
+            IF OBJECT_ID('Approvals', 'U') IS NOT NULL AND COL_LENGTH('Approvals', 'PowerAutomateRunId') IS NULL
+            BEGIN
+                ALTER TABLE [Approvals] ADD [PowerAutomateRunId] nvarchar(160) NOT NULL DEFAULT('')
+            END
+            IF OBJECT_ID('Approvals', 'U') IS NOT NULL AND COL_LENGTH('Approvals', 'NotificationStatus') IS NULL
+            BEGIN
+                ALTER TABLE [Approvals] ADD [NotificationStatus] nvarchar(80) NOT NULL DEFAULT('NotSent')
+            END
+            IF OBJECT_ID('Approvals', 'U') IS NOT NULL AND COL_LENGTH('Approvals', 'DecidedByEmail') IS NULL
+            BEGIN
+                ALTER TABLE [Approvals] ADD [DecidedByEmail] nvarchar(180) NOT NULL DEFAULT('')
             END
             IF OBJECT_ID('ApprovalAuditEvents', 'U') IS NULL
             BEGIN

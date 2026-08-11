@@ -10,6 +10,7 @@ Las capturas de escritorio y dispositivos moviles fueron regeneradas desde la ap
 - [Arquitectura C4](architecture/c4.md)
 - [Arquitectura tecnica](technical/technical-architecture.md)
 - [Arquitectura frontend](technical/frontend-architecture.md)
+- [Flujo seguro de aprobaciones](technical/approval-workflow.md)
 - [Acceso desde LAN y WLAN](technical/lan-access.md)
 - [Guia funcional de usuario](functional/user-guide.md)
 - [Especificación funcional](functional/functional-specification.md)

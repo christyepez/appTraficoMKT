@@ -23,6 +23,10 @@ const nextConfig = {
         destination: `${process.env.ACTIVITIES_API_URL ?? "http://localhost:5102"}/notification-records/:path*`
       },
       {
+        source: "/api/approvals/:approvalId/decision",
+        destination: `${process.env.ACTIVITIES_API_URL ?? "http://localhost:5102"}/approvals/:approvalId/decision`
+      },
+      {
         source: "/api/evidence/:path*",
         destination: `${process.env.EVIDENCE_API_URL ?? "http://localhost:5103"}/evidence/:path*`
       },

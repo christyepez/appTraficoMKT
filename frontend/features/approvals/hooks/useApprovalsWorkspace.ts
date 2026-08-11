@@ -48,11 +48,29 @@ export function useApprovalsWorkspace(pollInterval = 15_000) {
 
   const decide = useCallback(async (activityId: string, decision: ApprovalDecision, comments: string) => {
     if (pendingRef.current.has(activityId) || !canDecideApprovals(getSession())) return false;
+    const pendingApproval = approvals.find((approval) => approval.activityId === activityId && approvalStatus(approval) === "Pending");
+    if (!pendingApproval) {
+      const feedback = "No existe una solicitud pendiente para este producto.";
+      setMessage(feedback);
+      showToast(feedback, "error");
+      return false;
+    }
+    if (decision === "Rejected" && comments.trim().length < 3) {
+      const feedback = "Ingrese un comentario para rechazar.";
+      setMessage(feedback);
+      showToast(feedback, "error");
+      return false;
+    }
     pendingRef.current.add(activityId);
     setPendingIds(new Set(pendingRef.current));
     try {
       const session = getSession();
-      await submitApproval(activityId, { decision, approvedBy: session?.user.name ?? session?.user.email ?? "Aprobador", comments });
+      await submitApproval(pendingApproval.id, {
+        decision: decision === "Approved" ? "approved" : "rejected",
+        decidedByEmail: session?.user.email ?? session?.user.name ?? "aprobador",
+        comments,
+        source: "web"
+      });
       const feedback = decision === "Approved" ? "Producto aprobado correctamente." : "Producto rechazado correctamente.";
       setMessage(feedback);
       showToast(feedback);
@@ -68,7 +86,7 @@ export function useApprovalsWorkspace(pollInterval = 15_000) {
       pendingRef.current.delete(activityId);
       setPendingIds(new Set(pendingRef.current));
     }
-  }, [load]);
+  }, [approvals, load]);
 
   useEffect(() => {
     void load(true).catch(() => undefined);
@@ -78,4 +96,8 @@ export function useApprovalsWorkspace(pollInterval = 15_000) {
 
   const visibleActivities = useMemo(() => filterApprovalActivities(activities, showApproved, search), [activities, search, showApproved]);
   return { activities: visibleActivities, allActivities: activities, evidence, approvals, showApproved, setShowApproved, search, setSearch, canDecide: canDecideApprovals(getSession()), isInitialLoading, isRefreshing, loadError, message, pendingIds, refresh: () => load(false), decide };
+}
+
+function approvalStatus(approval: Approval) {
+  return approval.status ?? (approval.decision === "Pending" ? "Pending" : approval.decision);
 }

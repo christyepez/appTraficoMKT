@@ -19,7 +19,7 @@ export function NotificationSettingsForm({ item, onSave, onClose }: { item: Noti
   async function submit(value: NotificationSettingsValues) {
     setError("");
     try {
-      await onSave(value);
+      await onSave({ ...value, powerAutomateWebhookUrl: item?.powerAutomateWebhookUrl === "Configurado" ? "Configurado" : "" });
       onClose();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "No se pudo guardar.");
@@ -31,7 +31,8 @@ export function NotificationSettingsForm({ item, onSave, onClose }: { item: Noti
     <form className="form top-space" noValidate onSubmit={handleSubmit(submit)}>
       <input type="hidden" {...register("id")}/>
       <label className="field field-wide"><span>Nombre</span><input {...register("name")}/>{errors.name && <small role="alert">{errors.name.message}</small>}</label>
-      <label className="field field-wide"><span>Webhook Power Automate</span><input type="url" {...register("powerAutomateWebhookUrl")}/>{errors.powerAutomateWebhookUrl && <small role="alert">{errors.powerAutomateWebhookUrl.message}</small>}</label>
+      <input type="hidden" {...register("powerAutomateWebhookUrl")}/>
+      <div className="field field-wide"><span>Power Automate</span><strong>{item?.powerAutomateWebhookUrl ? "Configurado en servidor" : "Pendiente de configurar en variables de entorno"}</strong></div>
       {email && <label className="field"><span>Correos destino</span><input {...register("emailTo")}/>{errors.emailTo && <small role="alert">{errors.emailTo.message}</small>}</label>}
       {teams && <label className="field"><span>Canal Teams</span><input {...register("teamsChannel")}/>{errors.teamsChannel && <small role="alert">{errors.teamsChannel.message}</small>}</label>}
       <NotificationTemplateEditor value={html} onChange={(value) => setValue("htmlTemplate", value, { shouldDirty: true, shouldValidate: true })}/>

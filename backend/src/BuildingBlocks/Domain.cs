@@ -42,6 +42,7 @@ public enum ActivityStatus
 
 public enum ApprovalDecision
 {
+    Pending = 0,
     Approved = 1,
     Rejected = 2
 }
@@ -463,6 +464,14 @@ public sealed class ActivityApproval : Entity
     {
         ApprovedBy = string.Empty;
         Comments = string.Empty;
+        ApproverEmail = string.Empty;
+        RequesterEmail = string.Empty;
+        Status = "Pending";
+        DecisionSource = "web";
+        CorrelationId = string.Empty;
+        PowerAutomateRunId = string.Empty;
+        NotificationStatus = "NotSent";
+        DecidedByEmail = string.Empty;
     }
 
     public ActivityApproval(Guid activityId, ApprovalDecision decision, string approvedBy, string comments)
@@ -474,10 +483,73 @@ public sealed class ActivityApproval : Entity
         Decision = decision;
         ApprovedBy = approvedBy.Trim();
         Comments = comments.Trim();
+        ApproverEmail = approvedBy.Trim().ToLowerInvariant();
+        RequesterEmail = string.Empty;
+        Status = decision == ApprovalDecision.Pending ? "Pending" : decision.ToString();
+        SubmittedAt = CreatedAt;
+        DecidedAt = decision == ApprovalDecision.Pending ? null : DateTimeOffset.UtcNow;
+        DecisionSource = "legacy";
+        CorrelationId = Guid.NewGuid().ToString("N");
+        PowerAutomateRunId = string.Empty;
+        NotificationStatus = "NotSent";
+        DecidedByEmail = decision == ApprovalDecision.Pending ? string.Empty : approvedBy.Trim().ToLowerInvariant();
+    }
+
+    public static ActivityApproval Request(Guid activityId, string approverEmail, string requesterEmail, string comments, string source)
+    {
+        if (activityId == Guid.Empty) throw new ArgumentException("Activity id is required.", nameof(activityId));
+        if (string.IsNullOrWhiteSpace(approverEmail)) throw new ArgumentException("Approver email is required.", nameof(approverEmail));
+
+        return new ActivityApproval
+        {
+            ActivityId = activityId,
+            Decision = ApprovalDecision.Pending,
+            ApprovedBy = approverEmail.Trim().ToLowerInvariant(),
+            ApproverEmail = approverEmail.Trim().ToLowerInvariant(),
+            RequesterEmail = requesterEmail.Trim().ToLowerInvariant(),
+            Comments = comments.Trim(),
+            Status = "Pending",
+            SubmittedAt = DateTimeOffset.UtcNow,
+            DecisionSource = string.IsNullOrWhiteSpace(source) ? "web" : source.Trim(),
+            CorrelationId = Guid.NewGuid().ToString("N")
+        };
     }
 
     public Guid ActivityId { get; private set; }
     public ApprovalDecision Decision { get; private set; }
     public string ApprovedBy { get; private set; }
     public string Comments { get; private set; }
+    public string ApproverEmail { get; private set; }
+    public string RequesterEmail { get; private set; }
+    public string Status { get; private set; }
+    public DateTimeOffset SubmittedAt { get; private set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset? DecidedAt { get; private set; }
+    public string DecisionSource { get; private set; }
+    public string CorrelationId { get; private set; }
+    public string PowerAutomateRunId { get; private set; }
+    public string NotificationStatus { get; private set; }
+    public string DecidedByEmail { get; private set; }
+
+    public void MarkNotification(string status, string? powerAutomateRunId = null)
+    {
+        NotificationStatus = string.IsNullOrWhiteSpace(status) ? NotificationStatus : status.Trim();
+        PowerAutomateRunId = string.IsNullOrWhiteSpace(powerAutomateRunId) ? PowerAutomateRunId : powerAutomateRunId.Trim();
+        Touch();
+    }
+
+    public void Decide(ApprovalDecision decision, string decidedByEmail, string comments, string source)
+    {
+        if (Status != "Pending") throw new InvalidOperationException("Approval request was already answered.");
+        if (decision == ApprovalDecision.Pending) throw new ArgumentException("Decision must be approved or rejected.", nameof(decision));
+        if (decision == ApprovalDecision.Rejected && string.IsNullOrWhiteSpace(comments)) throw new ArgumentException("Comments are required when rejecting.", nameof(comments));
+
+        Decision = decision;
+        Status = decision.ToString();
+        ApprovedBy = string.IsNullOrWhiteSpace(decidedByEmail) ? ApproverEmail : decidedByEmail.Trim();
+        DecidedByEmail = string.IsNullOrWhiteSpace(decidedByEmail) ? ApproverEmail : decidedByEmail.Trim().ToLowerInvariant();
+        Comments = comments.Trim();
+        DecisionSource = string.IsNullOrWhiteSpace(source) ? "web" : source.Trim();
+        DecidedAt = DateTimeOffset.UtcNow;
+        Touch();
+    }
 }

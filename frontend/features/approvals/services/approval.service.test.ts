@@ -17,8 +17,8 @@ describe("approval.service", () => {
 
   it("envía una decisión al endpoint actual", async () => {
     apiMock.mockResolvedValue(undefined as never);
-    const payload = { decision: "Rejected" as const, approvedBy: "Aprobador", comments: "Requiere cambios" };
-    await submitApproval("p1", payload);
-    expect(apiMock).toHaveBeenCalledWith("/api/activities/p1/approvals", { method: "POST", body: JSON.stringify(payload) });
+    const payload = { decision: "rejected" as const, decidedByEmail: "aprobador@example.com", comments: "Requiere cambios", source: "web" as const };
+    await submitApproval("a1", payload);
+    expect(apiMock).toHaveBeenCalledWith("/api/approvals/a1/decision", { method: "POST", body: JSON.stringify(payload) });
   });
 });

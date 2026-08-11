@@ -11,6 +11,6 @@ export async function getApprovalWorkspace(): Promise<ApprovalWorkspaceData> {
   return { activities, evidence, approvals };
 }
 
-export function submitApproval(activityId: string, payload: ApprovalDecisionPayload) {
-  return api(`/api/activities/${activityId}/approvals`, { method: "POST", body: JSON.stringify(payload) });
+export function submitApproval(approvalId: string, payload: ApprovalDecisionPayload) {
+  return api(`/api/approvals/${approvalId}/decision`, { method: "POST", body: JSON.stringify(payload) });
 }

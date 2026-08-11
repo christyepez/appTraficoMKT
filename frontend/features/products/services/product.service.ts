@@ -40,7 +40,15 @@ export function saveProduct(product: Activity | null, payload: SaveProductPayloa
 }
 
 export function updateProductStatus(productId: string, action: "start" | "submit-approval" | "evidence-attached") {
+  if (action === "submit-approval") return submitProductApproval(productId);
   return api(`/api/activities/${productId}/${action}`, { method: "PATCH" });
+}
+
+export function submitProductApproval(productId: string) {
+  return api(`/api/activities/${productId}/submit-approval`, {
+    method: "POST",
+    body: JSON.stringify({ source: "web" })
+  });
 }
 
 export function deleteProduct(productId: string) {

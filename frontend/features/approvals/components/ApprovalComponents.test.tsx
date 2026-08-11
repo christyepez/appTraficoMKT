@@ -27,12 +27,13 @@ describe("ApprovalQueue", () => {
     const user = userEvent.setup();
     const onDecision = vi.fn();
     const onEvidence = vi.fn();
-    const { rerender } = render(<ApprovalQueue activities={[activity()]} approvals={[]} search="" showApproved={false} canDecide pendingIds={new Set()} isInitialLoading={false} loadError="" onSearch={vi.fn()} onShowApproved={vi.fn()} onRetry={vi.fn()} onDecision={onDecision} onEvidence={onEvidence} />);
+    const approvals = [{ id: "a1", activityId: "p1", decision: "Pending", approvedBy: "aprobador@example.com", comments: "", status: "Pending" }];
+    const { rerender } = render(<ApprovalQueue activities={[activity()]} approvals={approvals} search="" showApproved={false} canDecide pendingIds={new Set()} isInitialLoading={false} loadError="" onSearch={vi.fn()} onShowApproved={vi.fn()} onRetry={vi.fn()} onDecision={onDecision} onEvidence={onEvidence} />);
     await user.click(screen.getByRole("button", { name: "Aprobar PROD-1" }));
     expect(onDecision).toHaveBeenCalledWith(expect.objectContaining({ id: "p1" }), "Approved");
     await user.click(screen.getByRole("button", { name: "Ver adjuntos de PROD-1" }));
     expect(onEvidence).toHaveBeenCalled();
-    rerender(<ApprovalQueue activities={[activity()]} approvals={[]} search="" showApproved={false} canDecide={false} pendingIds={new Set()} isInitialLoading={false} loadError="" onSearch={vi.fn()} onShowApproved={vi.fn()} onRetry={vi.fn()} onDecision={onDecision} onEvidence={onEvidence} />);
+    rerender(<ApprovalQueue activities={[activity()]} approvals={approvals} search="" showApproved={false} canDecide={false} pendingIds={new Set()} isInitialLoading={false} loadError="" onSearch={vi.fn()} onShowApproved={vi.fn()} onRetry={vi.fn()} onDecision={onDecision} onEvidence={onEvidence} />);
     expect(screen.queryByRole("button", { name: "Aprobar PROD-1" })).not.toBeInTheDocument();
   });
 
