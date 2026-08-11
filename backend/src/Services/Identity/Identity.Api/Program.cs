@@ -425,6 +425,7 @@ public sealed record UpsertBrandSettingsRequest(
     bool ShowDemoCredentials,
     bool ShowOffice365Login,
     bool ShowProductIdField,
+    string RequirementFormLayout,
     string WorkdayStartTime,
     string WorkdayEndTime,
     int ReplanningWindowDays,
@@ -572,6 +573,7 @@ public sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> option
             entity.Property(x => x.ShowDemoCredentials).HasDefaultValue(true);
             entity.Property(x => x.ShowOffice365Login).HasDefaultValue(true);
             entity.Property(x => x.ShowProductIdField).HasDefaultValue(false);
+            entity.Property(x => x.RequirementFormLayout).HasMaxLength(20).HasDefaultValue("singlePage");
             entity.Property(x => x.WorkdayStartTime).HasMaxLength(5).HasDefaultValue("08:00");
             entity.Property(x => x.WorkdayEndTime).HasMaxLength(5).HasDefaultValue("17:00");
             entity.Property(x => x.ReplanningWindowDays).HasDefaultValue(15);
@@ -644,6 +646,7 @@ public sealed class BrandSettings
     public bool ShowDemoCredentials { get; set; } = true;
     public bool ShowOffice365Login { get; set; } = true;
     public bool ShowProductIdField { get; set; }
+    public string RequirementFormLayout { get; set; } = "singlePage";
     public string WorkdayStartTime { get; set; } = "08:00";
     public string WorkdayEndTime { get; set; } = "17:00";
     public int ReplanningWindowDays { get; set; } = 15;
@@ -726,6 +729,7 @@ public sealed class BrandSettings
         ShowDemoCredentials = request.ShowDemoCredentials;
         ShowOffice365Login = request.ShowOffice365Login;
         ShowProductIdField = request.ShowProductIdField;
+        RequirementFormLayout = request.RequirementFormLayout.Equals("stepper", StringComparison.OrdinalIgnoreCase) ? "stepper" : "singlePage";
         WorkdayStartTime = NormalizeTime(request.WorkdayStartTime, "08:00");
         WorkdayEndTime = NormalizeTime(request.WorkdayEndTime, "17:00");
         ReplanningWindowDays = Math.Clamp(request.ReplanningWindowDays, 0, 365);
@@ -995,6 +999,7 @@ public static class IdentitySchema
                     [ShowDemoCredentials] bit NOT NULL DEFAULT(1),
                     [ShowOffice365Login] bit NOT NULL DEFAULT(1),
                     [ShowProductIdField] bit NOT NULL DEFAULT(0),
+                    [RequirementFormLayout] nvarchar(20) NOT NULL DEFAULT('singlePage'),
                     [WorkdayStartTime] nvarchar(5) NOT NULL DEFAULT('08:00'),
                     [WorkdayEndTime] nvarchar(5) NOT NULL DEFAULT('17:00'),
                     [ReplanningWindowDays] int NOT NULL DEFAULT(15),
@@ -1133,6 +1138,10 @@ public static class IdentitySchema
             BEGIN
                 ALTER TABLE [BrandSettings] ADD [ShowProductIdField] bit NOT NULL DEFAULT(0)
             END
+            IF COL_LENGTH('BrandSettings', 'RequirementFormLayout') IS NULL
+            BEGIN
+                ALTER TABLE [BrandSettings] ADD [RequirementFormLayout] nvarchar(20) NOT NULL DEFAULT('singlePage')
+            END
             IF COL_LENGTH('BrandSettings', 'WorkdayStartTime') IS NULL
             BEGIN
                 ALTER TABLE [BrandSettings] ADD [WorkdayStartTime] nvarchar(5) NOT NULL DEFAULT('08:00')
@@ -1209,7 +1218,7 @@ public static class IdentitySchema
                 EXEC('INSERT INTO [BrandSettings] (
                     [Id], [Primary], [PrimaryDark], [Accent], [Background], [Surface], [Foreground], [Muted], [Line],
                     [ButtonText], [Secondary], [SecondaryText], [Success], [Warning], [Danger], [TopbarText],
-                    [FontFamily], [MenuMode], [MenuCollapsed], [MobileMenuCollapsed], [BrandVersion], [Logo], [ChatbotIcon], [ShowPublicRequirementForm], [ShowPublicRequirementFullPage], [ShowLoginChatbot], [ShowDemoCredentials], [ShowOffice365Login], [ShowProductIdField], [Title], [Subtitle],
+                    [FontFamily], [MenuMode], [MenuCollapsed], [MobileMenuCollapsed], [BrandVersion], [Logo], [ChatbotIcon], [ShowPublicRequirementForm], [ShowPublicRequirementFullPage], [ShowLoginChatbot], [ShowDemoCredentials], [ShowOffice365Login], [ShowProductIdField], [RequirementFormLayout], [Title], [Subtitle],
                     [CreatedAt], [UpdatedAt])
                 VALUES (
                     NEWID(), ''#3c235f'', ''#2a1844'', ''#f6b700'', ''#f5f7fb'', ''#ffffff'', ''#101b2d'', ''#697386'', ''#d9deea'',
@@ -1217,7 +1226,7 @@ public static class IdentitySchema
                     ''Segoe UI, Arial, Helvetica, sans-serif'', ''horizontal'', 0, 1, 3,
                     ''https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/logo-gen-cuad.jpg'',
                     ''https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/logo-gen-cuad.jpg'',
-                    1, 1, 1, 1, 1, 0, ''Creamos conexiones que dejan huella'', ''Universidad Indoamérica'',
+                    1, 1, 1, 1, 1, 0, ''singlePage'', ''Creamos conexiones que dejan huella'', ''Universidad Indoamérica'',
                     SYSDATETIMEOFFSET(), NULL)')
             END
             """);

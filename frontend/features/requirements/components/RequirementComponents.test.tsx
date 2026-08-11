@@ -28,6 +28,12 @@ describe("RequirementForm", () => {
   it("bloquea edición cuando no está en borrador", () => {
     renderForm(req("r1", "InAnalysis")); expect(screen.getByText(/solo puede consultarse/)).toBeInTheDocument(); expect(screen.getByRole("button", { name: "Guardar" })).toBeDisabled();
   });
+  it("muestra variante paso a paso cuando marca lo parametriza", async () => {
+    const user = userEvent.setup(); renderForm(null, "stepper"); expect(screen.getByRole("status")).toHaveTextContent("Paso 1 de 9");
+    await user.type(screen.getByLabelText("Actividad o evento"), "Feria");
+    await user.click(screen.getByRole("button", { name: "Siguiente" }));
+    expect(await screen.findByLabelText("Nombre del solicitante")).toBeInTheDocument();
+  });
 });
 
 describe("requirement presentation", () => {
@@ -42,7 +48,7 @@ describe("requirement presentation", () => {
   });
 });
 
-function renderForm(requirement: ReturnType<typeof req> | null = null) { return render(<RequirementForm requirement={requirement} catalogs={catalogs} onSave={onSave} onSuccess={onSuccess} onFeedback={onFeedback} onCancel={onCancel} />); }
+function renderForm(requirement: ReturnType<typeof req> | null = null, layout: "singlePage" | "stepper" = "singlePage") { return render(<RequirementForm requirement={requirement} catalogs={catalogs} layout={layout} onSave={onSave} onSuccess={onSuccess} onFeedback={onFeedback} onCancel={onCancel} />); }
 async function fill(user: ReturnType<typeof userEvent.setup>) {
   await user.type(screen.getByLabelText("Actividad o evento"), "Feria"); await user.type(screen.getByLabelText("Nombre del solicitante"), "Ana Solicitante"); await user.type(screen.getByLabelText("Correo del solicitante"), "owner@example.com"); await user.selectOptions(screen.getByLabelText("Facultad"), "f"); await user.selectOptions(screen.getByLabelText("Carrera"), "cr"); await user.selectOptions(screen.getByLabelText("Sede"), "c"); await user.type(screen.getByLabelText("Lugar"), "Auditorio"); await user.type(screen.getByLabelText("Fecha y hora de inicio"), "2026-08-01T08:00"); await user.type(screen.getByLabelText("Fecha y hora de fin"), "2026-08-02T09:00"); await user.selectOptions(screen.getByLabelText("Público"), "mixed"); await user.selectOptions(screen.getByLabelText("Formato del evento"), "e"); await user.type(screen.getByLabelText("Objetivo del evento"), "Objetivo"); await user.type(screen.getByLabelText("Formato o dinámica de la actividad"), "Charla presencial"); await user.upload(screen.getByLabelText("Adjuntos del requerimiento"), new File(["ok"], "brief.pdf", { type: "application/pdf" }));
 }

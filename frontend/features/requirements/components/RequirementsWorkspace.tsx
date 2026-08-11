@@ -30,7 +30,7 @@ export function RequirementsWorkspace({ workspace }: { workspace: Workspace }) {
 
   return (
     <section className={`content-shell tracking-layout ${styles.shell}`}>
-      {formOpen && <RequirementForm key={editing?.id ?? "new"} requirement={editing} catalogs={workspace.catalogs} onSave={workspace.save} onSuccess={closeForm} onFeedback={workspace.report} onCancel={closeForm} />}
+      {formOpen && <RequirementForm key={editing?.id ?? "new"} requirement={editing} catalogs={workspace.catalogs} layout={workspace.brand.requirementFormLayout} onSave={workspace.save} onSuccess={closeForm} onFeedback={workspace.report} onCancel={closeForm} />}
       {selected && <RelatedProductsDialog requirement={selected} activities={workspace.activities} onClose={() => setSelected(null)} />}
       <section className="panel">
         <div className="card-head"><div><span className="eyebrow">Operación de marketing</span><h2>Seguimiento de requerimientos</h2></div><div className="actions">

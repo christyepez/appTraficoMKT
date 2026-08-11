@@ -99,4 +99,14 @@ describe("PublicRequirementForm", () => {
     await user.click(screen.getByRole("button", { name: "Enviar requerimiento" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("Servicio no disponible");
   });
+
+  it("puede mostrarse como paso a paso por marca", async () => {
+    const user = userEvent.setup();
+    render(<PublicRequirementForm availability={enabled} layout="stepper" loadCatalogs={vi.fn().mockResolvedValue(catalogs)} />);
+    await screen.findByLabelText("Actividad o evento");
+    expect(screen.getByRole("status")).toHaveTextContent("Paso 1 de 9");
+    fireEvent.change(screen.getByLabelText("Actividad o evento"), { target: { value: "Feria" } });
+    await user.click(screen.getByRole("button", { name: "Siguiente" }));
+    expect(await screen.findByLabelText("Nombre del solicitante")).toBeInTheDocument();
+  });
 });

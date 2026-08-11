@@ -21,7 +21,7 @@ export const brandSettingsSchema = z.object({
   publicRequirementFormActiveFrom: optionalDate, publicRequirementFormActiveUntil: optionalDate,
   publicRequirementFullPageActiveFrom: optionalDate, publicRequirementFullPageActiveUntil: optionalDate,
   loginChatbotActiveFrom: optionalDate, loginChatbotActiveUntil: optionalDate,
-  showDemoCredentials: z.boolean(), showOffice365Login: z.boolean(), showProductIdField: z.boolean(),
+  showDemoCredentials: z.boolean(), showOffice365Login: z.boolean(), showProductIdField: z.boolean(), requirementFormLayout: z.enum(["singlePage", "stepper"]),
   workdayStartTime: z.string().regex(/^\d{2}:\d{2}$/), workdayEndTime: z.string().regex(/^\d{2}:\d{2}$/), replanningWindowDays: z.number().min(0).max(365),
   title: z.string().trim().min(1, "Ingrese el título.").max(120), subtitle: z.string().trim().min(1, "Ingrese el subtítulo.").max(180)
 }).superRefine((value, context) => {

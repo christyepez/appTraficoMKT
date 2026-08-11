@@ -16,7 +16,7 @@ export type BrandSettings = {
   publicRequirementFormActiveFrom?: string | null; publicRequirementFormActiveUntil?: string | null;
   publicRequirementFullPageActiveFrom?: string | null; publicRequirementFullPageActiveUntil?: string | null;
   loginChatbotActiveFrom?: string | null; loginChatbotActiveUntil?: string | null;
-  showDemoCredentials: boolean; showOffice365Login: boolean; showProductIdField: boolean;
+  showDemoCredentials: boolean; showOffice365Login: boolean; showProductIdField: boolean; requirementFormLayout: "singlePage" | "stepper";
   workdayStartTime: string; workdayEndTime: string; replanningWindowDays: number; title: string; subtitle: string;
 };
 
@@ -36,7 +36,7 @@ export const defaultBrandSettings: BrandSettings = {
   chatbotIcon: "https://www.indoamerica.edu.ec/wp-content/uploads/2026/03/logo-gen-cuad.jpg",
   showPublicRequirementForm: true, showPublicRequirementFullPage: true, showLoginChatbot: true,
   publicRequirementFormActiveFrom: null, publicRequirementFormActiveUntil: null, publicRequirementFullPageActiveFrom: null, publicRequirementFullPageActiveUntil: null,
-  loginChatbotActiveFrom: null, loginChatbotActiveUntil: null, showDemoCredentials: true, showOffice365Login: true, showProductIdField: false,
+  loginChatbotActiveFrom: null, loginChatbotActiveUntil: null, showDemoCredentials: true, showOffice365Login: true, showProductIdField: false, requirementFormLayout: "singlePage",
   workdayStartTime: "08:00", workdayEndTime: "17:00", replanningWindowDays: 15,
   title: "Creamos conexiones que dejan huella", subtitle: "Universidad Indoamérica"
 };

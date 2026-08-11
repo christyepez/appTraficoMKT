@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Save, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Save, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { showToast } from "../../../app/lib";
@@ -30,6 +30,7 @@ type Props = {
   loadCatalogs?: () => Promise<PublicRequirementCatalogs>;
   submitRequirement?: (payload: PublicRequirementPayload) => Promise<PublicRequirementCreationResult>;
   uploadAttachment?: (requirementId: string, uploadToken: string, file: File) => Promise<PublicRequirementAttachmentResult>;
+  layout?: "singlePage" | "stepper";
   now?: number;
 };
 
@@ -40,6 +41,7 @@ export function PublicRequirementForm({
   loadCatalogs = getPublicRequirementCatalogs,
   submitRequirement = createPublicRequirement,
   uploadAttachment = uploadPublicRequirementAttachment,
+  layout = "singlePage",
   now
 }: Props) {
   const active = isPublicFeatureActive(availability, now);
@@ -50,9 +52,10 @@ export function PublicRequirementForm({
   const [failedFiles, setFailedFiles] = useState<File[]>([]);
   const [lastCreation, setLastCreation] = useState<PublicRequirementCreationResult | null>(null);
   const [turnstileToken, setTurnstileToken] = useState("");
+  const [step, setStep] = useState(0);
   const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
   const schema = useMemo(() => catalogs ? buildPublicRequirementSchema(catalogs) : buildPublicRequirementSchema({ faculties: [], careers: [], campuses: [], eventFormats: [] }), [catalogs]);
-  const { register, handleSubmit, reset, setValue, control, formState: { errors, isSubmitting } } = useForm<PublicRequirementValues>({
+  const { register, handleSubmit, reset, setValue, control, trigger, formState: { errors, isSubmitting } } = useForm<PublicRequirementValues>({
     resolver: zodResolver(schema),
     defaultValues: publicRequirementDefaults
   });
@@ -139,6 +142,7 @@ export function PublicRequirementForm({
       setSubmitMessage({ type: "success", text: creation.message || successText });
       showToast("Requerimiento enviado correctamente.");
       setTurnstileToken("");
+      setStep(0);
       reset(requirementFormDefaults());
       onSuccess?.();
     } catch (reason) {
@@ -146,6 +150,10 @@ export function PublicRequirementForm({
       setSubmitMessage({ type: "error", text: message });
       showToast(message, "error");
     }
+  }
+
+  async function nextStep() {
+    if (await trigger(publicStepFields(step))) setStep((current) => Math.min(current + 1, publicSteps.length - 1));
   }
 
   async function retryFailedFiles() {
@@ -173,20 +181,21 @@ export function PublicRequirementForm({
 
   return (
     <form className="form top-space" onSubmit={handleSubmit(submit)} noValidate>
-      <Field label="Actividad o evento" error={errors.activityOrEvent?.message}><input {...register("activityOrEvent")} /></Field>
-      <Field label="Nombre del solicitante" error={errors.requesterName?.message}><input {...register("requesterName")} /></Field>
-      <Field label="Correo del solicitante" error={errors.requesterEmail?.message}><input type="email" placeholder="correo@uti.edu.ec" {...register("requesterEmail")} /></Field>
-      <Field label="Facultad" error={errors.facultyId?.message}><select {...register("facultyId", { onChange: () => setValue("careerId", "") })}><option value="">Seleccione...</option>{catalogs.faculties.map(option)}</select></Field>
+      {layout === "stepper" && <p className="hint" role="status">Paso {step + 1} de {publicSteps.length}: {publicSteps[step]}</p>}
+      {showPublicStep(layout, step, 0) && <Field label="Actividad o evento" error={errors.activityOrEvent?.message}><input {...register("activityOrEvent")} /></Field>}
+      {showPublicStep(layout, step, 1) && <><Field label="Nombre del solicitante" error={errors.requesterName?.message}><input {...register("requesterName")} /></Field>
+      <Field label="Correo del solicitante" error={errors.requesterEmail?.message}><input type="email" placeholder="correo@uti.edu.ec" {...register("requesterEmail")} /></Field></>}
+      {showPublicStep(layout, step, 2) && <><Field label="Facultad" error={errors.facultyId?.message}><select {...register("facultyId", { onChange: () => setValue("careerId", "") })}><option value="">Seleccione...</option>{catalogs.faculties.map(option)}</select></Field>
       <Field label="Carrera" error={errors.careerId?.message}><select disabled={!facultyId} {...register("careerId")}><option value="">Seleccione...</option>{careers.map(option)}</select></Field>
       <Field label="Sede" error={errors.campusId?.message}><select {...register("campusId")}><option value="">Seleccione...</option>{catalogs.campuses.map(option)}</select></Field>
-      <Field label="Lugar" error={errors.place?.message}><input {...register("place")} /></Field>
-      <Field label="Fecha y hora de inicio" error={errors.startAt?.message}><input type="datetime-local" {...register("startAt")} /></Field>
-      <Field label="Fecha y hora de fin" error={errors.endAt?.message}><input type="datetime-local" {...register("endAt")} /></Field>
-      <Field label="Público objetivo" error={errors.audienceType?.message}><select {...register("audienceType")}><option value="internal">Interno</option><option value="external">Externo</option><option value="mixed">Mixto</option></select></Field>
-      <Field label="Formato" error={errors.eventFormatId?.message}><select {...register("eventFormatId")}><option value="">Seleccione...</option>{catalogs.eventFormats.map(option)}</select></Field>
-      <Field label={`Objetivo del evento (${wordCount(eventObjective ?? "")}/${REQUIREMENT_WORD_LIMIT})`} error={errors.eventObjective?.message} wide><textarea aria-label="Objetivo del evento" {...register("eventObjective")} /></Field>
-      <Field label={`Formato o dinámica (${wordCount(activityFormatDescription ?? "")}/${REQUIREMENT_WORD_LIMIT})`} error={errors.activityFormatDescription?.message} wide><textarea aria-label="Formato o dinámica" {...register("activityFormatDescription")} /></Field>
-      <Field label="Adjuntos del requerimiento" error={errors.attachments?.message} wide>
+      <Field label="Lugar" error={errors.place?.message}><input {...register("place")} /></Field></>}
+      {showPublicStep(layout, step, 3) && <><Field label="Fecha y hora de inicio" error={errors.startAt?.message}><input type="datetime-local" {...register("startAt")} /></Field>
+      <Field label="Fecha y hora de fin" error={errors.endAt?.message}><input type="datetime-local" {...register("endAt")} /></Field></>}
+      {showPublicStep(layout, step, 4) && <><Field label="Público objetivo" error={errors.audienceType?.message}><select {...register("audienceType")}><option value="internal">Interno</option><option value="external">Externo</option><option value="mixed">Mixto</option></select></Field>
+      <Field label="Formato" error={errors.eventFormatId?.message}><select {...register("eventFormatId")}><option value="">Seleccione...</option>{catalogs.eventFormats.map(option)}</select></Field></>}
+      {showPublicStep(layout, step, 5) && <Field label={`Objetivo del evento (${wordCount(eventObjective ?? "")}/${REQUIREMENT_WORD_LIMIT})`} error={errors.eventObjective?.message} wide><textarea aria-label="Objetivo del evento" {...register("eventObjective")} /></Field>}
+      {showPublicStep(layout, step, 6) && <Field label={`Formato o dinámica (${wordCount(activityFormatDescription ?? "")}/${REQUIREMENT_WORD_LIMIT})`} error={errors.activityFormatDescription?.message} wide><textarea aria-label="Formato o dinámica" {...register("activityFormatDescription")} /></Field>}
+      {showPublicStep(layout, step, 7) && <Field label="Adjuntos del requerimiento" error={errors.attachments?.message} wide>
         <input
           aria-label="Adjuntos del requerimiento"
           type="file"
@@ -194,15 +203,18 @@ export function PublicRequirementForm({
           accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp"
           onChange={(event) => setValue("attachments", Array.from(event.target.files ?? []), { shouldValidate: true })}
         />
-      </Field>
+      </Field>}
       {!!attachments.length && <p className="hint" role="status">{attachments.length} archivo(s) seleccionado(s).</p>}
       {turnstileSiteKey && <div id="public-requirement-turnstile" className="field-wide" aria-label="Verificación de seguridad" />}
-      <div className="summary">
+      {showPublicStep(layout, step, 8) && <div className="summary">
         <strong>Resumen</strong>
         <span>El requerimiento se registrará primero y luego se cargarán los adjuntos seleccionados.</span>
-      </div>
+      </div>}
       <div className="form-actions">
-        <button className="button" type="submit" disabled={isSubmitting}><Save size={16} /> {isSubmitting ? "Enviando..." : "Enviar requerimiento"}</button>
+        {layout === "stepper" && <button className="button secondary" type="button" disabled={step === 0 || isSubmitting} onClick={() => setStep((current) => Math.max(current - 1, 0))}><ChevronLeft size={16} /> Anterior</button>}
+        {layout === "stepper" && step < publicSteps.length - 1
+          ? <button className="button" type="button" disabled={isSubmitting} onClick={() => void nextStep()}><ChevronRight size={16} /> Siguiente</button>
+          : <button className="button" type="submit" disabled={isSubmitting}><Save size={16} /> {isSubmitting ? "Enviando..." : "Enviar requerimiento"}</button>}
         {failedFiles.length > 0 && <button className="button secondary" type="button" disabled={isSubmitting} onClick={() => void retryFailedFiles()}>Reintentar adjuntos</button>}
         {onCancel && <button className="button secondary" type="button" disabled={isSubmitting} onClick={onCancel}><X size={16} /> Cancelar</button>}
       </div>
@@ -212,3 +224,21 @@ export function PublicRequirementForm({
 }
 
 function option(item: { id: string; name: string }) { return <option key={item.id} value={item.id}>{item.name}</option>; }
+
+const publicSteps = ["Actividad", "Solicitante", "Ubicación", "Fechas", "Público", "Objetivo", "Formato", "Adjuntos", "Resumen"] as const;
+
+function showPublicStep(layout: "singlePage" | "stepper", current: number, expected: number) {
+  return layout === "singlePage" || current === expected;
+}
+
+function publicStepFields(step: number): (keyof PublicRequirementValues)[] {
+  if (step === 0) return ["activityOrEvent"];
+  if (step === 1) return ["requesterName", "requesterEmail"];
+  if (step === 2) return ["facultyId", "careerId", "campusId", "place"];
+  if (step === 3) return ["startAt", "endAt"];
+  if (step === 4) return ["audienceType", "eventFormatId"];
+  if (step === 5) return ["eventObjective"];
+  if (step === 6) return ["activityFormatDescription"];
+  if (step === 7) return ["attachments"];
+  return [];
+}

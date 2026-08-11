@@ -1,15 +1,18 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getSession, showToast } from "../../../app/lib";
+import { defaultBrandSettings } from "../../../core/branding/brand-settings";
+import { getPublicBrandSettings } from "../../public-requirement/services/public-requirement.service";
 import { deleteRequirement, getRequirementWorkspace, saveRequirement, updateRequirementStatus } from "../services/requirement.service";
 import { useRequirementsWorkspace } from "./useRequirementsWorkspace";
 
 vi.mock("../../../app/lib", () => ({ getSession: vi.fn(), showToast: vi.fn() }));
+vi.mock("../../public-requirement/services/public-requirement.service", () => ({ getPublicBrandSettings: vi.fn() }));
 vi.mock("../services/requirement.service", () => ({ getRequirementWorkspace: vi.fn(), saveRequirement: vi.fn(), updateRequirementStatus: vi.fn(), deleteRequirement: vi.fn() }));
 const sessionMock = vi.mocked(getSession), workspaceMock = vi.mocked(getRequirementWorkspace), saveMock = vi.mocked(saveRequirement), statusMock = vi.mocked(updateRequirementStatus), deleteMock = vi.mocked(deleteRequirement);
 
 beforeEach(() => {
-  vi.clearAllMocks(); sessionMock.mockReturnValue(session("Administrador")); workspaceMock.mockResolvedValue(workspace()); saveMock.mockResolvedValue({} as never); statusMock.mockResolvedValue({} as never); deleteMock.mockResolvedValue({} as never); vi.spyOn(window, "confirm").mockReturnValue(true);
+  vi.clearAllMocks(); sessionMock.mockReturnValue(session("Administrador")); vi.mocked(getPublicBrandSettings).mockResolvedValue(defaultBrandSettings); workspaceMock.mockResolvedValue(workspace()); saveMock.mockResolvedValue({} as never); statusMock.mockResolvedValue({} as never); deleteMock.mockResolvedValue({} as never); vi.spyOn(window, "confirm").mockReturnValue(true);
 });
 
 describe("useRequirementsWorkspace", () => {

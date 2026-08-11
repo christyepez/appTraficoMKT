@@ -2,7 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getSession, showToast } from "../../../app/lib";
+import { defaultBrandSettings, type BrandSettings } from "../../../core/branding/brand-settings";
 import type { Activity } from "../../../shared/models/api.models";
+import { getPublicBrandSettings } from "../../public-requirement/services/public-requirement.service";
 import type { Requirement, RequirementCatalogs, RequirementPermissions, RequirementStatusAction, SaveRequirementPayload } from "../models/requirement.models";
 import { deleteRequirement, getRequirementWorkspace, saveRequirement, updateRequirementStatus, uploadRequirementAttachments } from "../services/requirement.service";
 import { filterRequirementsForSession, requirementPermissions } from "../utils/requirement.utils";
@@ -13,6 +15,7 @@ export function useRequirementsWorkspace(pollInterval = 15_000) {
   const [requirements, setRequirements] = useState<Requirement[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [catalogs, setCatalogs] = useState<RequirementCatalogs>(emptyCatalogs);
+  const [brand, setBrand] = useState<BrandSettings>(defaultBrandSettings);
   const [permissions, setPermissions] = useState<RequirementPermissions>({ canCreate: false, canManage: false });
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -29,11 +32,13 @@ export function useRequirementsWorkspace(pollInterval = 15_000) {
       try {
         const session = getSession();
         const workspace = await getRequirementWorkspace();
+        const brandSettings = await getPublicBrandSettings().catch(() => defaultBrandSettings);
         const visible = filterRequirementsForSession(workspace.requirements, workspace.activities, session);
         const visibleIds = new Set(visible.map((item) => item.id));
         setRequirements(visible);
         setActivities(workspace.activities.filter((item) => visibleIds.has(item.requirementId)));
         setCatalogs(workspace.catalogs);
+        setBrand(brandSettings);
         setPermissions(requirementPermissions(session));
         setLoadError("");
       } catch (error) {
@@ -126,7 +131,7 @@ export function useRequirementsWorkspace(pollInterval = 15_000) {
     };
   }, [load, pollInterval]);
 
-  return { requirements, activities, catalogs, permissions, isInitialLoading, isRefreshing, loadError, message, pendingRequirementIds, refresh: () => load(false), save, changeStatus, remove, report };
+  return { requirements, activities, catalogs, brand, permissions, isInitialLoading, isRefreshing, loadError, message, pendingRequirementIds, refresh: () => load(false), save, changeStatus, remove, report };
 }
 
 function startPending(values: Set<string>, id: string) {
