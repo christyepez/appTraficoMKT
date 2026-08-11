@@ -1,8 +1,7 @@
-export type PublicCatalog = {
-  id: string;
-  name: string;
+import type { LegacyRequirementPayload, RequirementFormCatalog } from "../../requirements/domain/requirement-form.types";
+
+export type PublicCatalog = RequirementFormCatalog & {
   isActive: boolean;
-  facultyId?: string;
 };
 
 export type PublicRequirementCatalogs = {
@@ -12,23 +11,24 @@ export type PublicRequirementCatalogs = {
   eventFormats: PublicCatalog[];
 };
 
-export type PublicRequirementPayload = {
-  activityOrEvent: string;
-  requestedBy: string;
-  facultyId: string;
-  faculty: string;
-  career: string;
-  campusId: string;
-  campus: string;
-  place: string;
-  startDate: string;
-  startTime: string | null;
-  endDate: string;
-  endTime: string | null;
-  eventObjective: string;
-  eventFormatId: string;
-  eventFormat: string;
-  requestDate: string;
+export type PublicRequirementPayload = LegacyRequirementPayload & {
+  idempotencyKey: string;
+  turnstileToken?: string;
+};
+
+export type PublicRequirementCreationResult = {
+  requirementId: string;
+  requirementCode: string;
+  uploadToken: string;
+  uploadTokenExpiresAt: string;
+  message: string;
+};
+
+export type PublicRequirementAttachmentResult = {
+  attachmentId: string;
+  fileName: string;
+  success: boolean;
+  error?: string;
 };
 
 export type PublicAvailability = {

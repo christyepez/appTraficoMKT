@@ -1,6 +1,7 @@
 using BuildingBlocks;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
 
 public static class RequirementEndpoints
 {
@@ -11,10 +12,13 @@ public static class RequirementEndpoints
             HttpRequest httpRequest,
             RequirementsDbContext db,
             IHttpClientFactory httpClientFactory,
+            IConfiguration configuration,
             IRequirementUploadTokenService tokenService) =>
         {
             var idempotencyKey = request.IdempotencyKey ?? httpRequest.Headers["Idempotency-Key"].FirstOrDefault();
             if (string.IsNullOrWhiteSpace(idempotencyKey)) return Results.BadRequest(new { message = "Clave de idempotencia requerida." });
+            if (!await TurnstileVerifier.IsValidAsync(request.TurnstileToken, httpRequest, httpClientFactory, configuration))
+                return Results.BadRequest(new { message = "No se pudo validar Turnstile." });
             var idempotencyHash = tokenService.Hash(idempotencyKey);
             var existing = await db.RequirementPublicCreations.FirstOrDefaultAsync(x => x.IdempotencyKeyHash == idempotencyHash);
             if (existing is not null)
@@ -120,6 +124,39 @@ public static class RequirementEndpoints
         var tokenHash = tokenService.Hash(token);
         return await db.RequirementPublicCreations.AnyAsync(x => x.RequirementId == requirementId && x.UploadTokenHash == tokenHash && x.ExpiresAt >= DateTimeOffset.UtcNow);
     }
+}
+
+public static class TurnstileVerifier
+{
+    private const string VerifyUrl = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
+
+    public static async Task<bool> IsValidAsync(string? token, HttpRequest request, IHttpClientFactory httpClientFactory, IConfiguration configuration)
+    {
+        var secret = configuration["Turnstile:SecretKey"] ?? configuration["TURNSTILE_SECRET_KEY"];
+        if (string.IsNullOrWhiteSpace(secret)) return true;
+        if (string.IsNullOrWhiteSpace(token)) return false;
+
+        try
+        {
+            var client = httpClientFactory.CreateClient();
+            using var content = new FormUrlEncodedContent(new Dictionary<string, string?>
+            {
+                ["secret"] = secret,
+                ["response"] = token,
+                ["remoteip"] = request.HttpContext.Connection.RemoteIpAddress?.ToString()
+            }.Where(x => !string.IsNullOrWhiteSpace(x.Value)).ToDictionary(x => x.Key, x => x.Value!));
+            var response = await client.PostAsync(VerifyUrl, content);
+            if (!response.IsSuccessStatusCode) return false;
+            var result = await response.Content.ReadFromJsonAsync<TurnstileResponse>();
+            return result?.Success == true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private sealed record TurnstileResponse([property: JsonPropertyName("success")] bool Success);
 }
 
 public static class RequirementFactory

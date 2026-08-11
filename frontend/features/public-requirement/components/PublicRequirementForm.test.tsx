@@ -1,7 +1,7 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import type { PublicRequirementCatalogs } from "../models/public-requirement.models";
+import type { PublicRequirementCatalogs, PublicRequirementCreationResult } from "../models/public-requirement.models";
 import { PublicRequirementForm } from "./PublicRequirementForm";
 
 vi.mock("../../../app/lib", () => ({ showToast: vi.fn() }));
@@ -13,18 +13,28 @@ const catalogs: PublicRequirementCatalogs = {
   eventFormats: [{ id: "e1", name: "Presencial", isActive: true }]
 };
 const enabled = { enabled: true };
+const creation: PublicRequirementCreationResult = {
+  requirementId: "r1",
+  requirementCode: "REQ-2026-0001",
+  uploadToken: "token",
+  uploadTokenExpiresAt: "2026-01-10T10:00:00Z",
+  message: "Su requerimiento fue registrado correctamente con el código REQ-2026-0001. El área de Marketing revisará la información enviada."
+};
 
 async function fill(user: ReturnType<typeof userEvent.setup>) {
-  await user.type(screen.getByLabelText("Actividad o evento"), "Feria");
-  await user.type(screen.getByLabelText("Correo del solicitante"), "ana@example.com");
+  fireEvent.change(screen.getByLabelText("Actividad o evento"), { target: { value: "Feria" } });
+  fireEvent.change(screen.getByLabelText("Nombre del solicitante"), { target: { value: "Ana Torres" } });
+  fireEvent.change(screen.getByLabelText("Correo del solicitante"), { target: { value: "ana@example.com" } });
   await user.selectOptions(screen.getByLabelText("Facultad"), "f1");
   await user.selectOptions(screen.getByLabelText("Carrera"), "c1");
   await user.selectOptions(screen.getByLabelText("Sede"), "s1");
-  await user.type(screen.getByLabelText("Lugar"), "Auditorio");
-  await user.type(screen.getByLabelText("Fecha inicio"), "2026-01-10");
-  await user.type(screen.getByLabelText("Fecha fin"), "2026-01-10");
+  fireEvent.change(screen.getByLabelText("Lugar"), { target: { value: "Auditorio" } });
+  fireEvent.change(screen.getByLabelText("Fecha y hora de inicio"), { target: { value: "2026-01-10T09:00" } });
+  fireEvent.change(screen.getByLabelText("Fecha y hora de fin"), { target: { value: "2026-01-10T10:00" } });
+  await user.selectOptions(screen.getByLabelText("Público objetivo"), "mixed");
   await user.selectOptions(screen.getByLabelText("Formato"), "e1");
-  await user.type(screen.getByLabelText("Objetivo del evento"), "Presentar proyectos");
+  fireEvent.change(screen.getByLabelText("Objetivo del evento"), { target: { value: "Presentar proyectos" } });
+  fireEvent.change(screen.getByLabelText("Formato o dinámica"), { target: { value: "Exposición con agenda guiada" } });
 }
 
 describe("PublicRequirementForm", () => {
@@ -45,20 +55,37 @@ describe("PublicRequirementForm", () => {
     expect(screen.queryByRole("option", { name: "Gráfico" })).not.toBeInTheDocument();
   });
 
-  it("valida, envía una vez y muestra confirmación", async () => {
+  it("crea una vez, carga adjuntos y muestra el código", async () => {
     const user = userEvent.setup();
-    let resolveRequest!: () => void;
-    const submitRequirement = vi.fn().mockReturnValue(new Promise<void>((resolve) => { resolveRequest = resolve; }));
-    render(<PublicRequirementForm availability={enabled} loadCatalogs={vi.fn().mockResolvedValue(catalogs)} submitRequirement={submitRequirement} />);
+    let resolveRequest!: (value: PublicRequirementCreationResult) => void;
+    const submitRequirement = vi.fn().mockReturnValue(new Promise<PublicRequirementCreationResult>((resolve) => { resolveRequest = resolve; }));
+    const uploadAttachment = vi.fn().mockResolvedValue({ attachmentId: "a1", fileName: "brief.pdf", success: true });
+    render(<PublicRequirementForm availability={enabled} loadCatalogs={vi.fn().mockResolvedValue(catalogs)} submitRequirement={submitRequirement} uploadAttachment={uploadAttachment} />);
     await screen.findByLabelText("Facultad");
     await fill(user);
+    await user.upload(screen.getByLabelText("Adjuntos del requerimiento"), new File(["pdf"], "brief.pdf", { type: "application/pdf" }));
     await user.click(screen.getByRole("button", { name: "Enviar requerimiento" }));
     await waitFor(() => expect(submitRequirement).toHaveBeenCalledTimes(1));
-    expect(screen.getByRole("button", { name: "Enviando..." })).toBeDisabled();
-    await user.click(screen.getByRole("button", { name: "Enviando..." }));
+    expect(submitRequirement).toHaveBeenCalledWith(expect.objectContaining({ requesterName: "Ana Torres", requesterEmail: "ana@example.com", requestedBy: "ana@example.com", audienceType: "mixed", activityFormatDescription: "Exposición con agenda guiada" }));
+    resolveRequest(creation);
+    expect(await screen.findByText(/REQ-2026-0001/)).toBeInTheDocument();
+    expect(uploadAttachment).toHaveBeenCalledWith("r1", "token", expect.any(File));
+  });
+
+  it("permite reintentar solo adjuntos fallidos sin duplicar requerimiento", async () => {
+    const user = userEvent.setup();
+    const submitRequirement = vi.fn().mockResolvedValue(creation);
+    const uploadAttachment = vi.fn().mockRejectedValueOnce(new Error("Archivo ocupado")).mockResolvedValueOnce({ attachmentId: "a1", fileName: "brief.pdf", success: true });
+    render(<PublicRequirementForm availability={enabled} loadCatalogs={vi.fn().mockResolvedValue(catalogs)} submitRequirement={submitRequirement} uploadAttachment={uploadAttachment} />);
+    await screen.findByLabelText("Facultad");
+    await fill(user);
+    await user.upload(screen.getByLabelText("Adjuntos del requerimiento"), new File(["pdf"], "brief.pdf", { type: "application/pdf" }));
+    await user.click(screen.getByRole("button", { name: "Enviar requerimiento" }));
+    expect(await screen.findByText(/Puede reintentarlos/)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Reintentar adjuntos" }));
+    await waitFor(() => expect(screen.getByText(/REQ-2026-0001/)).toBeInTheDocument());
     expect(submitRequirement).toHaveBeenCalledTimes(1);
-    resolveRequest();
-    expect(await screen.findByRole("status")).toHaveTextContent("enviado correctamente");
+    expect(uploadAttachment).toHaveBeenCalledTimes(2);
   });
 
   it("permite reintentar carga y presenta error de envío", async () => {

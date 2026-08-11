@@ -307,7 +307,8 @@ public sealed record CreateRequirementRequest(
     string? RequesterEmail = null,
     string? AudienceType = null,
     string? ActivityFormatDescription = null,
-    string? IdempotencyKey = null);
+    string? IdempotencyKey = null,
+    string? TurnstileToken = null);
 public sealed record SubmitSatisfactionRequest(int OverallRating, int TimelinessRating, int QualityRating, bool WouldRecommend, string? Comments);
 public sealed record SatisfactionFormResponse(string RequirementCode, string ActivityOrEvent, string RequestedBy, bool AlreadySubmitted, DateTimeOffset? SubmittedAt);
 public sealed record ActivitySummary(int Total, int Approved, int Pending);

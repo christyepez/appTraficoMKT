@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { isPublicFeatureActive, mapPublicRequirementPayload } from "./public-requirement.utils";
 
 describe("public requirement utils", () => {
@@ -12,8 +12,9 @@ describe("public requirement utils", () => {
   });
 
   it("construye el contrato existente con nombres de catálogo", () => {
+    vi.spyOn(crypto, "randomUUID").mockReturnValue("idem-1");
     const catalogs = { faculties: [{ id: "f1", name: "Ingeniería", isActive: true }], careers: [{ id: "c1", name: "Sistemas", isActive: true, facultyId: "f1" }], campuses: [{ id: "s1", name: "Quito", isActive: true }], eventFormats: [{ id: "e1", name: "Presencial", isActive: true }] };
-    const values = { activityOrEvent: " Evento ", requestedBy: " ana@example.com ", facultyId: "f1", careerId: "c1", campusId: "s1", place: " Auditorio ", startDate: "2026-01-10", startTime: "", endDate: "2026-01-10", endTime: "", eventObjective: " Objetivo ", eventFormatId: "e1" };
-    expect(mapPublicRequirementPayload(values, catalogs, "2026-01-01")).toEqual(expect.objectContaining({ activityOrEvent: "Evento", faculty: "Ingeniería", career: "Sistemas", campus: "Quito", eventFormat: "Presencial", startTime: null, requestDate: "2026-01-01" }));
+    const values = { activityOrEvent: " Evento ", requesterName: " Ana ", requesterEmail: " ana@example.com ", facultyId: "f1", faculty: "", careerId: "c1", career: "", campusId: "s1", campus: "", place: " Auditorio ", startAt: "2026-01-10T09:00", endAt: "2026-01-10T10:00", audienceType: "mixed" as const, eventObjective: " Objetivo ", eventFormatId: "e1", eventFormat: "", activityFormatDescription: " Dinámica ", attachments: [] };
+    expect(mapPublicRequirementPayload(values, catalogs, "2026-01-01")).toEqual(expect.objectContaining({ activityOrEvent: "Evento", requestedBy: "ana@example.com", requesterName: "Ana", requesterEmail: "ana@example.com", faculty: "Ingeniería", career: "Sistemas", campus: "Quito", eventFormat: "Presencial", startTime: "09:00", requestDate: "2026-01-01", idempotencyKey: "idem-1" }));
   });
 });

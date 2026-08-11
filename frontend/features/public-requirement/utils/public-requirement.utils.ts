@@ -1,5 +1,6 @@
 import type { PublicAvailability, PublicRequirementCatalogs, PublicRequirementPayload } from "../models/public-requirement.models";
 import type { PublicRequirementValues } from "../schemas/public-requirement.schema";
+import { mapRequirementFormToLegacyPayload } from "../../requirements/domain/requirement-form.mappers";
 
 export function isPublicFeatureActive(availability: PublicAvailability, now = Date.now()) {
   if (!availability.enabled) return false;
@@ -10,22 +11,9 @@ export function isPublicFeatureActive(availability: PublicAvailability, now = Da
 }
 
 export function mapPublicRequirementPayload(values: PublicRequirementValues, catalogs: PublicRequirementCatalogs, requestDate = new Date().toISOString().slice(0, 10)): PublicRequirementPayload {
-  return {
-    activityOrEvent: values.activityOrEvent.trim(),
-    requestedBy: values.requestedBy.trim(),
-    facultyId: values.facultyId,
-    faculty: catalogs.faculties.find((item) => item.id === values.facultyId)?.name ?? "",
-    career: catalogs.careers.find((item) => item.id === values.careerId)?.name ?? "",
-    campusId: values.campusId,
-    campus: catalogs.campuses.find((item) => item.id === values.campusId)?.name ?? "",
-    place: values.place.trim(),
-    startDate: values.startDate,
-    startTime: values.startTime || null,
-    endDate: values.endDate,
-    endTime: values.endTime || null,
-    eventObjective: values.eventObjective.trim(),
-    eventFormatId: values.eventFormatId,
-    eventFormat: catalogs.eventFormats.find((item) => item.id === values.eventFormatId)?.name ?? "",
-    requestDate
-  };
+  return { ...mapRequirementFormToLegacyPayload(values, catalogs, requestDate), idempotencyKey: crypto.randomUUID() };
+}
+
+export function publicRequirementSuccessMessage(requirementCode: string) {
+  return `Su requerimiento fue registrado correctamente con el código ${requirementCode}. El área de Marketing revisará la información enviada.`;
 }
