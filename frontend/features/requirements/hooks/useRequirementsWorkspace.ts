@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { getSession, showToast } from "../../../app/lib";
 import type { Activity } from "../../../shared/models/api.models";
 import type { Requirement, RequirementCatalogs, RequirementPermissions, RequirementStatusAction, SaveRequirementPayload } from "../models/requirement.models";
-import { deleteRequirement, getRequirementWorkspace, saveRequirement, updateRequirementStatus } from "../services/requirement.service";
+import { deleteRequirement, getRequirementWorkspace, saveRequirement, updateRequirementStatus, uploadRequirementAttachments } from "../services/requirement.service";
 import { filterRequirementsForSession, requirementPermissions } from "../utils/requirement.utils";
 
 const emptyCatalogs: RequirementCatalogs = { faculties: [], careers: [], campuses: [], eventFormats: [] };
@@ -63,9 +63,17 @@ export function useRequirementsWorkspace(pollInterval = 15_000) {
   }, []);
 
   const save = useCallback(async (requirement: Requirement | null, payload: SaveRequirementPayload) => {
-    await saveRequirement(requirement, payload);
+    const saved = await saveRequirement(requirement, payload);
+    if (payload.attachments?.length) {
+      const uploadedBy = getSession()?.user.email ?? payload.requesterEmail ?? payload.requestedBy;
+      const result = await uploadRequirementAttachments(saved.id, payload.attachments, uploadedBy);
+      if (result.failedFiles.length) {
+        report(`Requerimiento guardado. Adjuntos con error: ${result.failedFiles.join(", ")}`, "error");
+      }
+    }
     await refreshAfterMutation();
-  }, [refreshAfterMutation]);
+    return saved;
+  }, [refreshAfterMutation, report]);
 
   const changeStatus = useCallback(async (requirementId: string, action: RequirementStatusAction) => {
     if (!startPending(pendingRef.current, requirementId)) return false;

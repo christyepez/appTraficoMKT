@@ -3,8 +3,11 @@ export type Requirement = {
   code: string;
   activityOrEvent: string;
   requestedBy: string;
+  requesterName?: string;
+  requesterEmail?: string;
   facultyId: string;
   faculty: string;
+  careerId?: string | null;
   career: string;
   campusId: string;
   campus: string;
@@ -16,9 +19,12 @@ export type Requirement = {
   eventObjective: string;
   eventFormatId: string;
   eventFormat: string;
+  audienceType?: "internal" | "external" | "mixed";
+  activityFormatDescription?: string;
   requestDate: string;
   status: string;
   statusId: string;
+  canEdit?: boolean;
 };
 
 export type Activity = {
