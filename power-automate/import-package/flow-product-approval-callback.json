@@ -1,0 +1,130 @@
+{
+  "name": "AppTraficoMKT_ProductApprovalCallback",
+  "type": "PowerAutomateTemplate",
+  "description": "Publica tarjeta de aprobacion en Teams, espera decision y llama el callback seguro de la aplicacion.",
+  "trigger": {
+    "kind": "HttpRequestReceived",
+    "schema": {
+      "type": "object",
+      "required": ["eventType", "subject", "idempotencyKey", "data"],
+      "properties": {
+        "eventType": { "type": "string" },
+        "subject": { "type": "string" },
+        "teamsTitle": { "type": "string" },
+        "html": { "type": "string" },
+        "recipientEmail": { "type": "string" },
+        "idempotencyKey": { "type": "string" },
+        "data": {
+          "type": "object",
+          "required": ["approvalId", "activityId", "productId"],
+          "properties": {
+            "approvalId": { "type": "string" },
+            "activityId": { "type": "string" },
+            "requirementId": { "type": "string" },
+            "productId": { "type": "string" },
+            "productType": { "type": "string" },
+            "productResponsible": { "type": "string" },
+            "diffusionChannel": { "type": "string" },
+            "mainKpi": { "type": "string" },
+            "productUrl": { "type": "string" }
+          }
+        }
+      }
+    }
+  },
+  "actions": [
+    {
+      "name": "Construir tarjeta adaptativa",
+      "type": "Compose",
+      "inputs": {
+        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+        "type": "AdaptiveCard",
+        "version": "1.5",
+        "body": [
+          {
+            "type": "TextBlock",
+            "text": "@{triggerBody()?['subject']}",
+            "weight": "Bolder",
+            "size": "Large",
+            "wrap": true
+          },
+          {
+            "type": "FactSet",
+            "facts": [
+              { "title": "Producto", "value": "@{triggerBody()?['data']?['productId']}" },
+              { "title": "Tipo", "value": "@{triggerBody()?['data']?['productType']}" },
+              { "title": "Responsable", "value": "@{triggerBody()?['data']?['productResponsible']}" },
+              { "title": "Canal", "value": "@{triggerBody()?['data']?['diffusionChannel']}" },
+              { "title": "KPI", "value": "@{triggerBody()?['data']?['mainKpi']}" }
+            ]
+          },
+          {
+            "type": "TextBlock",
+            "text": "Revise los adjuntos dentro de la aplicacion antes de decidir.",
+            "wrap": true
+          },
+          {
+            "type": "Input.Text",
+            "id": "comments",
+            "label": "Comentarios",
+            "isMultiline": true
+          }
+        ],
+        "actions": [
+          {
+            "type": "Action.Submit",
+            "title": "Aprobar",
+            "data": { "decision": "approved" }
+          },
+          {
+            "type": "Action.Submit",
+            "title": "Rechazar",
+            "data": { "decision": "rejected" }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Publicar tarjeta Teams y esperar respuesta",
+      "connector": "Microsoft Teams",
+      "operation": "Post adaptive card and wait for a response",
+      "inputs": {
+        "team": "{{DEFAULT_TEAMS_TEAM_ID}}",
+        "channel": "{{DEFAULT_TEAMS_CHANNEL_ID}}",
+        "card": "@outputs('Construir_tarjeta_adaptativa')"
+      }
+    },
+    {
+      "name": "Retornar decision a la aplicacion",
+      "connector": "HTTP",
+      "operation": "POST",
+      "inputs": {
+        "method": "POST",
+        "uri": "{{PUBLIC_APP_URL}}/api/approvals/@{triggerBody()?['data']?['approvalId']}/decision",
+        "headers": {
+          "content-type": "application/json",
+          "x-api-key": "{{APPROVAL_CALLBACK_API_KEY}}"
+        },
+        "body": {
+          "decision": "@{outputs('Publicar_tarjeta_Teams_y_esperar_respuesta')?['body']?['data']?['decision']}",
+          "decidedByEmail": "@{outputs('Publicar_tarjeta_Teams_y_esperar_respuesta')?['body']?['responder']?['email']}",
+          "comments": "@{outputs('Publicar_tarjeta_Teams_y_esperar_respuesta')?['body']?['data']?['comments']}",
+          "source": "powerautomate"
+        }
+      }
+    },
+    {
+      "name": "Responder OK",
+      "connector": "Response",
+      "operation": "Response",
+      "inputs": {
+        "statusCode": 202,
+        "body": {
+          "accepted": true,
+          "channel": "TeamsApproval",
+          "idempotencyKey": "@{triggerBody()?['idempotencyKey']}"
+        }
+      }
+    }
+  ]
+}

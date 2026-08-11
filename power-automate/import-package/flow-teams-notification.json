@@ -1,0 +1,64 @@
+{
+  "name": "AppTraficoMKT_TeamsNotification",
+  "type": "PowerAutomateTemplate",
+  "description": "Recibe eventos de la aplicacion y publica una notificacion en Teams.",
+  "trigger": {
+    "kind": "HttpRequestReceived",
+    "schema": {
+      "type": "object",
+      "required": ["eventType", "channel", "subject", "idempotencyKey"],
+      "properties": {
+        "eventType": { "type": "string" },
+        "channel": { "type": "string" },
+        "subject": { "type": "string" },
+        "teamsTitle": { "type": "string" },
+        "html": { "type": "string" },
+        "message": { "type": "string" },
+        "recipientEmail": { "type": "string" },
+        "teamsChannel": { "type": "string" },
+        "idempotencyKey": { "type": "string" },
+        "data": {
+          "type": "object",
+          "properties": {
+            "id": { "type": "string" },
+            "requirementId": { "type": "string" },
+            "activityId": { "type": "string" },
+            "payloadJson": { "type": "string" }
+          }
+        }
+      }
+    }
+  },
+  "actions": [
+    {
+      "name": "Validar canal Teams",
+      "type": "Condition",
+      "expression": "@equals(triggerBody()?['channel'], 'Teams')"
+    },
+    {
+      "name": "Publicar mensaje Teams",
+      "connector": "Microsoft Teams",
+      "operation": "Post message in a chat or channel",
+      "inputs": {
+        "postAs": "Flow bot",
+        "postIn": "Channel",
+        "team": "{{DEFAULT_TEAMS_TEAM_ID}}",
+        "channel": "{{DEFAULT_TEAMS_CHANNEL_ID}}",
+        "message": "<h2>@{coalesce(triggerBody()?['teamsTitle'], triggerBody()?['subject'])}</h2>@{coalesce(triggerBody()?['html'], triggerBody()?['message'])}"
+      }
+    },
+    {
+      "name": "Responder OK",
+      "connector": "Response",
+      "operation": "Response",
+      "inputs": {
+        "statusCode": 202,
+        "body": {
+          "accepted": true,
+          "channel": "Teams",
+          "idempotencyKey": "@{triggerBody()?['idempotencyKey']}"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "environment": "prod",
+  "owner": "christianyepez@uti.edu.ec",
+  "publicAppUrl": "{{PUBLIC_APP_URL}}",
+  "approvalCallbackApiKey": "{{APPROVAL_CALLBACK_API_KEY}}",
+  "defaultTeamsTeamId": "{{DEFAULT_TEAMS_TEAM_ID}}",
+  "defaultTeamsChannelId": "{{DEFAULT_TEAMS_CHANNEL_ID}}",
+  "emailWebhookAppSetting": "Notifications__EmailWebhookUrl",
+  "teamsWebhookAppSetting": "Notifications__TeamsWebhookUrl",
+  "legacyWebhookAppSetting": "Notifications__PowerAutomateWebhookUrl",
+  "callbackApiKeyAppSetting": "Approvals__CallbackApiKey"
+}

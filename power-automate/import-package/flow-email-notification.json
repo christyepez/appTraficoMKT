@@ -1,0 +1,62 @@
+{
+  "name": "AppTraficoMKT_EmailNotification",
+  "type": "PowerAutomateTemplate",
+  "description": "Recibe eventos de la aplicacion y envia correo HTML al destinatario indicado.",
+  "trigger": {
+    "kind": "HttpRequestReceived",
+    "schema": {
+      "type": "object",
+      "required": ["eventType", "channel", "subject", "recipientEmail", "idempotencyKey"],
+      "properties": {
+        "eventType": { "type": "string" },
+        "channel": { "type": "string" },
+        "subject": { "type": "string" },
+        "html": { "type": "string" },
+        "message": { "type": "string" },
+        "recipientEmail": { "type": "string" },
+        "idempotencyKey": { "type": "string" },
+        "data": {
+          "type": "object",
+          "properties": {
+            "id": { "type": "string" },
+            "requirementId": { "type": "string" },
+            "activityId": { "type": "string" },
+            "payloadJson": { "type": "string" }
+          }
+        }
+      }
+    }
+  },
+  "actions": [
+    {
+      "name": "Validar canal Email",
+      "type": "Condition",
+      "expression": "@equals(triggerBody()?['channel'], 'Email')"
+    },
+    {
+      "name": "Enviar correo HTML",
+      "connector": "Office 365 Outlook",
+      "operation": "Send an email (V2)",
+      "inputs": {
+        "to": "@{triggerBody()?['recipientEmail']}",
+        "subject": "@{triggerBody()?['subject']}",
+        "body": "@{coalesce(triggerBody()?['html'], triggerBody()?['message'])}",
+        "importance": "Normal",
+        "isHtml": true
+      }
+    },
+    {
+      "name": "Responder OK",
+      "connector": "Response",
+      "operation": "Response",
+      "inputs": {
+        "statusCode": 202,
+        "body": {
+          "accepted": true,
+          "channel": "Email",
+          "idempotencyKey": "@{triggerBody()?['idempotencyKey']}"
+        }
+      }
+    }
+  ]
+}
