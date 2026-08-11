@@ -44,6 +44,19 @@ using (var scope = app.Services.CreateScope())
 app.MapGet("/health", () => Results.Ok(new { service = "administration", status = "healthy" }));
 app.MapInitialImport();
 
+app.MapGet("/public/catalogs/requirements", async (AdministrationDbContext db) =>
+{
+    var faculties = await db.Faculties.Where(x => x.IsActive).OrderBy(x => x.Name).ToListAsync();
+    var careers = await db.Careers.Where(x => x.IsActive).OrderBy(x => x.Name).ToListAsync();
+    var campuses = await db.Campuses.Where(x => x.IsActive).OrderBy(x => x.Name).ToListAsync();
+    var eventFormats = await db.CatalogItems
+        .Where(x => x.Type == "FormatoEvento" && x.IsActive)
+        .OrderBy(x => x.Name)
+        .ToListAsync();
+
+    return Results.Ok(new PublicRequirementCatalogsResponse(faculties, careers, campuses, eventFormats));
+});
+
 MapCrud<Faculty, UpsertNamedRequest>(app, "/faculties", db => db.Faculties, (item, request) =>
 {
     item.Code = request.Code.Trim();
@@ -200,6 +213,11 @@ public sealed record UpsertNamedRequest(string Code, string Name, bool IsActive)
 public sealed record UpsertCatalogRequest(string Type, string Code, string Name, bool IsActive);
 public sealed record UpsertApproverRequest(string Name, string Email, Guid? FacultyId, Guid? CampusId, int ApprovalLevel, bool IsActive);
 public sealed record UpsertCareerRequest(string Code, string Name, Guid FacultyId, bool IsActive);
+public sealed record PublicRequirementCatalogsResponse(
+    IReadOnlyCollection<Faculty> Faculties,
+    IReadOnlyCollection<Career> Careers,
+    IReadOnlyCollection<Campus> Campuses,
+    IReadOnlyCollection<CatalogItem> EventFormats);
 
 public abstract class CatalogEntity
 {

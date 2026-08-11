@@ -15,6 +15,7 @@ import { microsoftAuthorizeUrl, randomString, sha256Base64Url } from "../utils/p
 export function useLoginExperience() {
   const [message, setMessage] = useState(initialAuthError);
   const [brand, setBrand] = useState<BrandSettings>(defaultBrandSettings);
+  const [brandLoaded, setBrandLoaded] = useState(false);
   const [catalogs, setCatalogs] = useState<PublicRequirementCatalogs | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isPublicFormOpen, setIsPublicFormOpen] = useState(false);
@@ -27,11 +28,15 @@ export function useLoginExperience() {
 
   useEffect(() => {
     queueMicrotask(() => {
-      getPublicBrandSettings().then(setBrand).catch(() => undefined);
+      getPublicBrandSettings().then(setBrand).catch(() => undefined).finally(() => setBrandLoaded(true));
       getPublicRequirementCatalogs().then(setCatalogs).catch(() => undefined);
       void completeMicrosoftLogin().catch((error: unknown) => setMessage(safeAuthMessage(error instanceof Error ? error.message : "No se pudo iniciar sesión.")));
     });
   }, []);
+
+  const showPublicPopup = brandLoaded && isPublicFeatureActive(availability.popup);
+  const showPublicFullPage = brandLoaded && isPublicFeatureActive(availability.fullPage);
+  const showChatbot = brandLoaded && isPublicFeatureActive(availability.chatbot);
 
   async function microsoftLogin() {
     try {
@@ -74,11 +79,11 @@ export function useLoginExperience() {
   }
 
   return {
-    message, brand, catalogs, availability, isChatOpen, setIsChatOpen, isPublicFormOpen, setIsPublicFormOpen, chatMessage, microsoftLogin, submitChat,
+    message, brand, brandLoaded, catalogs, availability, isChatOpen: isChatOpen && showChatbot, setIsChatOpen, isPublicFormOpen: isPublicFormOpen && showPublicPopup, setIsPublicFormOpen, chatMessage, microsoftLogin, submitChat,
     catalogsReady: Boolean(catalogs?.faculties[0] && catalogs.careers[0] && catalogs.campuses[0] && catalogs.eventFormats[0]),
-    showPublicPopup: isPublicFeatureActive(availability.popup),
-    showPublicFullPage: isPublicFeatureActive(availability.fullPage),
-    showChatbot: isPublicFeatureActive(availability.chatbot)
+    showPublicPopup,
+    showPublicFullPage,
+    showChatbot
   };
 }
 

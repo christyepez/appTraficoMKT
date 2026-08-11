@@ -31,10 +31,32 @@ describe("useLoginExperience", () => {
 
   it("carga marca y catálogos y crea el requerimiento rápido", async () => {
     const { result } = renderHook(() => useLoginExperience());
+    expect(result.current.showPublicPopup).toBe(false);
+    expect(result.current.showPublicFullPage).toBe(false);
+    expect(result.current.showChatbot).toBe(false);
     await waitFor(() => expect(result.current.catalogsReady).toBe(true));
+    expect(result.current.brandLoaded).toBe(true);
     await act(async () => expect(await result.current.submitChat(values)).toBe(true));
     expect(createPublicRequirement).toHaveBeenCalledWith(expect.objectContaining({ facultyId: "f", careerId: "c", requesterEmail: "ana@example.com", place: "Auditorio" }));
     expect(result.current.chatMessage).toContain("REQ-1");
+  });
+
+  it("respeta rangos vencidos de formularios públicos y mantiene robot activo si corresponde", async () => {
+    vi.mocked(getPublicBrandSettings).mockResolvedValue({
+      ...defaultBrandSettings,
+      showPublicRequirementForm: true,
+      showPublicRequirementFullPage: true,
+      showLoginChatbot: true,
+      publicRequirementFormActiveUntil: "2020-01-01T00:00:00Z",
+      publicRequirementFullPageActiveUntil: "2020-01-01T00:00:00Z",
+      loginChatbotActiveFrom: null,
+      loginChatbotActiveUntil: null
+    });
+    const { result } = renderHook(() => useLoginExperience());
+    await waitFor(() => expect(result.current.brandLoaded).toBe(true));
+    expect(result.current.showPublicPopup).toBe(false);
+    expect(result.current.showPublicFullPage).toBe(false);
+    expect(result.current.showChatbot).toBe(true);
   });
 
   it("conserva el formulario ante error de envío", async () => {

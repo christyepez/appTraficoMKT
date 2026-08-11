@@ -1,24 +1,20 @@
-import { api, defaultBrandSettings, type BrandSettings } from "../../../app/lib";
+import { defaultBrandSettings, type BrandSettings } from "../../../app/lib";
+import { friendlyHttpMessage } from "../../../core/api/api-client";
 import type { PublicCatalog, PublicRequirementAttachmentResult, PublicRequirementCatalogs, PublicRequirementCreationResult, PublicRequirementPayload } from "../models/public-requirement.models";
 
 export async function getPublicRequirementCatalogs(): Promise<PublicRequirementCatalogs> {
-  const [faculties, careers, campuses, eventFormats] = await Promise.all([
-    api<PublicCatalog[]>("/api/admin/faculties"),
-    api<PublicCatalog[]>("/api/admin/careers"),
-    api<PublicCatalog[]>("/api/admin/campuses"),
-    api<PublicCatalog[]>("/api/admin/catalogs/by-type/FormatoEvento")
-  ]);
+  const { faculties, careers, campuses, eventFormats } = await publicApi<PublicRequirementCatalogs>("/api/admin/public/catalogs/requirements");
   const active = (items: PublicCatalog[]) => items.filter((item) => item.isActive);
   return { faculties: active(faculties), careers: active(careers), campuses: active(campuses), eventFormats: active(eventFormats) };
 }
 
 export async function getPublicBrandSettings() {
-  const settings = await api<BrandSettings>("/api/identity/brand-settings");
+  const settings = await publicApi<BrandSettings>("/api/identity/brand-settings");
   return { ...defaultBrandSettings, ...settings };
 }
 
 export function createPublicRequirement(payload: PublicRequirementPayload) {
-  return api<PublicRequirementCreationResult>("/api/requirements/public", {
+  return publicApi<PublicRequirementCreationResult>("/api/requirements/public", {
     method: "POST",
     headers: { "Idempotency-Key": payload.idempotencyKey },
     body: JSON.stringify(payload)
@@ -29,6 +25,15 @@ export async function uploadPublicRequirementAttachment(requirementId: string, u
   const form = new FormData();
   form.append("file", file);
   form.append("uploadToken", uploadToken);
-  await api(`/api/requirements/${requirementId}/attachments`, { method: "POST", body: form, headers: { "X-Requirement-Upload-Token": uploadToken } });
+  await publicApi(`/api/requirements/${requirementId}/attachments`, { method: "POST", body: form, headers: { "X-Requirement-Upload-Token": uploadToken } });
   return { attachmentId: crypto.randomUUID(), fileName: file.name, success: true } satisfies PublicRequirementAttachmentResult;
+}
+
+async function publicApi<T>(url: string, init: RequestInit = {}): Promise<T> {
+  const headers = new Headers(init.headers);
+  if (!headers.has("Content-Type") && init.body && !(init.body instanceof FormData)) headers.set("Content-Type", "application/json");
+  const response = await fetch(url, { cache: "no-store", ...init, headers });
+  if (!response.ok) throw new Error(friendlyHttpMessage(response.status, await response.text()));
+  if (response.status === 204) return undefined as T;
+  return response.json() as Promise<T>;
 }
