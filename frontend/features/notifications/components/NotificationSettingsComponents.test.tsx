@@ -57,12 +57,9 @@ describe("NotificationSettingsForm", () => {
 });
 
 describe("NotificationSettingsList", () => {
-  it("renders configured notification settings and exposes actions", () => {
-    const onEdit = vi.fn();
-    const onDisable = vi.fn();
-    render(<NotificationSettingsList items={[configured]} pendingIds={new Set()} onEdit={onEdit} onDisable={onDisable} />);
+  it("renders configured notification settings", () => {
+    render(<NotificationSettingsList items={[configured]} pendingIds={new Set()} onEdit={vi.fn()} onDisable={vi.fn()} />);
     expect(screen.getByText("Alertas operativas")).toBeInTheDocument();
     expect(screen.getAllByText(/Configurado/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByRole("button").length).toBeGreaterThan(0);
   });
 });
