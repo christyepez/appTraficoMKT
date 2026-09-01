@@ -24,9 +24,7 @@ describe("NotificationSettingsForm", () => {
   it("preserves configured webhooks when the user does not replace them", async () => {
     const onSave = vi.fn().mockResolvedValue(undefined);
     render(<NotificationSettingsForm item={configured} onSave={onSave} onClose={vi.fn()} />);
-
     fireEvent.click(screen.getByRole("button", { name: "Guardar" }));
-
     await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
     expect(onSave.mock.calls[0][0]).toMatchObject({
       powerAutomateWebhookUrl: "Configurado",
@@ -38,11 +36,8 @@ describe("NotificationSettingsForm", () => {
   it("replaces a configured webhook when the user enters a new HTTPS URL", async () => {
     const onSave = vi.fn().mockResolvedValue(undefined);
     render(<NotificationSettingsForm item={configured} onSave={onSave} onClose={vi.fn()} />);
-
-    const emailWebhook = screen.getByRole("textbox", { name: /Webhook Power Automate correo/i });
-    fireEvent.change(emailWebhook, { target: { value: "https://example.com/new-email-flow" } });
+    fireEvent.change(screen.getByRole("textbox", { name: /Webhook Power Automate correo/i }), { target: { value: "https://example.com/new-email-flow" } });
     fireEvent.click(screen.getByRole("button", { name: "Guardar" }));
-
     await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
     expect(onSave.mock.calls[0][0]).toMatchObject({
       powerAutomateWebhookUrl: "Configurado",
@@ -54,22 +49,20 @@ describe("NotificationSettingsForm", () => {
   it("blocks malformed or non-HTTPS webhook values", async () => {
     const onSave = vi.fn().mockResolvedValue(undefined);
     render(<NotificationSettingsForm item={configured} onSave={onSave} onClose={vi.fn()} />);
-
     fireEvent.change(screen.getByRole("textbox", { name: /Webhook legado/i }), { target: { value: "http://example.com/flow" } });
     fireEvent.click(screen.getByRole("button", { name: "Guardar" }));
-
     expect(await screen.findByText("El webhook debe usar HTTPS.")).toBeInTheDocument();
     expect(onSave).not.toHaveBeenCalled();
   });
 });
 
 describe("NotificationSettingsList", () => {
-  it("renders configured notification settings and actions", () => {
+  it("renders configured notification settings and exposes actions", () => {
     const onEdit = vi.fn();
     const onDisable = vi.fn();
     render(<NotificationSettingsList items={[configured]} pendingIds={new Set()} onEdit={onEdit} onDisable={onDisable} />);
-
     expect(screen.getByText("Alertas operativas")).toBeInTheDocument();
     expect(screen.getAllByText(/Configurado/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("button").length).toBeGreaterThan(0);
   });
 });
