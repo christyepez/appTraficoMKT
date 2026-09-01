@@ -38,7 +38,7 @@ describe("NotificationSettingsForm", () => {
     const onSave = vi.fn().mockResolvedValue(undefined);
     render(<NotificationSettingsForm item={configured} onSave={onSave} onClose={vi.fn()} />);
 
-    const emailWebhook = screen.getByLabelText(/Webhook Power Automate correo/i);
+    const emailWebhook = screen.getByRole("textbox", { name: /Webhook Power Automate correo/i });
     fireEvent.change(emailWebhook, { target: { value: "https://example.com/new-email-flow" } });
     fireEvent.click(screen.getByRole("button", { name: "Guardar" }));
 
@@ -54,7 +54,7 @@ describe("NotificationSettingsForm", () => {
     const onSave = vi.fn().mockResolvedValue(undefined);
     render(<NotificationSettingsForm item={configured} onSave={onSave} onClose={vi.fn()} />);
 
-    fireEvent.change(screen.getByLabelText(/Webhook legado/i), { target: { value: "http://example.com/flow" } });
+    fireEvent.change(screen.getByRole("textbox", { name: /Webhook legado/i }), { target: { value: "http://example.com/flow" } });
     fireEvent.click(screen.getByRole("button", { name: "Guardar" }));
 
     expect(await screen.findByText("El webhook debe usar HTTPS.")).toBeInTheDocument();
