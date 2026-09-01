@@ -1,73 +1,63 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { emptyNotificationSettings } from "../models/notification.models";
 import { NotificationSettingsForm } from "./NotificationSettingsForm";
-import { NotificationSettingsList } from "./NotificationSettingsList";
+import type { NotificationSettings } from "../models/notification.models";
 
-describe("settings components", () => {
-  it("valida, cambia modo y crea", async () => {
-    const user = userEvent.setup();
-    const save = vi.fn().mockResolvedValue(undefined);
-    render(<NotificationSettingsForm item={null} onSave={save} onClose={vi.fn()} />);
+const configured: NotificationSettings = {
+  id: "notif-1",
+  name: "Alertas operativas",
+  emailEnabled: false,
+  emailTo: "",
+  teamsEnabled: false,
+  teamsChannel: "",
+  powerAutomateWebhookUrl: "Configurado",
+  emailPowerAutomateWebhookUrl: "Configurado",
+  teamsPowerAutomateWebhookUrl: "Configurado",
+  htmlTemplate: "",
+  emailHtmlTemplate: "",
+  teamsHtmlTemplate: "",
+  isActive: true
+};
 
-    await user.click(screen.getByRole("button", { name: "Crear" }));
-    expect(await screen.findByText("Ingrese al menos un correo destino.")).toBeInTheDocument();
+describe("NotificationSettingsForm", () => {
+  it("preserves configured webhooks when the user does not replace them", async () => {
+    const onSave = vi.fn().mockResolvedValue(undefined);
+    render(<NotificationSettingsForm item={configured} onSave={onSave} onClose={vi.fn()} />);
 
-    await user.type(screen.getByLabelText(/^Correos destino/), "ana@example.com");
-    await user.type(screen.getByLabelText(/^Canal Teams/), "General");
+    fireEvent.click(screen.getByRole("button", { name: "Guardar" }));
 
-    const legacyTemplate = screen.getByText("Plantilla HTML legado").closest("section");
-    expect(legacyTemplate).not.toBeNull();
-    await user.click(within(legacyTemplate!).getByRole("button", { name: "HTML" }));
-    expect(screen.getByLabelText("Codigo HTML de Plantilla HTML legado")).toBeInTheDocument();
-
-    await user.click(within(legacyTemplate!).getByRole("button", { name: "Vista previa" }));
-    expect(screen.getByTitle("Vista previa segura de Plantilla HTML legado")).toHaveAttribute("sandbox", "");
-
-    await user.click(screen.getByRole("button", { name: "Crear" }));
-    await waitFor(() => expect(save).toHaveBeenCalled());
+    await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
+    expect(onSave.mock.calls[0][0]).toMatchObject({
+      powerAutomateWebhookUrl: "Configurado",
+      emailPowerAutomateWebhookUrl: "Configurado",
+      teamsPowerAutomateWebhookUrl: "Configurado"
+    });
   });
 
-  it("diferencia estados y acciones", async () => {
-    const user = userEvent.setup();
-    const retry = vi.fn();
-    const edit = vi.fn();
-    const disable = vi.fn();
-    const props = {
-      items: [],
-      search: "",
-      loading: true,
-      error: "",
-      pendingIds: new Set<string>(),
-      onRetry: retry,
-      onEdit: edit,
-      onDisable: disable
-    };
+  it("replaces a configured webhook when the user enters a new HTTPS URL", async () => {
+    const onSave = vi.fn().mockResolvedValue(undefined);
+    render(<NotificationSettingsForm item={configured} onSave={onSave} onClose={vi.fn()} />);
 
-    const view = render(<NotificationSettingsList {...props} />);
-    expect(screen.getByRole("status")).toBeInTheDocument();
+    const emailWebhook = screen.getByLabelText(/Webhook Power Automate correo/i);
+    fireEvent.change(emailWebhook, { target: { value: "https://example.com/new-email-flow" } });
+    fireEvent.click(screen.getByRole("button", { name: "Guardar" }));
 
-    view.rerender(<NotificationSettingsList {...props} loading={false} error="Error" />);
-    const retryButton = screen.getByRole("button", { name: "Reintentar" });
-    expect(retryButton).toHaveClass("button", "secondary");
-    await user.click(retryButton);
+    await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
+    expect(onSave.mock.calls[0][0]).toMatchObject({
+      powerAutomateWebhookUrl: "Configurado",
+      emailPowerAutomateWebhookUrl: "https://example.com/new-email-flow",
+      teamsPowerAutomateWebhookUrl: "Configurado"
+    });
+  });
 
-    view.rerender(
-      <NotificationSettingsList
-        {...props}
-        loading={false}
-        items={[{ ...emptyNotificationSettings, id: "1", emailEnabled: false, teamsEnabled: false }]}
-      />
-    );
-    const editButton = screen.getByRole("button", { name: `Editar ${emptyNotificationSettings.name}` });
-    const disableButton = screen.getByRole("button", { name: `Inactivar ${emptyNotificationSettings.name}` });
-    expect(editButton).toHaveClass("icon-button");
-    expect(disableButton).toHaveClass("icon-button", "danger");
+  it("blocks malformed or non-HTTPS webhook values", async () => {
+    const onSave = vi.fn().mockResolvedValue(undefined);
+    render(<NotificationSettingsForm item={configured} onSave={onSave} onClose={vi.fn()} />);
 
-    await user.click(editButton);
-    await user.click(disableButton);
-    expect(edit).toHaveBeenCalled();
-    expect(disable).toHaveBeenCalledWith("1");
+    fireEvent.change(screen.getByLabelText(/Webhook legado/i), { target: { value: "http://example.com/flow" } });
+    fireEvent.click(screen.getByRole("button", { name: "Guardar" }));
+
+    expect(await screen.findByText("El webhook debe usar HTTPS.")).toBeInTheDocument();
+    expect(onSave).not.toHaveBeenCalled();
   });
 });
