@@ -9,9 +9,23 @@ import { notificationSettingsSchema, type NotificationSettingsValues } from "../
 import styles from "../styles/Notifications.module.css";
 import { NotificationTemplateEditor } from "./NotificationTemplateEditor";
 
+function resolveWebhook(value: string, original?: string) {
+  const candidate = value.trim();
+  if (candidate && candidate !== "Configurado") return candidate;
+  return original === "Configurado" ? "Configurado" : candidate;
+}
+
 export function NotificationSettingsForm({ item, onSave, onClose }: { item: NotificationSettings | null; onSave: (value: NotificationSettings) => Promise<unknown>; onClose: () => void }) {
   const [error, setError] = useState("");
-  const { register, handleSubmit, control, setValue, formState: { errors, isSubmitting } } = useForm<NotificationSettingsValues>({ resolver: zodResolver(notificationSettingsSchema), defaultValues: item ?? emptyNotificationSettings });
+  const { register, handleSubmit, control, setValue, formState: { errors, isSubmitting } } = useForm<NotificationSettingsValues>({
+    resolver: zodResolver(notificationSettingsSchema),
+    defaultValues: item ? {
+      ...item,
+      powerAutomateWebhookUrl: item.powerAutomateWebhookUrl === "Configurado" ? "" : item.powerAutomateWebhookUrl,
+      emailPowerAutomateWebhookUrl: item.emailPowerAutomateWebhookUrl === "Configurado" ? "" : item.emailPowerAutomateWebhookUrl,
+      teamsPowerAutomateWebhookUrl: item.teamsPowerAutomateWebhookUrl === "Configurado" ? "" : item.teamsPowerAutomateWebhookUrl
+    } : emptyNotificationSettings
+  });
   const email = useWatch({ control, name: "emailEnabled" });
   const teams = useWatch({ control, name: "teamsEnabled" });
   const html = useWatch({ control, name: "htmlTemplate" });
@@ -23,9 +37,9 @@ export function NotificationSettingsForm({ item, onSave, onClose }: { item: Noti
     try {
       await onSave({
         ...value,
-        powerAutomateWebhookUrl: value.powerAutomateWebhookUrl === "Configurado" || item?.powerAutomateWebhookUrl === "Configurado" ? "Configurado" : value.powerAutomateWebhookUrl,
-        emailPowerAutomateWebhookUrl: value.emailPowerAutomateWebhookUrl === "Configurado" || item?.emailPowerAutomateWebhookUrl === "Configurado" ? "Configurado" : value.emailPowerAutomateWebhookUrl,
-        teamsPowerAutomateWebhookUrl: value.teamsPowerAutomateWebhookUrl === "Configurado" || item?.teamsPowerAutomateWebhookUrl === "Configurado" ? "Configurado" : value.teamsPowerAutomateWebhookUrl
+        powerAutomateWebhookUrl: resolveWebhook(value.powerAutomateWebhookUrl, item?.powerAutomateWebhookUrl),
+        emailPowerAutomateWebhookUrl: resolveWebhook(value.emailPowerAutomateWebhookUrl, item?.emailPowerAutomateWebhookUrl),
+        teamsPowerAutomateWebhookUrl: resolveWebhook(value.teamsPowerAutomateWebhookUrl, item?.teamsPowerAutomateWebhookUrl)
       });
       onClose();
     } catch (cause) {
@@ -33,14 +47,16 @@ export function NotificationSettingsForm({ item, onSave, onClose }: { item: Noti
     }
   }
 
+  const configured = (value?: string) => value === "Configurado";
+
   return <AccessibleDialog labelledBy="notification-form-title" onClose={onClose} closeDisabled={isSubmitting} panelClassName={`modal-panel-wide ${styles.modal}`}>
     <h2 id="notification-form-title">{item ? "Editar notificación" : "Crear notificación"}</h2>
     <form className="form top-space" noValidate onSubmit={handleSubmit(submit)}>
       <input type="hidden" {...register("id")}/>
       <label className="field field-wide"><span>Nombre</span><input {...register("name")}/>{errors.name && <small role="alert">{errors.name.message}</small>}</label>
-      <label className="field field-wide"><span>Webhook legado</span><input placeholder={item?.powerAutomateWebhookUrl ? "Configurado" : "Opcional para compatibilidad"} {...register("powerAutomateWebhookUrl")}/></label>
-      <label className="field field-wide"><span>Webhook Power Automate correo</span><input placeholder={item?.emailPowerAutomateWebhookUrl ? "Configurado" : "URL del flujo de correo"} {...register("emailPowerAutomateWebhookUrl")}/></label>
-      <label className="field field-wide"><span>Webhook Power Automate Teams</span><input placeholder={item?.teamsPowerAutomateWebhookUrl ? "Configurado" : "URL del flujo de Teams"} {...register("teamsPowerAutomateWebhookUrl")}/></label>
+      <label className="field field-wide"><span>Webhook legado {configured(item?.powerAutomateWebhookUrl) && <small>• Configurado</small>}</span><input type="url" autoComplete="off" placeholder={configured(item?.powerAutomateWebhookUrl) ? "Configurado — ingrese una nueva URL para reemplazar" : "Opcional para compatibilidad"} {...register("powerAutomateWebhookUrl")}/>{errors.powerAutomateWebhookUrl && <small role="alert">{errors.powerAutomateWebhookUrl.message}</small>}</label>
+      <label className="field field-wide"><span>Webhook Power Automate correo {configured(item?.emailPowerAutomateWebhookUrl) && <small>• Configurado</small>}</span><input type="url" autoComplete="off" placeholder={configured(item?.emailPowerAutomateWebhookUrl) ? "Configurado — ingrese una nueva URL para reemplazar" : "URL HTTPS del flujo de correo"} {...register("emailPowerAutomateWebhookUrl")}/>{errors.emailPowerAutomateWebhookUrl && <small role="alert">{errors.emailPowerAutomateWebhookUrl.message}</small>}</label>
+      <label className="field field-wide"><span>Webhook Power Automate Teams {configured(item?.teamsPowerAutomateWebhookUrl) && <small>• Configurado</small>}</span><input type="url" autoComplete="off" placeholder={configured(item?.teamsPowerAutomateWebhookUrl) ? "Configurado — ingrese una nueva URL para reemplazar" : "URL HTTPS del flujo de Teams"} {...register("teamsPowerAutomateWebhookUrl")}/>{errors.teamsPowerAutomateWebhookUrl && <small role="alert">{errors.teamsPowerAutomateWebhookUrl.message}</small>}</label>
       {email && <label className="field"><span>Correos destino</span><input {...register("emailTo")}/>{errors.emailTo && <small role="alert">{errors.emailTo.message}</small>}</label>}
       {teams && <label className="field"><span>Canal Teams</span><input {...register("teamsChannel")}/>{errors.teamsChannel && <small role="alert">{errors.teamsChannel.message}</small>}</label>}
       <NotificationTemplateEditor label="Plantilla HTML legado" value={html} onChange={(value) => setValue("htmlTemplate", value, { shouldDirty: true, shouldValidate: true })}/>
