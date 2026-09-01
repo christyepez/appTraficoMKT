@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { NotificationSettingsForm } from "./NotificationSettingsForm";
+import { NotificationSettingsList } from "./NotificationSettingsList";
 import type { NotificationSettings } from "../models/notification.models";
 
 const configured: NotificationSettings = {
@@ -59,5 +60,16 @@ describe("NotificationSettingsForm", () => {
 
     expect(await screen.findByText("El webhook debe usar HTTPS.")).toBeInTheDocument();
     expect(onSave).not.toHaveBeenCalled();
+  });
+});
+
+describe("NotificationSettingsList", () => {
+  it("renders configured notification settings and actions", () => {
+    const onEdit = vi.fn();
+    const onDisable = vi.fn();
+    render(<NotificationSettingsList items={[configured]} pendingIds={new Set()} onEdit={onEdit} onDisable={onDisable} />);
+
+    expect(screen.getByText("Alertas operativas")).toBeInTheDocument();
+    expect(screen.getAllByText(/Configurado/i).length).toBeGreaterThan(0);
   });
 });
