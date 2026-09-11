@@ -1,0 +1,19 @@
+services:
+  requirements-api:
+    image: ghcr.io/christyepez/apptraficomkt-requirements-api@sha256:03daabcab8b6eadbc0b900e0ad1bf3c8007fd529902140e001fe984aa55705bf
+    build: null
+  activities-api:
+    image: ghcr.io/christyepez/apptraficomkt-activities-api@sha256:42ea8adc45c0afe4938c046a705ac8b7da86a4686308a9acaeb3e1d8e9753af3
+    build: null
+  evidence-api:
+    image: ghcr.io/christyepez/apptraficomkt-evidence-api@sha256:3a7c7719d1f462faf07e7788a73ffb710b48cfd23b2048d30980ce10bb0401e3
+    build: null
+  identity-api:
+    image: ghcr.io/christyepez/apptraficomkt-identity-api@sha256:ab38ba924b855eb75045bc6a86ece531f24d3dc52c4066603f58a26e86ff8217
+    build: null
+  administration-api:
+    image: ghcr.io/christyepez/apptraficomkt-administration-api@sha256:8d3f88886c3bbd87543e26d9d02a7f15ce646633060ece529a595eb78c61f920
+    build: null
+  web:
+    image: ghcr.io/christyepez/apptraficomkt-web@sha256:a4d5c6823a5e3f8f83d9574435ae36405d4a0c5e712e5adcac39e43b2e820287
+    build: null
